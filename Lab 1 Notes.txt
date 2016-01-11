@@ -1,0 +1,42 @@
+write code
+download
+run from flash
+open up terminal and see hello world printed
+
+
+run same code from simulator (using debugger)
+
+start up and UART_Polling files
+pull(poll?) one of the serial ports and write it through the port
+
+serial starts from 1
+
+only use one UART, UART 1
+
+follow steps in ch 8
+
+make RAM target?
+
+relocate code and readonly data to ram
+then debug on RAM
+
+UART_IRQ : INVESTIGATE THIS. COM0 interrupt driven, COM1 polled
+COM0 eventually becomes OS console
+COM1 polled when theres an issue within the interrupt if there is an issue
+
+open up both COM0 and COM1 windows?
+putty terminal connectected to two 
+
+SVC used to program system call
+
+Context_Switching contains source code to show how to switch b/w two processes assuming no hardware input
+Context_Switching_IRQ more complex: assuming we have external interrupt, and I want to switch between two processes by pressing a key (Don't need for P1)
+
+
+Timer_irg: timer interrupt handler
+
+Auto_test sample code assumes done P1 then we can use this code to show how to use 3rd party libraries to test your code
+
+in demo, provided with obj code, so we link with our OS (Automated testing)
+
+open device manager and go to Ports to see what the COM ports are connected to (COM1 + two random COM numbers possibly consecutive like COM11 and COM12)

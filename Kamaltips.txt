@@ -1,0 +1,15 @@
+Hi,
+
+Most of you has the same question in the tutorial. Where do I start from? I have sent the email to Irene regarding this. We will talk more in upcoming lab session as they are helping and demo lab session.  I will ask Irene to upload the slides on learn soon.
+
+Till that time start writing processes (try with simple 2 processes using uart) and try Memory Management, Processor Managment, and Process Priority stuff. Once you start writing the user_processes, you will need memory blocks, timers, I/Os etc. Go through request memory  slide from the file I emailed you (It will be soon posted on learn) . Figure out the memory mapping (go through the memory mapping part of a datasheet of LPC1768). 
+
+By the time you write a couple of processes you will realize the need of process transition. Now you could think of implementing interprocess communication, queues, svc etc.  
+
+Actually, I don't have any office hours left for discussion but if you guys have any question we could meet tomorrow right after the lab (from 11-12 ) at E5-5122. Please drop me an email before you come.
+
+Let me know if you guys have any problem understanding me.  And, feel free to point out the mistakes.
+
+Thanks,
+
+Kamal

@@ -27,7 +27,7 @@ U32 *gp_stack; /* The last allocated stack low address. 8 bytes aligned */
           |                           |
           |        HEAP               |
           |                           |
-          |---------------------------|
+          |---------------------------|<--- p_end after PCB allocated
           |        PCB 2              |
           |---------------------------|
           |        PCB 1              |
@@ -73,7 +73,15 @@ void memory_init(void)
 	}
   
 	/* allocate memory for heap, not implemented yet*/
-  
+	//TODO: implement free function 3rd param
+	list_new(&freelist, sizeof(U32*), NULL);
+	U32* current_memory_address = p_end;
+	while(gp_stack - current_memory_address >= SZ_MEM_BLK_WITH_HEADER){ // assumption: gp_stack is the maximum mem address you can allocate to for heap
+
+		list_append(&freelist, current_memory_address)
+		current_memory_address += SZ_MEM_BLK_WITH_HEADER;
+	}
+
 }
 
 /**
@@ -92,7 +100,7 @@ U32 *alloc_stack(U32 size_b)
 	gp_stack = (U32 *)((U8 *)sp - size_b);
 	
 	/* 8 bytes alignement adjustment to exception stack frame */
-	if ((U32)gp_stack & 0x04) {
+	if ((U32)gp_stack & 0x04) {0
 		--gp_stack; 
 	}
 	return sp;
@@ -102,6 +110,9 @@ void *k_request_memory_block(void) {
 #ifdef DEBUG_0 
 	printf("k_request_memory_block: entering...\n");
 #endif /* ! DEBUG_0 */
+	atomic(on);
+
+
 	return (void *) NULL;
 }
 

@@ -31,5 +31,8 @@ int list_size(list *list);
 void list_for_each(list *list, listIterator iterator);
 void list_head(list *list, void *element, bool removeFromList);
 void list_tail(list *list, void *element);
+
+//if the list contain the element
+int list_contain(list *list, void *element);
  
 #endif

@@ -103,3 +103,15 @@ int list_size(list *list)
 {
   return list->logicalLength;
 }
+
+int list_contain(list *list, void *element)
+{
+  listNode *node = list->head;
+  while(node !=NULL){
+    if(node == element){
+      return 1;
+    }
+    node = node->next;
+  }
+  return 0;
+}

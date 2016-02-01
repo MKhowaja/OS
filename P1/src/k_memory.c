@@ -107,9 +107,32 @@ void *k_request_memory_block(void) {
 	return (void *) NULL;
 }
 
+
 int k_release_memory_block(void *p_mem_blk) {
 #ifdef DEBUG_0 
 	printf("k_release_memory_block: releasing block @ 0x%x\n", p_mem_blk);
 #endif /* ! DEBUG_0 */
+
+	// atomic ( on ) ;
+	__disable_irq();
+
+	// if ( memory block pointer is not valid )
+	// return ERROR_CODE ;
+	int valid = list_contain(&free_list, p_mem_blk);
+	if (valid == 0){
+		return RTX_ERR;
+	}
+	// put memory_block into heap ;
+	list_append(&free_list, p_mem_blk);
+
+// if ( blocked on resource q not empty ) {
+// h a n d l e _ p r o c e s s _ r e a d y ( pop ( blocked resource q ) ) ;
+// // + Check if any other process is in ready state be
+// }
+
+
+	// atomic ( off ) ;
+	__enable_irq();
+	// return SUCCESS_CODE
 	return RTX_OK;
 }

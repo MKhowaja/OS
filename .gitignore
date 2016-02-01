@@ -1,0 +1,10 @@
+.*
+!/.gitignore
+*.o
+*.crf
+*.__i
+*.htm
+*.map
+*.plg
+*.tra
+*.dep

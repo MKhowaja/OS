@@ -162,13 +162,26 @@ int k_release_processor(void)
 }
 
 int set_process_priority(int process_id, int priority){
+	
 	int i;
+	if (process_id == 0){ //NULL PROCESS PRIORITY CANNOT BE CHANGED
+		return -1; //should we return error? or not
+	}
 	for ( i = 0; i < NUM_TEST_PROCS; i++ ) {
 		if ((gp_pcbs[i])->m_pid == process_id){ //find process with id process_id
 			(gp_pcbs[i])->m_priority = priority; //update priority of found process
 			return 1;
 		}
 	}
-	return 0;
+	return -1;  //process not found
+}
 
+int get_process_priority(int process_id){
+	int i;
+	for ( i = 0; i < NUM_TEST_PROCS; i++ ) {
+		if ((gp_pcbs[i])->m_pid == process_id){ //find process with id process_id
+			return (gp_pcbs[i])->m_priority; //return priority of found process
+		}
+	}
+	return -1; //process not found
 }

@@ -27,7 +27,15 @@ typedef unsigned char U8;
 typedef unsigned int U32;
 
 /* process states, note we only assume three states in this example */
-typedef enum {NEW = 0, RDY, RUN} PROC_STATE_E;  
+typedef enum {
+	NEW = 0,
+	RDY,
+	RUN,
+    MEM_BLOCKED, //blocked on resource
+    MSG_BLOCKED, //waiting on message
+    INTERRUPTED
+    //, EXIT	 //might need exit state?
+} PROC_STATE_E;  
 
 /*
   PCB data structure definition.
@@ -39,7 +47,10 @@ typedef struct pcb
 	//struct pcb *mp_next;  /* next pcb, not used in this example */  
 	U32 *mp_sp;		/* stack pointer of the process */
 	U32 m_pid;		/* process id */
-	PROC_STATE_E m_state;   /* state of the process */      
+	U32 priority;
+	PROC_STATE_E m_state;   /* state of the process */
+	//stack size?
+	//whether process is i-process?
 } PCB;
 
 /* initialization table item */

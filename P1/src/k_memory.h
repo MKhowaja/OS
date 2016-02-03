@@ -13,6 +13,8 @@
 
 /* ----- Definitions ----- */
 #define RAM_END_ADDR 0x10008000
+#define MEM_OFFSET_SIZE 	4 /* padding between kernel and heap */
+#define MEM_BLOCK_SIZE          0x100   // 0x100 bytes / sizeof(mem_blk_t)
 
 /* ----- Variables ----- */
 /* This symbol is defined in the scatter file (see RVCT Linker User Guide) */  

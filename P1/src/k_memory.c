@@ -66,6 +66,7 @@ void memory_init(void)
 	printf("gp_pcbs[1] = 0x%x \n", gp_pcbs[1]);
 #endif
 	
+
 	/* prepare for alloc_stack() to allocate memory for stacks */
 	
 	gp_stack = (U32 *)RAM_END_ADDR;

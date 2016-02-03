@@ -1,4 +1,4 @@
-#include "linkedlist.h"
+#include "list.h"
 
 int linkedList_init(linkedList* list) {
     if (list == NULL) {
@@ -57,8 +57,8 @@ int linkedList_push_back(linkedList* list, node* new_node) {
 }
 
 node* linkedList_pop_front(linkedList* list) {
-    node_t* first_node;
-    node_t* second_node;
+    node* first_node;
+    node* second_node;
 
     if (list == NULL || list->first == NULL) {
         return NULL;
@@ -84,8 +84,8 @@ node* linkedList_pop_front(linkedList* list) {
 }
 
 node* linkedList_pop_back(linkedList* list) {
-    node_t* last_node;
-    node_t* second_last_node;
+    node* last_node;
+    node* second_last_node;
 
     if (list == NULL || list->last == NULL) {
         return NULL;
@@ -110,40 +110,40 @@ node* linkedList_pop_back(linkedList* list) {
     return last_node;
 }
 
-node* linkedList_remove(linkedList* list, void* target_value) {
-    node_t* iter;
+// node* linkedList_remove(linkedList* list, void* target_value) {
+//     node* iter;
 
-    if (list == NULL) {
-        return NULL;
-    }
+//     if (list == NULL) {
+//         return NULL;
+//     }
 
-    if (list->first != NULL && list->first->value == target_value) {
-        return linkedlist_pop_front(list);
-    }
+//     if (list->first != NULL && list->first->value == target_value) {
+//         return (node*)linkedList_pop_front(list);
+//     }
 
-    if (list->last != NULL && list->last->value == target_value) {
-        return linkedlist_pop_back(list);
-    }
+//     if (list->last != NULL && list->last->value == target_value) {
+//         return (node*)linkedList_pop_back(list);
+//     }
 
-    iter = list->first;
+//     iter = list->first;
 
-    while (iter != NULL) {
-        if (iter->value == target_value) {
-            if (iter->next != NULL) {
-                iter->next->prev = iter->prev;
-            }
+//     while (iter != NULL) {
+//         if (iter->value == target_value) {
+//             if (iter->next != NULL) {
+//                 iter->next->prev = iter->prev;
+//             }
 
-            if (iter->prev != NULL) {
-                iter->prev->next = iter->next;
-            }
+//             if (iter->prev != NULL) {
+//                 iter->prev->next = iter->next;
+//             }
 
-            list->length--;
+//             list->length--;
 
-            return iter;
-        }
+//             return iter;
+//         }
 
-        iter = iter->next;
-    }
+//         iter = iter->next;
+//     }
 
-    return NULL;
-}
+//     return NULL;
+// }

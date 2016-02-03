@@ -16,6 +16,11 @@ U32 *gp_stack; /* The last allocated stack low address. 8 bytes aligned */
                /* The first stack starts at the RAM high address */
 	       /* stack grows down. Fully decremental stack */
 linkedList free_list;
+U32* heap_start;
+U32* heap_end;
+U32* test1;
+U32* test2;
+
 /**
  * @brief: Initialize RAM as follows:
 
@@ -73,7 +78,18 @@ void memory_init(void)
 		--gp_stack; 
 	}
 	//gp_stack is at RAM_END_ADDR
-  
+	linkedList_init(&free_list); // initialize linked list
+	heap_start = (U32*)p_end;
+	heap_end = heap_start + (SZ_MEM_BLK/32) * NUM_MEM; //divide by 32 because pointer is already 32 bits and we need to alloc 128B
+	for (i = 0; i < NUM_MEM; i++){
+		node* temp = (node*)(heap_start + i * (SZ_MEM_BLK/32));
+		// test1 = heap_start + i * (SZ_MEM_BLK/32);
+		// test2 = heap_end;
+		linkedList_push_back(&free_list, temp);
+	}
+	#ifdef DEBUG_0  
+	printf("Allocated heap done");
+	#endif
 	/* allocate memory for heap, not implemented yet*/
   
 }

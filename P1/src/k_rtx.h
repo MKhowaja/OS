@@ -62,4 +62,8 @@ typedef struct proc_init
 	void (*mpf_start_pc) ();/* entry point of the process */    
 } PROC_INIT;
 
+#define SZ_MEM_BLK 0x400           /* fixed size of memory block 128B default */
+#define SZ_MEM_BLK_WITH_HEADER SZ_MEM_BLK+0x20
+#define NUM_MEM 20
+
 #endif // ! K_RTX_H_

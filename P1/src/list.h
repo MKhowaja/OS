@@ -1,35 +1,25 @@
 #ifndef __LIST_H
 #define __LIST_H
- 
-// a common function used to free malloc'd objects
-typedef void (*freeFunction)(void *);
- 
-typedef enum { FALSE, TRUE } bool;
- 
-typedef bool (*listIterator)(void *);
- 
-typedef struct _listNode {
-  void *data;
-  struct _listNode *next;
-} listNode;
- 
+
+typedef struct _node {
+    struct _node* next;
+    struct _node* prev;
+    void* value;
+} node;
+
 typedef struct {
-  int logicalLength;
-  int elementSize;
-  listNode *head;
-  listNode *tail;
-  freeFunction freeFn;
-} list;
- 
-void list_new(list *list, int elementSize, freeFunction freeFn);
-void list_destroy(list *list);
- 
-void list_prepend(list *list, void *element);
-void list_append(list *list, void *element);
-int list_size(list *list);
- 
-void list_for_each(list *list, listIterator iterator);
-void list_head(list *list, void *element, bool removeFromList);
-void list_tail(list *list, void *element);
- 
+    node* first;
+    node* last;
+    int length;
+} linkedList;
+
+int linkedList_init(linkedList* list);
+
+int linkedList_push_front(linkedList* list, node* new_node);
+int linkedList_push_back(linkedList* list, node* new_node);
+
+node* linkedList_pop_front(linkedList* list);
+node* linkedList_pop_back(linkedList* list);
+node* linkedList_remove(linkedList* list, void* target_value);
+
 #endif

@@ -37,6 +37,7 @@ void nullProc (void){
 	int ret_val;
 	printf("Null Process Start\n");
 	while (1){
+		printf("while loop start");
 		ret_val = release_processor();
 		#ifdef DEBUG_0
 				printf("nullProc: ret_val=%d\n", ret_val);

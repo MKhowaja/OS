@@ -16,6 +16,11 @@
 #define NULL 0
 #define NUM_TEST_PROCS 15
 
+#define SZ_MEM_BLK 0x400           /* fixed size of memory block 128B default */
+#define SZ_MEM_BLK_WITH_HEADER SZ_MEM_BLK+0x20
+#define NUM_MEM 30
+
+
 #ifdef DEBUG_0
 #define USR_SZ_STACK 0x200         /* user proc stack size 512B   */
 #else

@@ -6,6 +6,7 @@
  */
 
 #include "k_memory.h"
+#include "k_rtx.h"
 
 #ifdef DEBUG_0
 #include "printf.h"
@@ -15,7 +16,9 @@
 U32 *gp_stack; /* The last allocated stack low address. 8 bytes aligned */
                /* The first stack starts at the RAM high address */
 	       /* stack grows down. Fully decremental stack */
-list free_list;
+
+//pointer to the free list
+linkedlist_t *free_list;
 /**
  * @brief: Initialize RAM as follows:
 
@@ -27,7 +30,7 @@ list free_list;
           |                           |
           |        HEAP               |
           |                           |
-          |---------------------------|
+          |---------------------------|<---- p_end
           |        PCB 2              |
           |---------------------------|
           |        PCB 1              |
@@ -73,9 +76,18 @@ void memory_init(void)
 		--gp_stack; 
 	}
 	//gp_stack is at RAM_END_ADDR
-  
+
+	linkedlist_init(free_list);
+	for( i = 0; i < NUM_MEM; i++) {
+		node_t *node;
+		node->value = p_end;
+		p_end = p_end + SZ_MEM_BLK_WITH_HEADER;
+		linkedlist_push_back(free_list, node);
+	}
+
+	
 	/* allocate memory for heap, not implemented yet*/
-  
+  	
 }
 
 /**
@@ -111,5 +123,12 @@ int k_release_memory_block(void *p_mem_blk) {
 #ifdef DEBUG_0 
 	printf("k_release_memory_block: releasing block @ 0x%x\n", p_mem_blk);
 #endif /* ! DEBUG_0 */
+
+
+	if(0){
+		return RTX_ERR;
+	}
+
+
 	return RTX_OK;
 }

@@ -21,6 +21,7 @@
 #else
 #define USR_SZ_STACK 0x100         /* user proc stack size 218B  */
 #endif /* DEBUG_0 */
+#include "list.h"
 
 /*----- Types -----*/
 typedef unsigned char U8;

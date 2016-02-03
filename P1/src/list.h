@@ -6,7 +6,7 @@
 typedef struct _node {
     struct _node* next;
     struct _node* prev;
-    //void* value;
+    void* value;
 } node;
 
 typedef struct {
@@ -22,6 +22,8 @@ int linkedList_push_back(linkedList* list, node* new_node);
 
 node* linkedList_pop_front(linkedList* list);
 node* linkedList_pop_back(linkedList* list);
+
+int linkedList_contain(linkedList* list, void *address);
 // node* linkedList_remove(linkedList* list, void* target_value);
 
 #endif

@@ -33,6 +33,7 @@ U32 g_switch_flag = 0;          /* whether to continue to run the process before
 /* process initialization table */
 PROC_INIT g_proc_table[NUM_TEST_PROCS];
 extern PROC_INIT g_test_procs[NUM_TEST_PROCS];
+linkedList readyQueue;
 
 /**
  * @biref: initialize all processes in the system
@@ -66,6 +67,8 @@ void process_init()
 		}
 		(gp_pcbs[i])->mp_sp = sp;
 	}
+	//Initialize ready queue
+	linkedList_init(&readyQueue);
 }
 
 /*@brief: scheduler, pick the pid of the next to run process
@@ -138,8 +141,13 @@ int process_switch(PCB *p_pcb_old)
 int k_release_processor(void)
 {
 	PCB *p_pcb_old = NULL;
+	node* temp;
 	
 	p_pcb_old = gp_current_process;
+	if (gp_current_process!= NULL){
+		temp->value = (void*)p_pcb_old->m_pid;
+		linkedList_push_back(&readyQueue, temp); //add old process to end of ready queue
+	}
 	gp_current_process = scheduler();
 	
 	if ( gp_current_process == NULL  ) {
@@ -151,4 +159,16 @@ int k_release_processor(void)
 	}
 	process_switch(p_pcb_old);
 	return RTX_OK;
+}
+
+int set_process_priority(int process_id, int priority){
+	int i;
+	for ( i = 0; i < NUM_TEST_PROCS; i++ ) {
+		if ((gp_pcbs[i])->m_pid == process_id){ //find process with id process_id
+			(gp_pcbs[i])->m_priority = priority; //update priority of found process
+			return 1;
+		}
+	}
+	return 0;
+
 }

@@ -33,8 +33,8 @@ typedef enum {
 	RUN,
     MEM_BLOCKED, //blocked on resource
     MSG_BLOCKED, //waiting on message
-    INTERRUPTED
-    //, EXIT	 //might need exit state?
+    INTERRUPTED,
+    EXIT
 } PROC_STATE_E;  
 
 /*
@@ -44,10 +44,10 @@ typedef enum {
 */
 typedef struct pcb 
 { 
-	//struct pcb *mp_next;  /* next pcb, not used in this example */  
+	struct pcb *mp_next;  /* next pcb, not used in this example */  
 	U32 *mp_sp;		/* stack pointer of the process */
 	U32 m_pid;		/* process id */
-	U32 priority;
+	int m_priority;
 	PROC_STATE_E m_state;   /* state of the process */
 	//stack size?
 	//whether process is i-process?

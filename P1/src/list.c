@@ -1,105 +1,152 @@
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
- 
 #include "list.h"
- 
-void list_new(list *list, int elementSize, freeFunction freeFn)
-{
-  assert(elementSize > 0);
-  list->logicalLength = 0;
-  list->elementSize = elementSize;
-  list->head = list->tail = NULL;
-  list->freeFn = freeFn;
-}
- 
-void list_destroy(list *list)
-{
-  listNode *current;
-  while(list->head != NULL) {
-    current = list->head;
-    list->head = current->next;
 
-    if(list->freeFn) {
-      list->freeFn(current->data);
+#define NULL                    0
+
+
+int linkedlist_init(linkedlist_t* list) {
+    if (list == NULL) {
+        return 1;
     }
 
-    free(current->data);
-    free(current);
-  }
-}
- 
-void list_prepend(list *list, void *element)
-{
-  listNode *node = malloc(sizeof(listNode));
-  node->data = malloc(list->elementSize);
-  memcpy(node->data, element, list->elementSize);
+    list->first = NULL;
+    list->last = NULL;
+    list->length = 0;
 
-  node->next = list->head;
-  list->head = node;
-
-  // first node?
-  if(!list->tail) {
-    list->tail = list->head;
-  }
-
-  list->logicalLength++;
+    return 0;
 }
- 
-void list_append(list *list, void *element)
-{
-  listNode *node = malloc(sizeof(listNode));
-  node->data = malloc(list->elementSize);
-  node->next = NULL;
 
-  memcpy(node->data, element, list->elementSize);
+int linkedlist_push_front(linkedlist_t* list, node_t* new_node) {
+    if (list == NULL) {
+        return 1;
+    }
 
-  if(list->logicalLength == 0) {
-    list->head = list->tail = node;
-  } else {
-    list->tail->next = node;
-    list->tail = node;
-  }
+    if (list->first != NULL) {
+        list->first->prev = new_node;
+    }
 
-  list->logicalLength++;
+    new_node->next = list->first;
+    new_node->prev = NULL; // whoever gave me this node is responsible for managing the new_node->prev pointer
+
+    list->length++;
+    list->first = new_node;
+
+    if (list->last == NULL) {
+        list->last = new_node;
+    }
+
+    return 0;
 }
- 
-void list_for_each(list *list, listIterator iterator)
-{
-  assert(iterator != NULL);
- 
-  listNode *node = list->head;
-  bool result = TRUE;
-  while(node != NULL && result) {
-    result = iterator(node->data);
-    node = node->next;
-  }
+
+int linkedlist_push_back(linkedlist_t* list, node_t* new_node) {
+    if (list == NULL) {
+        return 1;
+    }
+
+    if (list->last != NULL) {
+        list->last->next = new_node;
+    }
+
+    new_node->prev = list->last;
+    new_node->next = NULL; // whoever gave me this node is responsible for managing the new_node->next pointer
+
+    list->length++;
+    list->last = new_node;
+
+    if (list->first == NULL) {
+        list->first = new_node;
+    }
+
+    return 0;
 }
- 
-void list_head(list *list, void *element, bool removeFromList)
-{
-  assert(list->head != NULL);
- 
-  listNode *node = list->head;
-  memcpy(element, node->data, list->elementSize);
- 
-  if(removeFromList) {
-    list->head = node->next;
-    list->logicalLength--;
- 
-    free(node->data);
-    free(node);
-  }
+
+node_t* linkedlist_pop_front(linkedlist_t* list) {
+    node_t* first_node;
+    node_t* second_node;
+
+    if (list == NULL || list->first == NULL) {
+        return NULL;
+    }
+    // guarantees list->first is not null
+
+    first_node  = list->first;
+    second_node = first_node->next;
+
+    if (second_node != NULL) {
+        second_node->prev = NULL;
+    }
+
+    list->first = second_node;
+
+    if (list->first == NULL) {
+        list->last = NULL;
+    }
+
+    list->length--;
+
+    return first_node;
 }
- 
-void list_tail(list *list, void *element)
-{
-  assert(list->tail != NULL);
-  listNode *node = list->tail;
-  memcpy(element, node->data, list->elementSize);
+
+node_t* linkedlist_pop_back(linkedlist_t* list) {
+    node_t* last_node;
+    node_t* second_last_node;
+
+    if (list == NULL || list->last == NULL) {
+        return NULL;
+    }
+    // guarantees list->last is not null
+
+    last_node        = list->last;
+    second_last_node = last_node->prev;
+
+    if (second_last_node != NULL) {
+        second_last_node->next = NULL;
+    }
+
+    list->last = second_last_node;
+
+    if (list->last == NULL) {
+        list->first = NULL;
+    }
+
+    list->length--;
+
+    return last_node;
 }
- 
-int list_size(list *list)
-{
-  return list->logicalLength;
+
+node_t* linkedlist_remove(linkedlist_t* list, void* target_value) {
+    node_t* iter;
+
+    if (list == NULL) {
+        return NULL;
+    }
+
+    if (list->first != NULL && list->first->value == target_value) {
+        return linkedlist_pop_front(list);
+    }
+
+    if (list->last != NULL && list->last->value == target_value) {
+        return linkedlist_pop_back(list);
+    }
+
+    iter = list->first;
+
+    while (iter != NULL) {
+        if (iter->value == target_value) {
+            if (iter->next != NULL) {
+                iter->next->prev = iter->prev;
+            }
+
+            if (iter->prev != NULL) {
+                iter->prev->next = iter->next;
+            }
+
+            list->length--;
+
+            return iter;
+        }
+
+        iter = iter->next;
+    }
+
+    return NULL;
 }

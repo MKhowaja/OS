@@ -88,7 +88,7 @@ void memory_init(void)
 		linkedList_push_back(&free_list, temp);
 	}
 	#ifdef DEBUG_0  
-	printf("Allocated heap done");
+	printf("Allocated heap done\n");
 	#endif
 	/* allocate memory for heap, not implemented yet*/
   

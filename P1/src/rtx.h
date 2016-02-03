@@ -16,7 +16,8 @@
 #define LOW     3
 #define LOWEST  4
 
-
+#define PROC_BLK_SIZE 0x100 //size of each process' stack
+ 
 /* ----- Types ----- */
 typedef unsigned int U32;
 

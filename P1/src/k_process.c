@@ -44,7 +44,7 @@ void process_init()
 	int i;
 	U32 *sp;
   
-        /* fill out the initialization table */
+    /* fill out the initialization table */
 	set_test_procs();
 	for ( i = 0; i < NUM_TEST_PROCS; i++ ) {
 		g_proc_table[i].m_pid = g_test_procs[i].m_pid;

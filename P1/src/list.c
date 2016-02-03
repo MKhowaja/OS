@@ -147,3 +147,18 @@ node* linkedList_pop_back(linkedList* list) {
 
 //     return NULL;
 // }
+
+int linkedList_contain(linkedList* list, void *address){
+  node* temp = list->first;
+  while (temp!= list->last){
+    if (temp == address){
+      return 1;
+    }
+    temp = temp->next;
+  }
+  if (temp == address){
+    return 1;
+  }
+  return 0;
+
+}

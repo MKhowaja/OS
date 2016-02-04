@@ -37,6 +37,13 @@ extern PROC_INIT g_test_procs[NUM_TEST_PROCS];
 //linkedList readyQueue;
 static linkedList ready_queue[NUM_PRIORITY];
 static linkedList block_queue[NUM_PRIORITY];
+// Assume: pid mapping
+static node node_pool[NUM_TEST_PROCS];
+
+static node* node_factory(PCB * pcb){
+	node_pool[pcb->m_priority].value = pcb;
+	return &node_pool[pcb->m_priority];
+}
 
 /**
  * @biref: initialize all processes in the system
@@ -75,35 +82,31 @@ void process_init()
 		linkedList_init(&readyQueue[i]);
 		linkedList_init(&blockQueue[i]);
 	}
-
+	// Initialize everything to ready queue
 	for ( i = 0; i < NUM_TEST_PROCS; i++ ) {
 		int priority = gp_pcbs[i]->m_priority;
-		// @todo: add a node
-		linkedList_push_back(readyQueue[priority], node)
+		linkedList_push_back(readyQueue[priority], node_factory(&gp_pcbs[i]));
 	}
 }
 
 /*@brief: scheduler, pick the pid of the next to run process
  *@return: PCB pointer of the next to run process
  *         NULL if error happens
- *POST: if gp_current_process was NULL, then it gets set to pcbs[0].
+ *POST: if gp_current_process was NULL, then it gets set to nullProc.
  *      No other effect on other global variables.
  */
 
-PCB *scheduler(void)
-{
-	if (gp_current_process == NULL) {
-		gp_current_process = gp_pcbs[0]; 
-		return gp_pcbs[0];
-	}
 
-	if ( gp_current_process == gp_pcbs[0] ) {
-		return gp_pcbs[1];
-	} else if ( gp_current_process == gp_pcbs[1] ) {
-		return gp_pcbs[0];
-	} else {
-		return NULL;
+PCB *scheduler(void){
+	for ( i = 0; i < NUM_PRIORITY; i++ ){
+		if (readyQueue[i].length != 0){
+			// pop off the first ready process with highest priority
+			node* firstProcess = linkedList_pop_front(&readyQueue[i]);
+			return (PCB *)firstProcess->value;
+		}
 	}
+	// Error
+	return NULL;
 }
 
 /*@brief: switch out old pcb (p_pcb_old), run the new pcb (gp_current_process)
@@ -150,16 +153,18 @@ int process_switch(PCB *p_pcb_old)
  * @return RTX_ERR on error and zero on success
  * POST: gp_current_process gets updated to next to run process
  */
-int k_release_processor(void)
-{
+int k_release_processor(void){
+// 1. Set current process to state ready
+// 2. rpq enqueue(current process) put current process in ready queues
+// 3. process switch invokes scheduler and context-switches to the new process
+
 	PCB *p_pcb_old = NULL;
 	node* temp;
-	
 	p_pcb_old = gp_current_process;
+
 	if (gp_current_process!= NULL){
-		// @todo: add a node
-		temp->value = (void*)p_pcb_old->m_pid;
-		linkedList_push_back(&readyQueue, temp); //add old process to end of ready queue
+		temp = node_factory(gp_current_process);
+		linkedList_push_back(&readyQueue[temp->m_priority], temp); //add old process to end of ready queue
 	}
 	gp_current_process = scheduler();
 	
@@ -167,13 +172,14 @@ int k_release_processor(void)
 		gp_current_process = p_pcb_old; // revert back to the old process
 		return RTX_ERR;
 	}
-        if ( p_pcb_old == NULL ) {
+    if ( p_pcb_old == NULL ) {
 		p_pcb_old = gp_current_process;
 	}
 	process_switch(p_pcb_old);
 	return RTX_OK;
 }
 
+// @ todo: preemption code
 int set_process_priority(int process_id, int priority){
 	
 	int i;

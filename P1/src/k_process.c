@@ -34,7 +34,7 @@ U32 g_switch_flag = 0;          /* whether to continue to run the process before
 PROC_INIT g_proc_table[NUM_TEST_PROCS];
 extern PROC_INIT g_test_procs[NUM_TEST_PROCS];
 
-//linkedList readyQueue;
+//linkedList ready_queue;
 static linkedList ready_queue[NUM_PRIORITY];
 static linkedList block_queue[NUM_PRIORITY];
 // Assume: pid mapping
@@ -43,6 +43,19 @@ static node node_pool[NUM_TEST_PROCS];
 static node* node_factory(PCB * pcb){
 	node_pool[pcb->m_priority].value = pcb;
 	return &node_pool[pcb->m_priority];
+}
+
+
+/**
+ * Put the PCB into ready queue
+*/
+void ready_enqueue(PCB * pcb){
+	node* process_node;
+	int priority = current_process_node->m_priority;
+	pcb->state = RDY;
+	process_node = node_factory(gp_current_process);
+	// rpq enqueue(current process) put current process in ready queues
+	linkedList_push_back(&ready_queue[priority], process_node); 
 }
 
 /**
@@ -79,13 +92,12 @@ void process_init()
 	}
 	//Initialize ready queue and block queue
 	for ( i = 0; i < NUM_PRIORITY; i++ ){
-		linkedList_init(&readyQueue[i]);
-		linkedList_init(&blockQueue[i]);
+		linkedList_init(&ready_queue[i]);
+		linkedList_init(&block_queue[i]);
 	}
 	// Initialize everything to ready queue
 	for ( i = 0; i < NUM_TEST_PROCS; i++ ) {
-		int priority = gp_pcbs[i]->m_priority;
-		linkedList_push_back(readyQueue[priority], node_factory(&gp_pcbs[i]));
+		ready_enqueue(gp_pcbs[i]);
 	}
 }
 
@@ -99,9 +111,9 @@ void process_init()
 
 PCB *scheduler(void){
 	for ( i = 0; i < NUM_PRIORITY; i++ ){
-		if (readyQueue[i].length != 0){
+		if (ready_queue[i].length != 0){
 			// pop off the first ready process with highest priority
-			node* firstProcess = linkedList_pop_front(&readyQueue[i]);
+			node* firstProcess = linkedList_pop_front(&ready_queue[i]);
 			return (PCB *)firstProcess->value;
 		}
 	}
@@ -148,6 +160,7 @@ int process_switch(PCB *p_pcb_old)
 	}
 	return RTX_OK;
 }
+
 /**
  * @brief release_processor(). 
  * @return RTX_ERR on error and zero on success
@@ -157,15 +170,14 @@ int k_release_processor(void){
 // 1. Set current process to state ready
 // 2. rpq enqueue(current process) put current process in ready queues
 // 3. process switch invokes scheduler and context-switches to the new process
-
 	PCB *p_pcb_old = NULL;
-	node* temp;
+	
 	p_pcb_old = gp_current_process;
 
 	if (gp_current_process!= NULL){
-		temp = node_factory(gp_current_process);
-		linkedList_push_back(&readyQueue[temp->m_priority], temp); //add old process to end of ready queue
-	}
+		ready_enqueue(gp_current_process);
+	}	
+
 	gp_current_process = scheduler();
 	
 	if ( gp_current_process == NULL  ) {

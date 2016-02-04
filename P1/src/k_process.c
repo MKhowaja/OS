@@ -33,7 +33,10 @@ U32 g_switch_flag = 0;          /* whether to continue to run the process before
 /* process initialization table */
 PROC_INIT g_proc_table[NUM_TEST_PROCS];
 extern PROC_INIT g_test_procs[NUM_TEST_PROCS];
-linkedList readyQueue;
+
+//linkedList readyQueue;
+static linkedList ready_queue[NUM_PRIORITY];
+static linkedList block_queue[NUM_PRIORITY];
 
 /**
  * @biref: initialize all processes in the system
@@ -67,8 +70,17 @@ void process_init()
 		}
 		(gp_pcbs[i])->mp_sp = sp;
 	}
-	//Initialize ready queue
-	linkedList_init(&readyQueue);
+	//Initialize ready queue and block queue
+	for ( i = 0; i < NUM_PRIORITY; i++ ){
+		linkedList_init(&readyQueue[i]);
+		linkedList_init(&blockQueue[i]);
+	}
+
+	for ( i = 0; i < NUM_TEST_PROCS; i++ ) {
+		int priority = gp_pcbs[i]->m_priority;
+		// @todo: add a node
+		linkedList_push_back(readyQueue[priority], node)
+	}
 }
 
 /*@brief: scheduler, pick the pid of the next to run process
@@ -145,6 +157,7 @@ int k_release_processor(void)
 	
 	p_pcb_old = gp_current_process;
 	if (gp_current_process!= NULL){
+		// @todo: add a node
 		temp->value = (void*)p_pcb_old->m_pid;
 		linkedList_push_back(&readyQueue, temp); //add old process to end of ready queue
 	}

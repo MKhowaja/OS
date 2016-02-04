@@ -59,6 +59,18 @@ void ready_enqueue(PCB * pcb){
 }
 
 /**
+ * Put the PCB into block queue
+*/
+void block_enqueue(PCB * pcb, PROC_STATE_E state){
+	node* process_node;
+	int priority = current_process_node->m_priority;
+	pcb->state = state;
+	process_node = node_factory(gp_current_process);
+	// rpq enqueue(current process) put current process in ready queues
+	linkedList_push_back(&block_queue[priority], process_node); 
+}
+
+/**
  * @biref: initialize all processes in the system
  * NOTE: We assume there are only two user processes in the system in this example.
  */

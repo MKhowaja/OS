@@ -19,35 +19,21 @@ PROC_INIT g_test_procs[NUM_TEST_PROCS];
 
 void set_test_procs() {
 	int i;
-	g_test_procs[0].m_pid = 0;
-	g_test_procs[0].m_stack_size = PROC_BLK_SIZE;
-	g_test_procs[0].mpf_start_pc = &nullProc;
-	g_test_procs[0].m_priority = LOWEST;
+
 	//NUM_TEST_PROCS has match the total proc numbers
 	//otherwise it will create "empty" process
 	//also, the NUM_TEST_PROCS in kernal should be equal to the NUM_TEST_PROCS in front
 	//suggest: change NUM_TEST_PROCS to 2 in rtx.h
-	for( i = 1; i < NUM_TEST_PROCS; i++ ) {
+	for( i = 0; i < NUM_TEST_PROCS; i++ ) {
 		g_test_procs[i].m_pid=(U32)(i);
 		g_test_procs[i].m_priority=LOW;
 		g_test_procs[i].m_stack_size=0x100;
 	}
   
-	g_test_procs[1].mpf_start_pc = &proc1;
-	g_test_procs[2].mpf_start_pc = &proc2;
+	g_test_procs[0].mpf_start_pc = &proc1;
+	g_test_procs[1].mpf_start_pc = &proc2;
 }
 
-void nullProc (void){
-	int ret_val;
-	printf("Null Process Start\n");
-	while (1){
-		printf("while loop start");
-		ret_val = release_processor();
-		#ifdef DEBUG_0
-				printf("nullProc: ret_val=%d\n", ret_val);
-		#endif /* DEBUG_0 */
-	}
-}
 
 /**
  * @brief: a process that prints 5x6 uppercase letters

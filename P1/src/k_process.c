@@ -34,14 +34,15 @@ U32 g_switch_flag = 0;          /* whether to continue to run the process before
 node* next_process_node;
 
 /* process initialization table */
-PROC_INIT g_proc_table[NUM_TEST_PROCS];
+PROC_INIT g_proc_table[NUM_TOTAL_PROCS];
 extern PROC_INIT g_test_procs[NUM_TEST_PROCS];
+extern PROC_INIT g_kernal_procs[NUM_KERNAL_PROCS];
 
 //linkedList ready_queue;
 static linkedList ready_queue[NUM_PRIORITY];
 static linkedList block_queue[NUM_PRIORITY];
 // Assume: pid mapping
-static node node_pool[NUM_TEST_PROCS];
+static node node_pool[NUM_TOTAL_PROCS];
 
 static node* node_factory(PCB * pcb){
 	// pid mapping 
@@ -101,6 +102,7 @@ void process_init()
 	U32 *sp;
   
     /* fill out the initialization table */
+    set_kernal_procs();
 	set_test_procs();
 	for ( i = 0; i < NUM_TEST_PROCS; i++ ) {
 		g_proc_table[i].m_pid = g_test_procs[i].m_pid;
@@ -108,6 +110,13 @@ void process_init()
 		g_proc_table[i].mpf_start_pc = g_test_procs[i].mpf_start_pc;
 		g_proc_table[i].m_priority = g_test_procs[i].m_priority;
 		
+	}
+
+	for ( i = NUM_TEST_PROCS; i < NUM_TOTAL_PROCS; i++ ) {
+		g_proc_table[i].m_pid = g_kernal_procs[i].m_pid;
+		g_proc_table[i].m_stack_size = g_kernal_procs[i].m_stack_size;
+		g_proc_table[i].mpf_start_pc = g_kernal_procs[i].mpf_start_pc;
+		g_proc_table[i].m_priority = g_kernal_procs[i].m_priority;
 	}
   
 	/* initilize exception stack frame (i.e. initial context) for each process */

@@ -142,9 +142,6 @@ void process_init()
  *      No other effect on other global variables.
  */
 PCB *scheduler(void){
-	
-	//node *blocked_process_node;
-	//PCB *blocked_process;
 	int i;
 	for ( i = 0; i < NUM_PRIORITY; i++ ){
 		if (ready_queue[i].length != 0){

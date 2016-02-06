@@ -67,6 +67,9 @@ void ready_enqueue(PCB * pcb){
 void block_enqueue(PCB * pcb, PROC_STATE_E state){
 	node* process_node;
 	int priority = pcb->m_priority;
+	
+	linkedList_remove (&ready_queue[priority], pcb);
+	
 	pcb->m_state = state;
 	process_node = node_factory(pcb);
 	linkedList_push_back(&block_queue[priority], process_node); 
@@ -84,14 +87,15 @@ void check_preemption(){
 			blocked_process = (PCB *)blocked_process_node->value;
 			blocked_process->m_state = RDY;
 			linkedList_push_back(&ready_queue[i],blocked_process_node);
+			linkedList_remove (&block_queue[i], blocked_process); //remove node from blocked queue
 			// preempt the current process if the priority is higher
-			if (blocked_process->m_priority > gp_current_process->m_priority){
+			if (blocked_process->m_priority < gp_current_process->m_priority){
 				k_release_processor();
 			}
 			break;
 		}
 		// check if there are ready process that has higher priority
-		if ( i > gp_current_process->m_priority && ready_queue[i].first != NULL){
+		if ( i <= gp_current_process->m_priority && ready_queue[i].first != NULL){
 			k_release_processor();
 			break;
 		}
@@ -126,7 +130,7 @@ void process_init()
 	}
   
 	/* initilize exception stack frame (i.e. initial context) for each process */
-	for ( i = 0; i < NUM_TEST_PROCS; i++ ) {
+	for ( i = 0; i < NUM_TOTAL_PROCS; i++ ) {
 		int j;
 		(gp_pcbs[i])->m_pid = (g_proc_table[i]).m_pid;
 		(gp_pcbs[i])->m_state = NEW;
@@ -145,7 +149,7 @@ void process_init()
 		linkedList_init(&block_queue[i]);
 	}
 	// Initialize everything to ready queue
-	for ( i = 0; i < NUM_TEST_PROCS; i++ ) {
+	for ( i = 0; i < NUM_TOTAL_PROCS; i++ ) {
 		ready_enqueue(gp_pcbs[i]);
 	}
 }
@@ -246,7 +250,7 @@ int k_release_processor(void){
 		gp_current_process = p_pcb_old; // revert back to the old process
 		return RTX_ERR;
 	}
-    if ( p_pcb_old == NULL ) {
+  if ( p_pcb_old == NULL ) {
 		p_pcb_old = gp_current_process;
 	}
 	process_switch(p_pcb_old);
@@ -254,7 +258,7 @@ int k_release_processor(void){
 }
 
 int k_set_process_priority(int process_id, int priority){
-	
+	node* node_to_set_priority;
 	int i;
 	if (process_id == 0){ //NULL PROCESS PRIORITY CANNOT BE CHANGED
 		return RTX_ERR;
@@ -262,6 +266,8 @@ int k_set_process_priority(int process_id, int priority){
 	for ( i = 0; i < NUM_TEST_PROCS; i++ ) {
 		if ((gp_pcbs[i])->m_pid == process_id){ //find process with id process_id
 			(gp_pcbs[i])->m_priority = priority; //update priority of found process
+			node_to_set_priority = linkedList_remove (&ready_queue[i], gp_pcbs[i]);
+			ready_enqueue (gp_pcbs[i]);
 			check_preemption();
 			return RTX_OK;
 		}

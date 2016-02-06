@@ -128,7 +128,10 @@ void *k_request_memory_block(void) {
 		// put PCB on b l o c k e d _ r e s o u r c e _ q ;
 		// set process state to B L O C K E D _ O N _ R E S O U R C E ;
 		// release_processor ( ) ;
+		block_enqueue(gp_current_process, MEM_BLOCKED);
+		k_release_processor();
 	}
+
 	// int mem_blk = next free block ;
 	temp = (void*)linkedList_pop_front(&free_list);
 	// update the heap ;
@@ -159,11 +162,13 @@ int k_release_memory_block(void *p_mem_blk) {
  	temp = (node*) p_mem_blk;
  	linkedList_push_back(&free_list, temp);
 
+
  // if ( blocked on resource q not empty ) {
  // h a n d l e _ p r o c e s s _ r e a d y ( pop ( blocked resource q ) ) ;
  // // + Check if any other process is in ready state be
  // }
-
+ 	//this is done by this func already
+ 	check_preemption();
 
 // 	// atomic ( off ) ;
  	__enable_irq();

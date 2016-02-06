@@ -14,7 +14,11 @@
 #define RTX_OK  0
 
 #define NULL 0
-#define NUM_TEST_PROCS 15
+#define NUM_TEST_PROCS 3
+
+/*Added just in case since i don't know if vera actually needs it,
+it is used in k_process.c*/
+#define NUM_PRIORITY 5
 
 #ifdef DEBUG_0
 #define USR_SZ_STACK 0x200         /* user proc stack size 512B   */

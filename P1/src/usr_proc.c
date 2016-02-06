@@ -23,6 +23,10 @@ void set_test_procs() {
 	g_test_procs[0].m_stack_size = PROC_BLK_SIZE;
 	g_test_procs[0].mpf_start_pc = &nullProc;
 	g_test_procs[0].m_priority = LOWEST;
+	//NUM_TEST_PROCS has match the total proc numbers
+	//otherwise it will create "empty" process
+	//also, the NUM_TEST_PROCS in kernal should be equal to the NUM_TEST_PROCS in front
+	//suggest: change NUM_TEST_PROCS to 2 in rtx.h
 	for( i = 1; i < NUM_TEST_PROCS; i++ ) {
 		g_test_procs[i].m_pid=(U32)(i);
 		g_test_procs[i].m_priority=LOW;

@@ -18,7 +18,7 @@
 #include "uart_polling.h"
 #include "k_process.h"
 
-#ifdef DEBUG_0
+#ifdef DEBUG_0 	
 #include "printf.h"
 #endif /* DEBUG_0 */
 
@@ -29,6 +29,12 @@ PCB *gp_current_process = NULL; /* always point to the current RUN process */
 U32 g_switch_flag = 0;          /* whether to continue to run the process before the UART receive interrupt */
                                 /* 1 means to switch to another process, 0 means to continue the current process */
 				/* this value will be set by UART handler */
+
+
+
+node* next_process_node;
+
+
 
 /* process initialization table */
 PROC_INIT g_proc_table[NUM_TEST_PROCS];
@@ -41,8 +47,10 @@ static linkedList block_queue[NUM_PRIORITY];
 static node node_pool[NUM_TEST_PROCS];
 
 static node* node_factory(PCB * pcb){
-	node_pool[pcb->m_priority].value = pcb;
-	return &node_pool[pcb->m_priority];
+	//can't just use m_pority here since all the process has the same prority, 
+	//so that it will keep overriding the memory and all the nodes will have the same memory address
+	node_pool[pcb->m_pid].value = pcb;
+	return &node_pool[pcb->m_pid];
 }
 
 
@@ -51,21 +59,26 @@ static node* node_factory(PCB * pcb){
 */
 void ready_enqueue(PCB * pcb){
 	node* process_node;
-	int priority = current_process_node->m_priority;
-	pcb->state = RDY;
-	process_node = node_factory(gp_current_process);
+	//int priority = current_process_node->m_priority;
+	int priority = pcb->m_priority;
+	pcb->m_state = RDY;
+	//process_node = node_factory(gp_current_process);
+	process_node = node_factory(pcb);
 	// rpq enqueue(current process) put current process in ready queues
 	linkedList_push_back(&ready_queue[priority], process_node); 
 }
 
 /**
- * Put the PCB into block queue
+ * Put the PCB into block queue\
+
 */
 void block_enqueue(PCB * pcb, PROC_STATE_E state){
 	node* process_node;
-	int priority = current_process_node->m_priority;
-	pcb->state = state;
-	process_node = node_factory(gp_current_process);
+	//int priority = current_process_node->m_priority;
+	int priority = pcb->m_priority;
+	pcb->m_state = state;
+	//process_node = node_factory(gp_current_process);
+	process_node = node_factory(pcb);
 	// rpq enqueue(current process) put current process in ready queues
 	linkedList_push_back(&block_queue[priority], process_node); 
 }
@@ -86,6 +99,7 @@ void process_init()
 		g_proc_table[i].m_stack_size = g_test_procs[i].m_stack_size;
 		g_proc_table[i].mpf_start_pc = g_test_procs[i].mpf_start_pc;
 		g_proc_table[i].m_priority = g_test_procs[i].m_priority;
+		
 	}
   
 	/* initilize exception stack frame (i.e. initial context) for each process */
@@ -119,11 +133,24 @@ void process_init()
  *POST: if gp_current_process was NULL, then it gets set to nullProc.
  *      No other effect on other global variables.
  */
-
-
 PCB *scheduler(void){
+	
+	//node *blocked_process_node;
+	//PCB *blocked_process;
+	int i;
 	for ( i = 0; i < NUM_PRIORITY; i++ ){
+		/*
+			* When should we take care of blocked queue?
+		
+		if(free_list != NULL && block_queue[i].first){
+			blocked_process_node = linkedlist_pop_front(&block_queue[i]);
+			block_process = (PCB *)blocked_process_node->value;
+			block_process->m_state = RDY;
+			linkedlist_push_back(&ready_queue[i],blocked_process_node);
+		}
+		*/
 		if (ready_queue[i].length != 0){
+			
 			// pop off the first ready process with highest priority
 			node* firstProcess = linkedList_pop_front(&ready_queue[i]);
 			return (PCB *)firstProcess->value;
@@ -147,9 +174,10 @@ int process_switch(PCB *p_pcb_old)
 	
 	state = gp_current_process->m_state;
 
-	if (state == NEW) {
+	if (state == RDY) {
 		if (gp_current_process != p_pcb_old && p_pcb_old->m_state != NEW) {
-			p_pcb_old->m_state = RDY;
+			//p_pcb_old->m_state = RDY;
+			ready_enqueue(p_pcb_old);
 			p_pcb_old->mp_sp = (U32 *) __get_MSP();
 		}
 		gp_current_process->m_state = RUN;
@@ -183,13 +211,12 @@ int k_release_processor(void){
 // 2. rpq enqueue(current process) put current process in ready queues
 // 3. process switch invokes scheduler and context-switches to the new process
 	PCB *p_pcb_old = NULL;
-	
 	p_pcb_old = gp_current_process;
 
-	if (gp_current_process!= NULL){
-		ready_enqueue(gp_current_process);
-	}	
-
+	//if (gp_current_process!= NULL){
+		//gp_current_process->mp_sp = (U32 *) __get_MSP();
+		//ready_enqueue(gp_current_process);
+	//}	
 	gp_current_process = scheduler();
 	
 	if ( gp_current_process == NULL  ) {

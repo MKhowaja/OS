@@ -61,7 +61,7 @@ void ready_enqueue(PCB * pcb){
 	node* process_node;
 	//int priority = current_process_node->m_priority;
 	int priority = pcb->m_priority;
-	pcb->m_state = RDY;
+	//pcb->m_state = RDY;
 	//process_node = node_factory(gp_current_process);
 	process_node = node_factory(pcb);
 	// rpq enqueue(current process) put current process in ready queues
@@ -173,17 +173,16 @@ int process_switch(PCB *p_pcb_old)
 	PROC_STATE_E state;
 	
 	state = gp_current_process->m_state;
-
-	if (state == RDY) {
+	if (state == NEW) {
 		if (gp_current_process != p_pcb_old && p_pcb_old->m_state != NEW) {
-			//p_pcb_old->m_state = RDY;
+			p_pcb_old->m_state = RDY;
 			ready_enqueue(p_pcb_old);
 			p_pcb_old->mp_sp = (U32 *) __get_MSP();
 		}
 		gp_current_process->m_state = RUN;
 		__set_MSP((U32) gp_current_process->mp_sp);
 		__rte();  // pop exception stack frame from the stack for a new processes
-	} 
+	}
 	
 	/* The following will only execute if the if block above is FALSE */
 
@@ -192,6 +191,7 @@ int process_switch(PCB *p_pcb_old)
 			p_pcb_old->m_state = RDY; 
 			p_pcb_old->mp_sp = (U32 *) __get_MSP(); // save the old process's sp
 			gp_current_process->m_state = RUN;
+			ready_enqueue(p_pcb_old);
 			__set_MSP((U32) gp_current_process->mp_sp); //switch to the new proc's stack    
 		} else {
 			gp_current_process = p_pcb_old; // revert back to the old proc on error

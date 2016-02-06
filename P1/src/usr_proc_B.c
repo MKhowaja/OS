@@ -43,7 +43,7 @@
 
 #include "rtx.h"
 #include "uart_polling.h"
-#include "usr_proc.h"
+#include "auto_usr_proc.h"
 
 #ifdef DEBUG_0
 #include "printf.h"

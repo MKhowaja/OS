@@ -157,13 +157,22 @@ void process_init()
  */
 PCB *scheduler(void){
 	int i;
+	node* first_process_node;
+	PCB* first_process;
+
 	for ( i = 0; i < NUM_PRIORITY; i++ ){
-		if (ready_queue[i].length != 0){
+		if (ready_queue[i].first != NULL){
 			// pop off the first ready process with highest priority
-			node* firstProcess = linkedList_pop_front(&ready_queue[i]);
-			if (firstProcess->m_priority >= gp_current_process->m_priority){
-				// return new process only when the priority is at least the same level
-				return (PCB *)firstProcess->value;
+			first_process_node = ready_queue[i].first;
+			first_process = (PCB *) first_process_node->value;
+			if(gp_current_process == NULL){
+				linkedList_pop_front(&ready_queue[i]);
+				return first_process;
+			}
+			if (first_process->m_priority <= gp_current_process->m_priority){
+			// return new process only when the priority is at least the same level
+				first_process_node = linkedList_pop_front(&ready_queue[i]);
+				return first_process;
 			}else{
 				return gp_current_process;
 			}	

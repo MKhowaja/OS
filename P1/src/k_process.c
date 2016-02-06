@@ -76,7 +76,6 @@ void check_preemption(){
 	int i;
 	node* blocked_process_node;
 	PCB* blocked_process;
-	node* ready_process_node;
 
 	for ( i = 0; i < NUM_PRIORITY; i++ ){
 		// if memory is available, unblock the highest priority	
@@ -162,7 +161,12 @@ PCB *scheduler(void){
 		if (ready_queue[i].length != 0){
 			// pop off the first ready process with highest priority
 			node* firstProcess = linkedList_pop_front(&ready_queue[i]);
-			return (PCB *)firstProcess->value;
+			if (firstProcess->m_priority >= gp_current_process->m_priority){
+				// return new process only when the priority is at least the same level
+				return (PCB *)firstProcess->value;
+			}else{
+				return gp_current_process;
+			}	
 		}
 	}
 	// Error

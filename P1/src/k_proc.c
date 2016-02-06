@@ -15,7 +15,7 @@ void set_kernal_procs() {
 	g_kernal_procs[0].m_pid = 0;
 	g_kernal_procs[0].m_stack_size = PROC_BLK_SIZE;
 	g_kernal_procs[0].mpf_start_pc = &nullProc;
-	g_kernal_procs[0].m_priority = LOWEST;
+	g_kernal_procs[0].m_priority = NULLPROC;
 }
 
 void nullProc (void){

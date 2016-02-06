@@ -31,10 +31,7 @@ U32 g_switch_flag = 0;          /* whether to continue to run the process before
 				/* this value will be set by UART handler */
 
 
-
 node* next_process_node;
-
-
 
 /* process initialization table */
 PROC_INIT g_proc_table[NUM_TEST_PROCS];
@@ -47,40 +44,35 @@ static linkedList block_queue[NUM_PRIORITY];
 static node node_pool[NUM_TEST_PROCS];
 
 static node* node_factory(PCB * pcb){
-	//can't just use m_pority here since all the process has the same prority, 
-	//so that it will keep overriding the memory and all the nodes will have the same memory address
+	// pid mapping 
 	node_pool[pcb->m_pid].value = pcb;
 	return &node_pool[pcb->m_pid];
 }
-
 
 /**
  * Put the PCB into ready queue
 */
 void ready_enqueue(PCB * pcb){
 	node* process_node;
-	//int priority = current_process_node->m_priority;
 	int priority = pcb->m_priority;
 	//pcb->m_state = RDY;
-	//process_node = node_factory(gp_current_process);
 	process_node = node_factory(pcb);
-	// rpq enqueue(current process) put current process in ready queues
 	linkedList_push_back(&ready_queue[priority], process_node); 
 }
 
 /**
  * Put the PCB into block queue\
-
 */
 void block_enqueue(PCB * pcb, PROC_STATE_E state){
 	node* process_node;
-	//int priority = current_process_node->m_priority;
 	int priority = pcb->m_priority;
 	pcb->m_state = state;
-	//process_node = node_factory(gp_current_process);
 	process_node = node_factory(pcb);
-	// rpq enqueue(current process) put current process in ready queues
 	linkedList_push_back(&block_queue[priority], process_node); 
+}
+
+void check_preemption(){
+	// 
 }
 
 /**

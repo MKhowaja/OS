@@ -90,6 +90,7 @@ void check_preemption(){
 			}
 			break;
 		}
+		// check if there are ready process that has higher priority
 		if ( i > gp_current_process->m_priority && ready_queue[i].first != NULL){
 			k_release_processor();
 			break;
@@ -118,10 +119,10 @@ void process_init()
 	}
 
 	for ( i = NUM_TEST_PROCS; i < NUM_TOTAL_PROCS; i++ ) {
-		g_proc_table[i].m_pid = g_kernal_procs[i].m_pid;
-		g_proc_table[i].m_stack_size = g_kernal_procs[i].m_stack_size;
-		g_proc_table[i].mpf_start_pc = g_kernal_procs[i].mpf_start_pc;
-		g_proc_table[i].m_priority = g_kernal_procs[i].m_priority;
+		g_proc_table[i].m_pid = g_kernal_procs[i-NUM_TEST_PROCS].m_pid;
+		g_proc_table[i].m_stack_size = g_kernal_procs[i-NUM_TEST_PROCS].m_stack_size;
+		g_proc_table[i].mpf_start_pc = g_kernal_procs[i-NUM_TEST_PROCS].mpf_start_pc;
+		g_proc_table[i].m_priority = g_kernal_procs[i-NUM_TEST_PROCS].m_priority;
 	}
   
 	/* initilize exception stack frame (i.e. initial context) for each process */
@@ -252,21 +253,20 @@ int k_release_processor(void){
 	return RTX_OK;
 }
 
-// @ todo: preemption code
 int k_set_process_priority(int process_id, int priority){
 	
 	int i;
 	if (process_id == 0){ //NULL PROCESS PRIORITY CANNOT BE CHANGED
-		return -1; //should we return error? or not
+		return RTX_ERR;
 	}
 	for ( i = 0; i < NUM_TEST_PROCS; i++ ) {
 		if ((gp_pcbs[i])->m_pid == process_id){ //find process with id process_id
 			(gp_pcbs[i])->m_priority = priority; //update priority of found process
 			check_preemption();
-			return 1;
+			return RTX_OK;
 		}
 	}
-	return -1;  //process not found
+	return RTX_ERR;  //process not found
 }
 
 int k_get_process_priority(int process_id){
@@ -276,5 +276,5 @@ int k_get_process_priority(int process_id){
 			return (gp_pcbs[i])->m_priority; //return priority of found process
 		}
 	}
-	return -1; //process not found
+	return RTX_ERR; //process not found
 }

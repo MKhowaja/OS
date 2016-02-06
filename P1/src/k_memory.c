@@ -127,6 +127,7 @@ void *k_request_memory_block(void) {
 	__disable_irq();
 	// while ( no memory block is available ) {
 	while(free_list.length == 0){
+		
 		// put PCB on b l o c k e d _ r e s o u r c e _ q ;
 		// set process state to B L O C K E D _ O N _ R E S O U R C E ;
 		// release_processor ( ) ;
@@ -157,12 +158,12 @@ int k_release_memory_block(void *p_mem_blk) {
 // 	// if ( memory block pointer is not valid )
 // 	// return ERROR_CODE ;
  	valid = linkedList_contain(&free_list, p_mem_blk);
- 	if (valid == 0){
+ 	if (valid == 1){ //if its already in the free list, then error because we are releasing free memory
  		return RTX_ERR;
  	}
  	// put memory_block into heap ;
  	temp = (node*) p_mem_blk;
- 	linkedList_push_back(&free_list, temp);
+ 	linkedList_push_front(&free_list, temp);
 
 
  // if ( blocked on resource q not empty ) {

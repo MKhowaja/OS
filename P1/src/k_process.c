@@ -72,7 +72,21 @@ void block_enqueue(PCB * pcb, PROC_STATE_E state){
 }
 
 void check_preemption(){
-	// 
+	int i;
+	for ( i = 0; i < NUM_PRIORITY; i++ ){
+		// if memory is available, unblock the highest priority	
+		if(free_list != NULL && block_queue[i].first != NULL){
+			blocked_process_node = linkedList_pop_front(&block_queue[i]);
+			block_process = (PCB *)blocked_process_node->value;
+			block_process->m_state = RDY;
+			linkedList_push_back(&ready_queue[i],blocked_process_node);
+			// preempt the current process if the priority is higher
+			if (block_process->m_priority > gp_current_process->m_priority){
+				release_processor();
+			}
+			break;
+		}
+	}
 }
 
 /**
@@ -131,18 +145,7 @@ PCB *scheduler(void){
 	//PCB *blocked_process;
 	int i;
 	for ( i = 0; i < NUM_PRIORITY; i++ ){
-		/*
-			* When should we take care of blocked queue?
-		
-		if(free_list != NULL && block_queue[i].first){
-			blocked_process_node = linkedlist_pop_front(&block_queue[i]);
-			block_process = (PCB *)blocked_process_node->value;
-			block_process->m_state = RDY;
-			linkedlist_push_back(&ready_queue[i],blocked_process_node);
-		}
-		*/
 		if (ready_queue[i].length != 0){
-			
 			// pop off the first ready process with highest priority
 			node* firstProcess = linkedList_pop_front(&ready_queue[i]);
 			return (PCB *)firstProcess->value;

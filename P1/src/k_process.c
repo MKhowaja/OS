@@ -76,6 +76,8 @@ void check_preemption(){
 	int i;
 	node* blocked_process_node;
 	PCB* blocked_process;
+	node* ready_process_node;
+
 	for ( i = 0; i < NUM_PRIORITY; i++ ){
 		// if memory is available, unblock the highest priority	
 		if(has_free_memory() == 1 && block_queue[i].first != NULL){
@@ -87,6 +89,10 @@ void check_preemption(){
 			if (blocked_process->m_priority > gp_current_process->m_priority){
 				k_release_processor();
 			}
+			break;
+		}
+		if ( i > gp_current_process->m_priority && ready_queue[i].first != NULL){
+			k_release_processor();
 			break;
 		}
 	}

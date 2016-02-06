@@ -21,6 +21,9 @@
 void process_init(void);               /* initialize all procs in the system */
 PCB *scheduler(void);                  /* pick the pid of the next to run process */
 int k_release_processor(void);           /* kernel release_process function */
+void check_preemption(void);
+void block_enqueue(PCB * pcb, PROC_STATE_E state);
+void ready_enqueue(PCB * pcb);
 
 int set_process_priority(int process_id, int priority);
 int get_process_priority(int process_id);
@@ -28,5 +31,8 @@ int get_process_priority(int process_id);
 extern U32 *alloc_stack(U32 size_b);   /* allocate stack for a process */
 extern void __rte(void);               /* pop exception stack frame */
 extern void set_test_procs(void);      /* test process initial set up */
+extern void set_kernal_procs(void);      /* kernal process initial set up */
+extern int has_free_memory(void);
+
 
 #endif /* ! K_PROCESS_H_ */

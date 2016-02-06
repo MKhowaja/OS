@@ -21,6 +21,8 @@ U32* heap_end;
 U32* test1;
 U32* test2;
 
+extern PCB* gp_current_process;
+
 /**
  * @brief: Initialize RAM as follows:
 

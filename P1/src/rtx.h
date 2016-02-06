@@ -15,7 +15,6 @@
 #define HIGH    1
 #define MEDIUM  2
 #define LOW     3
-#define LOWEST  4
 
 #define PROC_BLK_SIZE 0x100 //size of each process' stack
  

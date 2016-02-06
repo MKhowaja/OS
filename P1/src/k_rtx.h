@@ -18,6 +18,9 @@
 #define NUM_KERNAL_PROCS 1
 #define NUM_TOTAL_PROCS NUM_TEST_PROCS + NUM_KERNAL_PROCS
 
+/* null proc priority */
+#define LOWEST  4 
+
 /*Added just in case since i don't know if vera actually needs it,
 it is used in k_process.c*/
 #define NUM_PRIORITY 5

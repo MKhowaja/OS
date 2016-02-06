@@ -244,7 +244,7 @@ int k_release_processor(void){
 }
 
 // @ todo: preemption code
-int set_process_priority(int process_id, int priority){
+int k_set_process_priority(int process_id, int priority){
 	
 	int i;
 	if (process_id == 0){ //NULL PROCESS PRIORITY CANNOT BE CHANGED
@@ -253,13 +253,14 @@ int set_process_priority(int process_id, int priority){
 	for ( i = 0; i < NUM_TEST_PROCS; i++ ) {
 		if ((gp_pcbs[i])->m_pid == process_id){ //find process with id process_id
 			(gp_pcbs[i])->m_priority = priority; //update priority of found process
+			check_preemption();
 			return 1;
 		}
 	}
 	return -1;  //process not found
 }
 
-int get_process_priority(int process_id){
+int k_get_process_priority(int process_id){
 	int i;
 	for ( i = 0; i < NUM_TEST_PROCS; i++ ) {
 		if ((gp_pcbs[i])->m_pid == process_id){ //find process with id process_id

@@ -170,3 +170,12 @@ int k_release_memory_block(void *p_mem_blk) {
 // 	// return SUCCESS_CODE
  	return RTX_OK;
 }
+
+int has_free_memory(){
+	if (free_list.length > 0){
+		return 1;
+	}else{
+		return 0;
+	}
+}
+	

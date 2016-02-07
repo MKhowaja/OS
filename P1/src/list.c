@@ -110,43 +110,43 @@ node* linkedList_pop_back(linkedList* list) {
     return last_node;
 }
 
-// node* linkedList_remove(linkedList* list, void* target_value) {
-//     node* iter;
+node* linkedList_remove(linkedList* list, void* target_value) {
+    node* iter;
 
-//     if (list == NULL) {
-//         return NULL;
-//     }
+    if (list == NULL) {
+        return NULL;
+    }
 
-//     if (list->first != NULL && list->first->value == target_value) {
-//         return (node*)linkedList_pop_front(list);
-//     }
+    if (list->first != NULL && list->first->value == target_value) {
+        return (node*)linkedList_pop_front(list);
+    }
 
-//     if (list->last != NULL && list->last->value == target_value) {
-//         return (node*)linkedList_pop_back(list);
-//     }
+    if (list->last != NULL && list->last->value == target_value) {
+        return (node*)linkedList_pop_back(list);
+    }
 
-//     iter = list->first;
+    iter = list->first;
 
-//     while (iter != NULL) {
-//         if (iter->value == target_value) {
-//             if (iter->next != NULL) {
-//                 iter->next->prev = iter->prev;
-//             }
+    while (iter != NULL) {
+        if (iter->value == target_value) {
+            if (iter->next != NULL) {
+                iter->next->prev = iter->prev;
+            }
 
-//             if (iter->prev != NULL) {
-//                 iter->prev->next = iter->next;
-//             }
+            if (iter->prev != NULL) {
+                iter->prev->next = iter->next;
+            }
 
-//             list->length--;
+            list->length--;
 
-//             return iter;
-//         }
+            return iter;
+        }
 
-//         iter = iter->next;
-//     }
+        iter = iter->next;
+    }
 
-//     return NULL;
-// }
+    return NULL;
+}
 
 int linkedList_contain(linkedList* list, void *address){
   node* temp = list->first;

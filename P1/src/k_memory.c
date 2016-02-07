@@ -16,7 +16,7 @@ U32 *gp_stack; /* The last allocated stack low address. 8 bytes aligned */
                /* The first stack starts at the RAM high address */
 	       /* stack grows down. Fully decremental stack */
 linkedList free_list;
-=U32* heap_start;
+U32* heap_start;
 // U32* heap_end;
 
 extern PCB* gp_current_process;
@@ -49,6 +49,8 @@ extern PCB* gp_current_process;
 
 */
 
+
+//this func is good...
 void memory_init(void)
 {
 	U8 *p_end = (U8 *)&Image$$RW_IRAM1$$ZI$$Limit;
@@ -91,8 +93,11 @@ void memory_init(void)
 	#ifdef DEBUG_0  
 	printf("Allocated heap done\n");
 	#endif
-  
 }
+
+
+
+
 
 /**
  * @brief: allocate stack for a process, align to 8 bytes boundary
@@ -121,24 +126,12 @@ void *k_request_memory_block(void) {
 #ifdef DEBUG_0 
 	printf("k_request_memory_block: entering...\n");
 #endif /* ! DEBUG_0 */
-	// atomic ( on ) ;
-	// __disable_irq();
-	// while ( no memory block is available ) {
-	while(free_list.length == 0){
-		
-		// put PCB on b l o c k e d _ r e s o u r c e _ q ;
-		// set process state to B L O C K E D _ O N _ R E S O U R C E ;
-		// release_processor ( ) ;
-		block_enqueue(gp_current_process, MEM_BLOCKED);
-		k_release_processor();
-	}
 
-	// int mem_blk = next free block ;
+	while(free_list.length == 0){
+		makeMeMBlock();
+	}
 	temp = (void*)linkedList_pop_front(&free_list);
-	// update the heap ;
-	
-	// atomic ( off ) ;
-	// __enable_irq();
+
 	return temp;
 }
 
@@ -149,31 +142,19 @@ int k_release_memory_block(void *p_mem_blk) {
 	printf("k_release_memory_block: releasing block @ 0x%x\n", p_mem_blk);
 #endif /* ! DEBUG_0 */
 	
-
-// 	// atomic ( on ) ;
- 	// __disable_irq();
-
-// 	// if ( memory block pointer is not valid )
-// 	// return ERROR_CODE ;
  	valid = linkedList_contain(&free_list, p_mem_blk);
  	if (valid == 1){ //if its already in the free list, then error because we are releasing free memory
  		return RTX_ERR;
  	}
+
  	// put memory_block into heap ;
  	temp = (node*) p_mem_blk;
  	linkedList_push_front(&free_list, temp);
 
 
- // if ( blocked on resource q not empty ) {
- // h a n d l e _ p r o c e s s _ r e a d y ( pop ( blocked resource q ) ) ;
- // // + Check if any other process is in ready state be
- // }
- 	//this is done by this func already
- 	check_preemption();
-
-// 	// atomic ( off ) ;
- 	// __enable_irq();
-// 	// return SUCCESS_CODE
+ 	if(!block_queue_empty()){
+ 		makeReady();
+ 	}
  	return RTX_OK;
 }
 

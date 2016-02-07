@@ -74,6 +74,72 @@ void block_enqueue(PCB * pcb, PROC_STATE_E state){
 	linkedList_push_back(&block_queue[priority], process_node);
 }
 
+
+
+
+//Jeff func starts//
+int block_queue_empty(){
+	int i;
+	for ( i = 0; i < NUM_PRIORITY; i++ ){
+		//at least one block in it.. not empty
+		if(block_queue[i].length != 0){
+			return 0
+		}
+	}
+	return 1
+}
+
+int ready_queue_empty(){
+	int i;
+	for ( i = 0; i < NUM_PRIORITY; i++ ){
+		//at least one block in it.. not empty
+		if(ready_queue[i].length != 0){
+			return 0
+		}
+	}
+	return 1
+}
+
+
+/**
+ * @brief: Dequeues the first element from the queue with the highest priority
+ */
+PCB* processDequeue(linkedList[] queue)
+{
+	int i;
+	for ( i = 0; i < NUM_PRIORITY; i++ ){
+		//at least one block in it.. not empty
+		if(ready_queue[i].length != 0){
+			return (PCB*)queue[i].first->value;
+		}
+	}
+	return NULL;
+}
+
+/**
+ * @brief: Transfers the highest priority PCB from the block queue to the ready queue
+ */
+void makeReady()
+{
+  PCB* thePCB = processDequeue(block_queue);
+  thePCB->m_state = RDY;
+  linkedList_push_back(&ready_queue[i], thePCB);
+  k_release_processor();
+}
+
+//yeah fuck only block your mem hmm?
+void makeMeMBlock()
+{
+  gp_current_process->m_state = MEM_BLOCKED;
+  k_release_processor();
+}
+
+
+//Jeff func ends//
+
+
+
+
 void check_preemption(){
 	int i;
 	node* blocked_process_node;

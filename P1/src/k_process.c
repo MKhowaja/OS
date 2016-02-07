@@ -68,11 +68,10 @@ void block_enqueue(PCB * pcb, PROC_STATE_E state){
 	node* process_node;
 	int priority = pcb->m_priority;
 	
-	linkedList_remove (&ready_queue[priority], pcb);
-	
+	//linkedList_remove (&ready_queue[priority], pcb);
 	pcb->m_state = state;
 	process_node = node_factory(pcb);
-	linkedList_push_back(&block_queue[priority], process_node); 
+	linkedList_push_back(&block_queue[priority], process_node);
 }
 
 void check_preemption(){
@@ -89,7 +88,7 @@ void check_preemption(){
 			linkedList_push_back(&ready_queue[i],blocked_process_node);
 			linkedList_remove (&block_queue[i], blocked_process); //remove node from blocked queue
 			// preempt the current process if the priority is higher
-			if (blocked_process->m_priority < gp_current_process->m_priority){
+			if (blocked_process->m_priority <= gp_current_process->m_priority){
 				k_release_processor();
 			}
 			break;
@@ -174,7 +173,7 @@ PCB *scheduler(void){
 				linkedList_pop_front(&ready_queue[i]);
 				return first_process;
 			}
-			if (first_process->m_priority <= gp_current_process->m_priority){
+			if (is_blocked(gp_current_process) || first_process->m_priority <= gp_current_process->m_priority){
 			// return new process only when the priority is at least the same level
 				first_process_node = linkedList_pop_front(&ready_queue[i]);
 				return first_process;
@@ -187,6 +186,15 @@ PCB *scheduler(void){
 	return NULL;
 }
 
+//returns true if 
+int is_blocked (PCB * pcb) {
+	if (pcb->m_state == MEM_BLOCKED || pcb->m_state == MSG_BLOCKED){
+		return 1;
+	}
+	else {
+		return 0;
+	}
+}
 /*@brief: switch out old pcb (p_pcb_old), run the new pcb (gp_current_process)
  *@param: p_pcb_old, the old pcb that was in RUN
  *@return: RTX_OK upon success
@@ -214,11 +222,14 @@ int process_switch(PCB *p_pcb_old)
 	/* The following will only execute if the if block above is FALSE */
 
 	if (gp_current_process != p_pcb_old) {
-		if (state == RDY){ 		
-			p_pcb_old->m_state = RDY; 
-			p_pcb_old->mp_sp = (U32 *) __get_MSP(); // save the old process's sp
+		if (state == RDY){
+			 // save the old process's sp
+			if(!is_blocked(p_pcb_old)){ //Don't insert in ready queue if blocked process
+				p_pcb_old->m_state = RDY; 
+				ready_enqueue(p_pcb_old);
+			}
+			p_pcb_old->mp_sp = (U32 *) __get_MSP();
 			gp_current_process->m_state = RUN;
-			ready_enqueue(p_pcb_old);
 			__set_MSP((U32) gp_current_process->mp_sp); //switch to the new proc's stack    
 		} else {
 			gp_current_process = p_pcb_old; // revert back to the old proc on error
@@ -266,8 +277,11 @@ int k_set_process_priority(int process_id, int priority){
 	for ( i = 0; i < NUM_TEST_PROCS; i++ ) {
 		if ((gp_pcbs[i])->m_pid == process_id){ //find process with id process_id
 			(gp_pcbs[i])->m_priority = priority; //update priority of found process
-			node_to_set_priority = linkedList_remove (&ready_queue[i], gp_pcbs[i]);
-			ready_enqueue (gp_pcbs[i]);
+			
+			if(gp_pcbs[i] != gp_current_process){
+					node_to_set_priority = linkedList_remove (&ready_queue[i], gp_pcbs[i]);
+				  ready_enqueue (gp_pcbs[i]);
+			}
 			check_preemption();
 			return RTX_OK;
 		}

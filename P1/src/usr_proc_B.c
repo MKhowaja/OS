@@ -113,6 +113,9 @@ void proc2(void)
 	void *p_mem_blk;
 	
 	p_mem_blk = request_memory_block();
+	#ifdef DEBUG_0
+			printf("proc2: p_mem_blk=0x%x\n", p_mem_blk);
+	#endif /* DEBUG_0 */
 	set_process_priority(PID_P2, MEDIUM);
 	while ( 1) {
 		if ( i != 0 && i%5 == 0 ) {

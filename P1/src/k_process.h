@@ -24,6 +24,7 @@ int k_release_processor(void);           /* kernel release_process function */
 void check_preemption(void);
 void block_enqueue(PCB * pcb, PROC_STATE_E state);
 void ready_enqueue(PCB * pcb);
+int is_blocked (PCB * pcb);
 
 int k_set_process_priority(int process_id, int priority);
 int k_get_process_priority(int process_id);

@@ -14,7 +14,14 @@
 #define RTX_OK  0
 
 #define NULL 0
-#define NUM_TEST_PROCS 3
+
+#define NUM_KERNEL_PROCS 1
+#define NUM_TEST_PROCS 2
+#define NUM_TOTAL_PROCS 3
+
+//#define LOWEST 4
+//#define PROC_BLK_SIZE 0x100 //size of each process' stack
+
 
 /*Added just in case since i don't know if vera actually needs it,
 it is used in k_process.c*/

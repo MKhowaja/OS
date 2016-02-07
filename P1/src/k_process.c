@@ -57,10 +57,10 @@ int block_queue_empty(){
 	for ( i = 0; i < NUM_PRIORITY; i++ ){
 		//at least one block in it.. not empty
 		if(block_queue[i].length != 0){
-			return 0
+			return 0;
 		}
 	}
-	return 1
+	return 1;
 }
 
 int ready_queue_empty(){
@@ -68,10 +68,10 @@ int ready_queue_empty(){
 	for ( i = 0; i < NUM_PRIORITY; i++ ){
 		//at least one block in it.. not empty
 		if(ready_queue[i].length != 0){
-			return 0
+			return 0;
 		}
 	}
-	return 1
+	return 1;
 }
 
 /**
@@ -186,7 +186,7 @@ int process_switch(PCB *p_pcb_old)
 
   if (state == NEW) {
     if (gp_current_process != p_pcb_old && p_pcb_old->m_state != NEW) {
-      if (p_pcb_old->m_state != BLK){
+      if (!is_blocked(p_pcb_old()){
         p_pcb_old->m_state = RDY;
       }
       p_pcb_old->mp_sp = (U32 *) __get_MSP();
@@ -225,6 +225,7 @@ void process_init()
 
   /* fill out the initialization table */
   set_test_procs();
+	set_kernal_procs();
 
   g_proc_table[0].m_pid = 0;
   //I KNOW IT IS 4
@@ -232,7 +233,7 @@ void process_init()
   g_proc_table[0].m_stack_size = 0x100;
   g_proc_table[0].mpf_start_pc = &nullProc;
 
-  for ( i = 1; i < NUM_PROCS; i++ ) {
+  for ( i = 1; i < NUM_TOTAL_PROCS; i++ ) {
     g_proc_table[i].m_pid = g_test_procs[i-1].m_pid;
     g_proc_table[i].m_priority = g_test_procs[i-1].m_priority;
     g_proc_table[i].m_stack_size = g_test_procs[i-1].m_stack_size;
@@ -240,7 +241,7 @@ void process_init()
   }
 
   /* initialize exception stack frame (i.e. initial context) for each process */
-  for ( i = 0; i < NUM_PROCS; i++ ) {
+  for ( i = 0; i < NUM_TOTAL_PROCS; i++ ) {
     int j;
     (gp_pcbs[i])->m_pid = (g_proc_table[i]).m_pid;
     (gp_pcbs[i])->m_state = NEW;
@@ -297,9 +298,9 @@ void moveProcessToPriority(PCB* thePCB, int old_priority) {
   	linkedList_remove(&block_queue[old_priority], process_node);
   	processEnqueue(block_queue, thePCB);
   }
-  else if(thePCB->state == RDY){
+  else if(thePCB->m_state == RDY){
   	linkedList_remove(&ready_queue[old_priority], process_node);
-  	process_node(ready_queue, thePCB);
+  	processEnqueue(ready_queue, thePCB);
   }
   //hmm fuck , you are no in ready or block queue
 }
@@ -312,7 +313,7 @@ int k_set_process_priority(int process_id, int priority){
   int i;
   int old_priority;
   PCB* thePCB;
-  if (0 <= priority && priority < NUM_OF_PRIORITIES - 1) {
+  if (0 <= priority && priority < NUM_PRIORITY - 1) {
   	//which is  NUM_OF_PRIORITIES - 1 = 4 
     for (i = 1; i < NUM_PROCS; i++){
       thePCB = gp_pcbs[i];

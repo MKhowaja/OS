@@ -22,8 +22,8 @@ void process_init(void);               /* initialize all procs in the system */
 PCB *scheduler(void);                  /* pick the pid of the next to run process */
 int k_release_process(void);           /* kernel release_process function */
 
-int set_process_priority(int process_id, int priority);
-int get_process_priority(int process_id);
+int k_set_process_priority(int process_id, int priority);
+int k_get_process_priority(int process_id);
 
 void ready_enqueue(PCB * pcb);
 void block_enqueue(PCB * pcb, PROC_STATE_E state);

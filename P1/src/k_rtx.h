@@ -16,8 +16,8 @@
 #define NULL 0
 
 #define NUM_KERNEL_PROCS 1
-#define NUM_TEST_PROCS 2
-#define NUM_TOTAL_PROCS 3
+#define NUM_TEST_PROCS 6
+#define NUM_TOTAL_PROCS 7
 
 //#define LOWEST 4
 //#define PROC_BLK_SIZE 0x100 //size of each process' stack

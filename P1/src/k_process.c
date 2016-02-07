@@ -240,7 +240,7 @@ int k_release_processor(void){
 }
 
 // @ todo: preemption code
-int set_process_priority(int process_id, int priority){
+int k_set_process_priority(int process_id, int priority){
 	
 	int i;
 	if (process_id == 0){ //NULL PROCESS PRIORITY CANNOT BE CHANGED

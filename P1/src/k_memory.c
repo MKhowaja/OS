@@ -16,10 +16,8 @@ U32 *gp_stack; /* The last allocated stack low address. 8 bytes aligned */
                /* The first stack starts at the RAM high address */
 	       /* stack grows down. Fully decremental stack */
 linkedList free_list;
-U32* heap_start;
-U32* heap_end;
-U32* test1;
-U32* test2;
+=U32* heap_start;
+// U32* heap_end;
 
 extern PCB* gp_current_process;
 
@@ -82,9 +80,10 @@ void memory_init(void)
 	//gp_stack is at RAM_END_ADDR
 	linkedList_init(&free_list); // initialize linked list
 	heap_start = (U32*)p_end;
-	heap_end = heap_start + (SZ_MEM_BLK/32) * NUM_MEM; //divide by 32 because pointer is already 32 bits and we need to alloc 128B
-	for (i = 0; i < NUM_MEM; i++){
-		node* temp = (node*)(heap_start + i * (SZ_MEM_BLK/32));
+	// heap_end = heap_start + (SZ_MEM_BLK/32) * NUM_MEM; 
+	for (i = 0; i < NUM_MEM && heap_start + i * (SZ_MEM_BLK) <= gp_stack; i++){
+		// node* temp = (node*)(heap_start + i * (SZ_MEM_BLK/32));
+		node* temp = (node*)(heap_start + i * (SZ_MEM_BLK));
 		// test1 = heap_start + i * (SZ_MEM_BLK/32);
 		// test2 = heap_end;
 		linkedList_push_back(&free_list, temp);
@@ -92,7 +91,6 @@ void memory_init(void)
 	#ifdef DEBUG_0  
 	printf("Allocated heap done\n");
 	#endif
-	/* allocate memory for heap, not implemented yet*/
   
 }
 
@@ -124,7 +122,7 @@ void *k_request_memory_block(void) {
 	printf("k_request_memory_block: entering...\n");
 #endif /* ! DEBUG_0 */
 	// atomic ( on ) ;
-	__disable_irq();
+	// __disable_irq();
 	// while ( no memory block is available ) {
 	while(free_list.length == 0){
 		
@@ -140,7 +138,7 @@ void *k_request_memory_block(void) {
 	// update the heap ;
 	
 	// atomic ( off ) ;
-	__enable_irq();
+	// __enable_irq();
 	return temp;
 }
 
@@ -153,7 +151,7 @@ int k_release_memory_block(void *p_mem_blk) {
 	
 
 // 	// atomic ( on ) ;
- 	__disable_irq();
+ 	// __disable_irq();
 
 // 	// if ( memory block pointer is not valid )
 // 	// return ERROR_CODE ;
@@ -174,7 +172,7 @@ int k_release_memory_block(void *p_mem_blk) {
  	check_preemption();
 
 // 	// atomic ( off ) ;
- 	__enable_irq();
+ 	// __enable_irq();
 // 	// return SUCCESS_CODE
  	return RTX_OK;
 }
@@ -186,4 +184,3 @@ int has_free_memory(){
 		return 0;
 	}
 }
-	

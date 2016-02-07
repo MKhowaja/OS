@@ -121,12 +121,12 @@ void process_init()
 		
 	}
 
-	for ( i = NUM_TEST_PROCS; i < NUM_TOTAL_PROCS; i++ ) {
-		g_proc_table[i].m_pid = g_kernal_procs[i-NUM_TEST_PROCS].m_pid;
-		g_proc_table[i].m_stack_size = g_kernal_procs[i-NUM_TEST_PROCS].m_stack_size;
-		g_proc_table[i].mpf_start_pc = g_kernal_procs[i-NUM_TEST_PROCS].mpf_start_pc;
-		g_proc_table[i].m_priority = g_kernal_procs[i-NUM_TEST_PROCS].m_priority;
-	}
+	// for ( i = NUM_TEST_PROCS; i < NUM_TOTAL_PROCS; i++ ) {
+	g_proc_table[i].m_pid = g_kernal_procs[0].m_pid;
+	g_proc_table[i].m_stack_size = g_kernal_procs[0].m_stack_size;
+	g_proc_table[i].mpf_start_pc = g_kernal_procs[0].mpf_start_pc;
+	g_proc_table[i].m_priority = g_kernal_procs[0].m_priority;
+	// }
   
 	/* initilize exception stack frame (i.e. initial context) for each process */
 	for ( i = 0; i < NUM_TOTAL_PROCS; i++ ) {

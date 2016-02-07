@@ -24,6 +24,6 @@ node* linkedList_pop_front(linkedList* list);
 node* linkedList_pop_back(linkedList* list);
 
 int linkedList_contain(linkedList* list, void *address);
-// node* linkedList_remove(linkedList* list, void* target_value);
+node* linkedList_remove(linkedList* list, void* target_value);
 
 #endif

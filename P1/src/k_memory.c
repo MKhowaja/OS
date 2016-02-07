@@ -16,18 +16,13 @@ U32 *gp_stack; /* The last allocated stack low address. 8 bytes aligned */
                /* The first stack starts at the RAM high address */
 	       /* stack grows down. Fully decremental stack */
 linkedList free_list;
+//U32 free_list[NUM_MEM];
 U32* heap_start;
 U32* heap_end;
 U32* test1;
 U32* test2;
 
-extern linkedList ready_queue[NUM_PRIORITY];
-extern linkedList block_queue[NUM_PRIORITY];
-
-extern PCB *gp_current_process;
-extern void ready_enqueue(PCB * pcb);
-extern void block_enqueue(PCB * pcb, PROC_STATE_E state);
-extern int k_release_processor(void);
+extern PCB* gp_current_process;
 
 
 /**
@@ -126,7 +121,7 @@ U32 *alloc_stack(U32 size_b)
 }
 
 void *k_request_memory_block(void) {
-	void* temp;
+	void** temp;
 #ifdef DEBUG_0 
 	printf("k_request_memory_block: entering...\n");
 #endif /* ! DEBUG_0 */
@@ -137,7 +132,7 @@ void *k_request_memory_block(void) {
 		// put PCB on b l o c k e d _ r e s o u r c e _ q ;
 		block_enqueue(gp_current_process,MEM_BLOCKED);
 		// set process state to B L O C K E D _ O N _ R E S O U R C E ;
-		k_release_processor() ;
+		k_release_processor();
 	}
 	// int mem_blk = next free block ;
 	temp = (void*)linkedList_pop_front(&free_list);
@@ -150,7 +145,6 @@ void *k_request_memory_block(void) {
 
 int k_release_memory_block(void *p_mem_blk) {
 	int valid;
-	int i;
 	node* temp;
 #ifdef DEBUG_0 
 	printf("k_release_memory_block: releasing block @ 0x%x\n", p_mem_blk);
@@ -169,18 +163,10 @@ int k_release_memory_block(void *p_mem_blk) {
  	// put memory_block into heap ;
  	temp = (node*) p_mem_blk;
  	linkedList_push_back(&free_list, temp);
-
-
- 	for(i = 0; i < NUM_PRIORITY; i++){
- 		if(block_queue[i]->first != NULL){
- 			temp = block_queue[i]->first;
- 			linkedList_remove(&block_queue[i], temp->first);
- 			ready_enqueue(&ready_queue[i],temp);
- 			break;
- 		}
- 	}
-
- 	k_release_processor();
+	
+	if(handle_blocked_process_ready()){
+		k_release_processor();
+	}
 
  // if ( blocked on resource q not empty ) {
  // h a n d l e _ p r o c e s s _ r e a d y ( pop ( blocked resource q ) ) ;

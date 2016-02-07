@@ -20,6 +20,10 @@ extern unsigned int Image$$RW_IRAM1$$ZI$$Limit;
 extern PCB **gp_pcbs;
 extern PROC_INIT g_proc_table[NUM_TEST_PROCS];
 
+extern int handle_blocked_process_ready(void);
+extern int k_release_processor(void);
+extern void block_enqueue(PCB * pcb, PROC_STATE_E state);
+
 /* ----- Functions ------ */
 void memory_init(void);
 U32 *alloc_stack(U32 size_b);

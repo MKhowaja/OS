@@ -54,6 +54,24 @@ static node* node_factory(PCB * pcb){
 	return &node_pool[pcb->m_pid];
 }
 
+int handle_blocked_process_ready(void){
+	U32 current_prority = gp_current_process->m_priority;
+	int i;
+	node* temp_node;
+	PCB* temp_pcb;
+	for(i = 0; i <= current_prority; i++){
+			if(block_queue[i].first != NULL){
+					temp_node = block_queue[i].first;
+					temp_node = linkedList_remove(&block_queue[i], temp_node->value);
+					temp_pcb = (PCB*)temp_node->value;
+					temp_pcb->m_state = RDY;
+					ready_enqueue(temp_pcb);
+					return 1;
+			}
+	}
+	return 0;
+	
+}
 
 /**
  * Put the PCB into ready queue
@@ -147,18 +165,13 @@ PCB *scheduler(void){
 	//node *blocked_process_node;
 	//PCB *blocked_process;
 	int i;
-	for ( i = 0; i < NUM_PRIORITY; i++ ){
-		/*
-			* When should we take care of blocked queue?
-		
-		if(free_list != NULL && block_queue[i].first){
-			blocked_process_node = linkedlist_pop_front(&block_queue[i]);
-			block_process = (PCB *)blocked_process_node->value;
-			block_process->m_state = RDY;
-			linkedlist_push_back(&ready_queue[i],blocked_process_node);
-		}
-		*/
-		if (ready_queue[i].length != 0){
+	if(gp_current_process != NULL && gp_current_process->m_state != MEM_BLOCKED){
+		gp_current_process->m_state = RDY;
+		ready_enqueue(gp_current_process);
+	}
+	for ( i = 0; i <= NUM_PRIORITY; i++ ){
+	
+		if (ready_queue[i].first != NULL){
 			
 			// pop off the first ready process with highest priority
 			node* firstProcess = linkedList_pop_front(&ready_queue[i]);
@@ -185,7 +198,7 @@ int process_switch(PCB *p_pcb_old)
 	if (state == NEW) {
 		if (gp_current_process != p_pcb_old && p_pcb_old->m_state != NEW) {
 			p_pcb_old->m_state = RDY;
-			ready_enqueue(p_pcb_old);
+			//ready_enqueue(p_pcb_old);
 			p_pcb_old->mp_sp = (U32 *) __get_MSP();
 		}
 		gp_current_process->m_state = RUN;
@@ -200,12 +213,14 @@ int process_switch(PCB *p_pcb_old)
 			p_pcb_old->m_state = RDY; 
 			p_pcb_old->mp_sp = (U32 *) __get_MSP(); // save the old process's sp
 			gp_current_process->m_state = RUN;
-			ready_enqueue(p_pcb_old);
+			//ready_enqueue(p_pcb_old);
 			__set_MSP((U32) gp_current_process->mp_sp); //switch to the new proc's stack    
 		} else {
 			gp_current_process = p_pcb_old; // revert back to the old proc on error
 			return RTX_ERR;
 		} 
+	}else{
+			gp_current_process->m_state = RUN;
 	}
 	return RTX_OK;
 }
@@ -243,16 +258,33 @@ int k_release_processor(void){
 int k_set_process_priority(int process_id, int priority){
 	
 	int i;
+	U32 old_priority;
+	PCB* proc_to_set_priority;
+	node* proc_node;
 	if (process_id == 0){ //NULL PROCESS PRIORITY CANNOT BE CHANGED
 		return -1; //should we return error? or not
 	}
-	for ( i = 0; i < NUM_TEST_PROCS; i++ ) {
+	for ( i = 0; i < NUM_TOTAL_PROCS; i++ ) {
 		if ((gp_pcbs[i])->m_pid == process_id){ //find process with id process_id
-			(gp_pcbs[i])->m_priority = priority; //update priority of found process
-			return 1;
+			proc_to_set_priority = gp_pcbs[i];
+			old_priority = proc_to_set_priority->m_priority;
+			proc_to_set_priority ->m_priority = priority; //update priority of found process
+			if(proc_to_set_priority != gp_current_process){
+				switch(proc_to_set_priority->m_state) 
+				{
+					case RDY:
+						linkedList_remove(&ready_queue[old_priority], proc_to_set_priority);
+						ready_enqueue(proc_to_set_priority);
+					case MEM_BLOCKED:
+						linkedList_remove(&block_queue[old_priority], proc_to_set_priority);
+						block_enqueue(proc_to_set_priority, proc_to_set_priority->m_state);
+					default :
+						break;
+				}
+			}		
 		}
 	}
-	return -1;  //process not found
+	return k_release_processor();  //process not found
 }
 
 int get_process_priority(int process_id){

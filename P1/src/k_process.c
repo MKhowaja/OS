@@ -257,7 +257,6 @@ void process_init()
   }
 
 
-
   //This one looks extra for our code
   // for ( i = 0; i < NUM_OF_PRIORITIES; i++ ) {
   //   ReadyPQ[i].head = NULL;
@@ -274,6 +273,94 @@ void process_init()
 #endif
     processEnqueue(ready_queue, gp_pcbs[i]);
   }
+}
+
+
+
+/**
+ * @brief moves pcb to its correct queue (for the case where a process changes another process' priority)
+ */
+void moveProcessToPriority(PCB* thePCB, int old_priority) {
+
+  node* process_node;
+  int now_priority;
+  now_priority = thePCB->m_priority;
+  if(now_priority == old_priority){
+  	return;//fuck? you really set the same thing? you fucking want me to move you
+  	//to the top of your priority?
+  }
+
+  //ok.. so you need to move your queue priority to other place...
+  process_node = node_factory(thePCB);
+
+  if(is_blocked(thePCB)){
+  	linkedList_remove(&block_queue[old_priority], process_node);
+  	processEnqueue(block_queue, thePCB);
+  }
+  else if(thePCB->state == RDY){
+  	linkedList_remove(&ready_queue[old_priority], process_node);
+  	process_node(ready_queue, thePCB);
+  }
+  //hmm fuck , you are no in ready or block queue
+}
+
+/**
+ * @brief Sets process priority, then calls release_processor()
+ * @return RTX_ERR on error and RTX_OK on success
+ */
+int k_set_process_priority(int process_id, int priority){
+  int i;
+  int old_priority;
+  PCB* thePCB;
+  if (0 <= priority && priority < NUM_OF_PRIORITIES - 1) {
+  	//which is  NUM_OF_PRIORITIES - 1 = 4 
+    for (i = 1; i < NUM_PROCS; i++){
+      thePCB = gp_pcbs[i];
+      if (thePCB->m_pid == process_id){
+        #ifdef DEBUG_0
+        printf("Setting Process Priority: %d\n", priority);
+        #endif /* DEBUG_0 */
+        if (thePCB->m_priority != priority) {
+          old_priority = thePCB->m_priority;
+          thePCB->m_priority = priority;
+
+          if (process_id != gp_current_process->m_pid) {
+            moveProcessToPriority(thePCB, old_priority);
+          }
+          k_release_processor();
+        }
+        return RTX_OK;
+      }
+    }
+  }
+
+#ifdef DEBUG_0
+  printf("Setting process priority failed.");
+#endif /* DEBUG_0 */
+
+  return RTX_ERR;
+}
+
+/**
+ * @brief Gets process priority
+ * @return process priority
+ */
+int k_get_process_priority(int process_id){
+  int i;
+  int priority = -1;
+  for (i = 0; i < NUM_PROCS; i++){
+    if (gp_pcbs[i]->m_pid == process_id){
+      priority = gp_pcbs[i]->m_priority;
+      #ifdef DEBUG_0
+      printf("Getting Process Priority: %d\n", priority);
+      #endif /* DEBUG_0 */
+      return priority;
+    }
+  }
+#ifdef DEBUG_0
+  printf("Getting Process Priority: %d\n", priority);
+#endif /* DEBUG_0 */
+  return priority;
 }
 
 //Jeff func ends//

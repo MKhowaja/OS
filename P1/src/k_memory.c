@@ -130,7 +130,7 @@ void *k_request_memory_block(void) {
 	// while ( no memory block is available ) {
 	while(free_list.length == 0){
 		// put PCB on b l o c k e d _ r e s o u r c e _ q ;
-		block_enqueue(gp_current_process,MEM_BLOCKED);
+		gp_current_process->m_state = MEM_BLOCKED;
 		// set process state to B L O C K E D _ O N _ R E S O U R C E ;
 		k_release_processor();
 	}

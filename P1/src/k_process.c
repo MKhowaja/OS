@@ -168,6 +168,8 @@ PCB *scheduler(void){
 	if(gp_current_process != NULL && gp_current_process->m_state != MEM_BLOCKED){
 		gp_current_process->m_state = RDY;
 		ready_enqueue(gp_current_process);
+	}else if(gp_current_process->m_state == MEM_BLOCKED){
+		block_enqueue(gp_current_process, MEM_BLOCKED);
 	}
 	for ( i = 0; i <= NUM_PRIORITY; i++ ){
 	

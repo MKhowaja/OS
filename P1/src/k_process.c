@@ -223,12 +223,12 @@ int process_switch(PCB *p_pcb_old)
 
 	if (gp_current_process != p_pcb_old) {
 		if (state == RDY){
-			 // save the old process's sp
+			p_pcb_old->mp_sp = (U32 *) __get_MSP(); // save the old process's sp
 			if(!is_blocked(p_pcb_old)){ //Don't insert in ready queue if blocked process
 				p_pcb_old->m_state = RDY; 
 				ready_enqueue(p_pcb_old);
 			}
-			p_pcb_old->mp_sp = (U32 *) __get_MSP();
+
 			gp_current_process->m_state = RUN;
 			__set_MSP((U32) gp_current_process->mp_sp); //switch to the new proc's stack    
 		} else {

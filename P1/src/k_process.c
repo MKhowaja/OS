@@ -149,7 +149,7 @@ void process_init()
 		linkedList_init(&block_queue[i]);
 	}
 	// Initialize everything to ready queue
-	for ( i = 0; i < NUM_TEST_PROCS; i++ ) {
+	for ( i = 0; i < NUM_TOTAL_PROCS; i++ ) {
 		ready_enqueue(gp_pcbs[i]);
 	}
 }

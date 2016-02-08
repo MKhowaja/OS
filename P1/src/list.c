@@ -148,7 +148,7 @@ node* linkedList_remove(linkedList* list, void* target_value) {
     return NULL;
 }
 
-int linkedList_contain(linkedList* list, void *address){
+int linkedList_old_contain(linkedList* list, void *address){
   node* temp = list->first;
   while (temp!= list->last){
     if (temp == address){
@@ -161,4 +161,18 @@ int linkedList_contain(linkedList* list, void *address){
   }
   return 0;
 
+}
+
+int linkedList_contain(linkedList* list, void *address){
+  node* temp = list->first;
+  while (temp!= list->last){
+    if (temp->value == address){
+      return 1;
+    }
+    temp = temp->next;
+  }
+	if (temp->value == address){
+    return 1;
+  }
+  return 0;
 }

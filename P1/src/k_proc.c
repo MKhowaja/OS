@@ -18,7 +18,7 @@
 PROC_INIT k_test_procs[NUM_KERNEL_PROCS];
 
 void set_kernel_procs() {
-	k_test_procs[0].m_pid = 3;
+	k_test_procs[0].m_pid = 0;
 	k_test_procs[0].m_stack_size = 0X100;
 	k_test_procs[0].mpf_start_pc = &nullProc;
 	k_test_procs[0].m_priority = 4;//LOWEST;

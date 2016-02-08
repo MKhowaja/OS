@@ -252,13 +252,11 @@ int k_release_processor(void){
 	return RTX_OK;
 }
 
-// @ todo: preemption code
 int k_set_process_priority(int process_id, int priority){
 	
 	int i;
 	U32 old_priority;
 	PCB* proc_to_set_priority;
-	node* proc_node;
 	if (process_id == 0 || priority == 4){ //NULL PROCESS PRIORITY CANNOT BE CHANGED
 		return RTX_ERR;
 	}

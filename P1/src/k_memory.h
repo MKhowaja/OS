@@ -13,6 +13,17 @@
 
 /* ----- Definitions ----- */
 #define RAM_END_ADDR 0x10008000
+typedef struct MemNode MemNode;
+
+struct MemNode {
+	MemNode* next;
+};
+
+typedef struct MemList MemList;
+struct MemList{
+	MemNode* first;
+	MemNode* last;
+};
 
 /* ----- Variables ----- */
 /* This symbol is defined in the scatter file (see RVCT Linker User Guide) */  

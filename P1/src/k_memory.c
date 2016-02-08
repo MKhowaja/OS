@@ -15,12 +15,12 @@
 U32 *gp_stack; /* The last allocated stack low address. 8 bytes aligned */
                /* The first stack starts at the RAM high address */
 	       /* stack grows down. Fully decremental stack */
-linkedList free_list;
+//linkedList free_list;
+MemList mem_list;
 //U32 free_list[NUM_MEM];
 U32* heap_start;
 //U32* heap_end;
-U32* test1;
-U32* test2;
+U8* p_end;
 
 extern PCB* gp_current_process;
 
@@ -64,10 +64,10 @@ static node* memory_node_factory(U32 * address){
 
 void memory_init(void)
 {
-	U8 *p_end = (U8 *)&Image$$RW_IRAM1$$ZI$$Limit;
 	int i;
-	node * new_memory_node;
-	U32 * temp_address;
+	U32 current_heap_location;
+	MemNode* new_memory_node;
+	p_end = (U8 *)&Image$$RW_IRAM1$$ZI$$Limit;
   
 	/* 4 bytes padding */
 	p_end += 4;
@@ -93,14 +93,17 @@ void memory_init(void)
 		--gp_stack; 
 	}
 	//gp_stack is at RAM_END_ADDR
-	linkedList_init(&free_list); // initialize linked list
+//	linkedList_init(&free_list); // initialize linked list
 	heap_start = (U32*)p_end;
-	//heap_end = heap_start + (SZ_MEM_BLK/32) * NUM_MEM; //divide by 32 because pointer is already 32 bits and we need to alloc 128B
+	mem_list.first = (MemNode*) heap_start;
+	current_heap_location = (U32)heap_start;
 	for (i = 0; i < NUM_MEM; i++){
-		temp_address = (heap_start + i * (SZ_MEM_BLK));
-		new_memory_node = memory_node_factory(temp_address);
-		linkedList_push_back(&free_list, new_memory_node);
+		new_memory_node = (MemNode*) current_heap_location;
+		current_heap_location += SZ_MEM_BLK;
+		new_memory_node->next = (MemNode*)current_heap_location;
 	}
+	new_memory_node->next = NULL;
+	mem_list.last = new_memory_node;
 	#ifdef DEBUG_0  
 	printf("Allocated heap done\n");
 	#endif
@@ -131,50 +134,59 @@ U32 *alloc_stack(U32 size_b)
 }
 
 void *k_request_memory_block(void) {
-	node* memory_node;
-	void* memory_block;
+	MemNode* memory_block;
 #ifdef DEBUG_0 
 	printf("k_request_memory_block: entering...\n");
 #endif /* ! DEBUG_0 */
 	// atomic ( on ) ;
-	__disable_irq();
+	//__disable_irq();
 	// while ( no memory block is available ) {
-	while(free_list.length == 0){
+	while(mem_list.first == NULL){
 		// put PCB on b l o c k e d _ r e s o u r c e _ q ;
 		gp_current_process->m_state = MEM_BLOCKED;
 		// set process state to B L O C K E D _ O N _ R E S O U R C E ;
 		k_release_processor();
 	}
-	// int mem_blk = next free block ;
-	memory_node = linkedList_pop_front(&free_list);
-	memory_block = memory_node->value;
+	memory_block = mem_list.first;
 	// update the heap ;
-	
+	if (mem_list.first == mem_list.last){
+		mem_list.first = NULL;
+		mem_list.last = NULL;
+	}
+	else {
+		mem_list.first = mem_list.first->next;
+	}
 	// atomic ( off ) ;
-	__enable_irq();
-	return memory_block;
+	//__enable_irq();
+	return (void *)memory_block;
 }
 
 int k_release_memory_block(void *p_mem_blk) {
-	int valid;
-	node* free_memory_node;
+	MemNode* free_memory_node;
 #ifdef DEBUG_0 
 	printf("k_release_memory_block: releasing block @ 0x%x\n", p_mem_blk);
 #endif /* ! DEBUG_0 */
 	
 
 // 	// atomic ( on ) ;
- 	__disable_irq();
+ //	__disable_irq();
 
 // 	// if ( memory block pointer is not valid )
 // 	// return ERROR_CODE ;
- 	valid = linkedList_contain(&free_list, p_mem_blk);
- 	if (valid == 0){
- 		return RTX_ERR;
- 	}
- 	// put memory_block into heap ;
- 	free_memory_node = memory_node_factory( p_mem_blk);
- 	linkedList_push_back(&free_list, free_memory_node);
+	if (!(p_end <= p_mem_blk && p_mem_blk < gp_stack && ((U32)p_mem_blk - (U32)p_end) % SZ_MEM_BLK == 0)) {
+    return RTX_ERR;
+  }
+ 	free_memory_node = (MemNode*) p_mem_blk;
+	free_memory_node -> next = NULL;
+	
+	if (mem_list.last !=NULL) {
+		mem_list.last -> next = free_memory_node;
+		mem_list.last = free_memory_node;
+	}
+	else {
+		mem_list.first = free_memory_node;
+		mem_list.last = free_memory_node;
+	}
 	
 	if(handle_blocked_process_ready()){
 		k_release_processor();
@@ -187,7 +199,7 @@ int k_release_memory_block(void *p_mem_blk) {
 
 
 // 	// atomic ( off ) ;
- 	__enable_irq();
+ 	//__enable_irq();
 // 	// return SUCCESS_CODE
  	return RTX_OK;
 }

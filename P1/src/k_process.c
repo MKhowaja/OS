@@ -55,11 +55,11 @@ static node* node_factory(PCB * pcb){
 }
 
 int handle_blocked_process_ready(void){
-	U32 current_prority = gp_current_process->m_priority;
+	//U32 current_prority = gp_current_process->m_priority;
 	int i;
 	node* temp_node;
 	PCB* temp_pcb;
-	for(i = 0; i <= current_prority; i++){
+	for(i = 0; i <= NUM_PRIORITY; i++){
 			if(block_queue[i].first != NULL){
 					temp_node = block_queue[i].first;
 					temp_node = linkedList_remove(&block_queue[i], temp_node->value);
@@ -168,7 +168,7 @@ PCB *scheduler(void){
 	if(gp_current_process != NULL && gp_current_process->m_state != MEM_BLOCKED){
 		gp_current_process->m_state = RDY;
 		ready_enqueue(gp_current_process);
-	}else if(gp_current_process->m_state == MEM_BLOCKED){
+	}else if(gp_current_process != NULL && gp_current_process->m_state == MEM_BLOCKED){
 		block_enqueue(gp_current_process, MEM_BLOCKED);
 	}
 	for ( i = 0; i <= NUM_PRIORITY; i++ ){
@@ -233,16 +233,12 @@ int process_switch(PCB *p_pcb_old)
  * POST: gp_current_process gets updated to next to run process
  */
 int k_release_processor(void){
-// 1. Set current process to state ready
-// 2. rpq enqueue(current process) put current process in ready queues
+// 1. Set current process to state ready if it's not block
+// 2. rpq enqueue(current process) put current process in specific queues
 // 3. process switch invokes scheduler and context-switches to the new process
 	PCB *p_pcb_old = NULL;
 	p_pcb_old = gp_current_process;
 
-	//if (gp_current_process!= NULL){
-		//gp_current_process->mp_sp = (U32 *) __get_MSP();
-		//ready_enqueue(gp_current_process);
-	//}	
 	gp_current_process = scheduler();
 	
 	if ( gp_current_process == NULL  ) {
@@ -263,8 +259,8 @@ int k_set_process_priority(int process_id, int priority){
 	U32 old_priority;
 	PCB* proc_to_set_priority;
 	node* proc_node;
-	if (process_id == 0){ //NULL PROCESS PRIORITY CANNOT BE CHANGED
-		return -1; //should we return error? or not
+	if (process_id == 0 || priority == 4){ //NULL PROCESS PRIORITY CANNOT BE CHANGED
+		return RTX_ERR;
 	}
 	for ( i = 0; i < NUM_TOTAL_PROCS; i++ ) {
 		if ((gp_pcbs[i])->m_pid == process_id){ //find process with id process_id

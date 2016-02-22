@@ -44,7 +44,9 @@
 #define PID_TIMER_IPROC  14
 #define PID_UART_IPROC   15
 
-
+#define DEFAULT 0
+#define KCD_REG 1
+#define CRT_DIS 2
 
 #define PROC_BLK_SIZE 0x100 //size of each process' stack
  

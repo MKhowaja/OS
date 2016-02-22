@@ -8,3 +8,4 @@
 *.plg
 *.tra
 *.dep
+CMakeLists.txt

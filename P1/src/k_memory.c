@@ -24,15 +24,15 @@ U8* p_end;
 
 extern PCB* gp_current_process;
 
-static node memory_node_pool[NUM_MEM];
+//static node memory_node_pool[NUM_MEM];
 
-static node* memory_node_factory(U32 * address){
+//static node* memory_node_factory(U32 * address){
 	//can't just use m_pority here since all the process has the same prority, 
 	//so that it will keep overriding the memory and all the nodes will have the same memory address
-	int index = ((U32)address - (U32)heap_start) / (SZ_MEM_BLK);
-	memory_node_pool[index].value = address;
-	return &memory_node_pool[index];
-}
+	///int index = ((U32)address - (U32)heap_start) / (SZ_MEM_BLK);
+	//memory_node_pool[index].value = address;
+	//return &memory_node_pool[index];
+//}
 
 /**
  * @brief: Initialize RAM as follows:
@@ -97,6 +97,7 @@ void memory_init(void)
 	heap_start = (U32*)p_end;
 	mem_list.first = (MemNode*) heap_start;
 	current_heap_location = (U32)heap_start;
+	new_memory_node = mem_list.first;
 	for (i = 0; i < NUM_MEM; i++){
 		new_memory_node = (MemNode*) current_heap_location;
 		current_heap_location += SZ_MEM_BLK;

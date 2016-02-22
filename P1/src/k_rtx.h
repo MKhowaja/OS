@@ -77,6 +77,6 @@ typedef struct proc_init
 #define SZ_MEM_BLK 128           /* fixed size of memory block 128B default */
 //#define SZ_MEM_BLK_WITH_HEADER SZ_MEM_BLK+0x20
 //#define NUM_MEM 20
-#define NUM_MEM 2
+#define NUM_MEM 0
 #define PROC_BLK_SIZE 0x100
 #endif // ! K_RTX_H_

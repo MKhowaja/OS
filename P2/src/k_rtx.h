@@ -74,6 +74,22 @@ typedef struct proc_init
 	void (*mpf_start_pc) ();/* entry point of the process */    
 } PROC_INIT;
 
+/* user version */
+typedef struct msgbuf
+{
+	int msg_type;
+	char mText[1];
+} MSGBUF;
+
+/* kernel version */
+typedef struct msg_t
+{
+	int sender_pid;				/* sender process id*/
+	int receiver_pid;			/* receiver process id */
+	int msg_type;					/* message type */
+	char mText[1];				/* message data */
+} MSG_T;
+
 #define SZ_MEM_BLK 128           /* fixed size of memory block 128B default */
 //#define SZ_MEM_BLK_WITH_HEADER SZ_MEM_BLK+0x20
 //#define NUM_MEM 20

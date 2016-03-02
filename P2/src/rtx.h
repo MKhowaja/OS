@@ -44,6 +44,10 @@
 #define PID_TIMER_IPROC  14
 #define PID_UART_IPROC   15
 
+#define DEFAULT 0
+#define KCD_REG 1
+#define CRT_DIS 2
+
 
 
 #define PROC_BLK_SIZE 0x100 //size of each process' stack
@@ -88,5 +92,6 @@ extern void *_request_memory_block(U32 p_func) __SVC_0;
 extern int k_release_memory_block(void *);
 #define release_memory_block(p_mem_blk) _release_memory_block((U32)k_release_memory_block, p_mem_blk)
 extern int _release_memory_block(U32 p_func, void *p_mem_blk) __SVC_0;
+
 
 #endif /* !RTX_H_ */

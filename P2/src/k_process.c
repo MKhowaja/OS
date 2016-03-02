@@ -73,6 +73,20 @@ int handle_blocked_process_ready(void){
 	
 }
 
+PCB * k_get_pcb_from_id (U32 process_id){
+	int i;
+	for ( i = 0; i < NUM_TEST_PROCS; i++ ) {
+		if ((gp_pcbs[i])->m_pid == process_id){ //find process with id process_id
+			return (gp_pcbs[i]); //return priority of found process
+		}
+	}
+	return NULL; //could not find pcb
+}
+
+PCB * k_get_current_process(){
+	return gp_current_process;
+}
+
 /**
  * Put the PCB into ready queue
 */
@@ -135,6 +149,7 @@ void process_init()
 		(gp_pcbs[i])->m_pid = (g_proc_table[i]).m_pid;
 		(gp_pcbs[i])->m_state = NEW;
 		(gp_pcbs[i])->m_priority = (g_proc_table[i]).m_priority;
+		linkedList_init(&gp_pcbs[i]->m_msg_queue);
 		sp = alloc_stack((g_proc_table[i]).m_stack_size);
 		*(--sp)  = INITIAL_xPSR;      // user process initial xPSR  
 		*(--sp)  = (U32)((g_proc_table[i]).mpf_start_pc); // PC contains the entry point of the process

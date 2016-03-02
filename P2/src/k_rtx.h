@@ -15,9 +15,9 @@
 
 #define NULL 0
 
-#define NUM_KERNEL_PROCS 1
+#define NUM_KERNEL_PROCS 5
 #define NUM_TEST_PROCS 6
-#define NUM_TOTAL_PROCS 7
+#define NUM_TOTAL_PROCS NUM_KERNEL_PROCS+NUM_TEST_PROCS
 
 //#define LOWEST 4
 //#define PROC_BLK_SIZE 0x100 //size of each process' stack
@@ -56,11 +56,12 @@ typedef enum {
 */
 typedef struct pcb 
 { 
-	//struct pcb *mp_next;  /* next pcb, not used in this example */  
+	//struct pcb *mp_next;  /* next pcb, not used in this example */
 	U32 *mp_sp;		/* stack pointer of the process */
 	U32 m_pid;		/* process id */
 	int m_priority;
 	PROC_STATE_E m_state;   /* state of the process */
+	linkedList m_msg_queue;
 	//stack size?
 	//whether process is i-process?
 } PCB;
@@ -87,12 +88,13 @@ typedef struct msg_t
 	int sender_pid;				/* sender process id*/
 	int receiver_pid;			/* receiver process id */
 	int msg_type;					/* message type */
+	int msg_delay;				/* message delay */
 	char mText[1];				/* message data */
 } MSG_T;
 
 #define SZ_MEM_BLK 128           /* fixed size of memory block 128B default */
 //#define SZ_MEM_BLK_WITH_HEADER SZ_MEM_BLK+0x20
 //#define NUM_MEM 20
-#define NUM_MEM 0
+#define NUM_MEM 2
 #define PROC_BLK_SIZE 0x100
 #endif // ! K_RTX_H_

@@ -140,13 +140,15 @@ void *k_request_memory_block(void) {
 	printf("k_request_memory_block: entering...\n");
 #endif /* ! DEBUG_0 */
 	// atomic ( on ) ;
-	//__disable_irq();
+	__disable_irq();
 	// while ( no memory block is available ) {
 	while(mem_list.first == NULL){
 		// put PCB on b l o c k e d _ r e s o u r c e _ q ;
 		gp_current_process->m_state = MEM_BLOCKED;
 		// set process state to B L O C K E D _ O N _ R E S O U R C E ;
+		__enable_irq();
 		k_release_processor();
+		__disable_irq();
 	}
 	memory_block = mem_list.first;
 	// update the heap ;
@@ -158,25 +160,33 @@ void *k_request_memory_block(void) {
 		mem_list.first = mem_list.first->next;
 	}
 	// atomic ( off ) ;
-	//__enable_irq();
+	__enable_irq();
 	return (void *)memory_block;
 }
 
 int k_release_memory_block(void *p_mem_blk) {
 	MemNode* free_memory_node;
+	MemNode* mem_traverse;
 #ifdef DEBUG_0 
 	printf("k_release_memory_block: releasing block @ 0x%x\n", p_mem_blk);
 #endif /* ! DEBUG_0 */
 	
 
 // 	// atomic ( on ) ;
- //	__disable_irq();
+ 	__disable_irq();
 
 // 	// if ( memory block pointer is not valid )
 // 	// return ERROR_CODE ;
 	if (!(p_end <= p_mem_blk && p_mem_blk < gp_stack && ((U32)p_mem_blk - (U32)p_end) % SZ_MEM_BLK == 0)) {
     return RTX_ERR;
   }
+	mem_traverse = mem_list.first;
+	while (mem_traverse != NULL) {
+		if (mem_traverse == p_mem_blk){
+			return RTX_ERR;
+		}
+		mem_traverse = mem_traverse->next;
+	}
  	free_memory_node = (MemNode*) p_mem_blk;
 	free_memory_node -> next = NULL;
 	
@@ -190,17 +200,13 @@ int k_release_memory_block(void *p_mem_blk) {
 	}
 	
 	if(handle_blocked_process_ready()){
+		__enable_irq();
 		k_release_processor();
+		__disable_irq();
 	}
 
- // if ( blocked on resource q not empty ) {
- // h a n d l e _ p r o c e s s _ r e a d y ( pop ( blocked resource q ) ) ;
- // // + Check if any other process is in ready state be
- // }
-
-
 // 	// atomic ( off ) ;
- 	//__enable_irq();
+ 	__enable_irq();
 // 	// return SUCCESS_CODE
  	return RTX_OK;
 }

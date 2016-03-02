@@ -166,6 +166,7 @@ void proc3(void)
 	#endif /* DEBUG_0 */
 
 	ret_val = release_memory_block(p_mem_blk1);
+	ret_val = release_memory_block(p_mem_blk1);
 	#ifdef DEBUG_0
 		printf("proc3: ret_val=%d\r\n", ret_val);
 	#endif /* DEBUG_0 */

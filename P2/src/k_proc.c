@@ -9,6 +9,7 @@
 #include "rtx.h"
 #include "uart_polling.h"
 #include "k_proc.h"
+#include "timer.h"
 
 #ifdef DEBUG_0
 #include "printf.h"
@@ -24,6 +25,7 @@ void set_kernel_procs() {
 	k_test_procs[0].m_priority = 4;//LOWEST;
 	
 	k_test_procs[0].mpf_start_pc = &nullProc;
+	//add timer i process to k_test_procs
 }
 
 void nullProc (void){
@@ -37,3 +39,11 @@ void nullProc (void){
 		#endif /* DEBUG_0 */
 	}
 }
+
+//every keystroke
+// 1.respond msg from crt, -> serial port 
+// 2.get character, forward to kcd
+void uart_i_process(){
+
+}
+

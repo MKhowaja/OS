@@ -3,8 +3,7 @@
 
 #include "k_rtx.h"
 
-
-int k_send_message(U32 receiving_pid,);
-void* k_receive_message(void)
+int k_send_message(U32 receiving_pid, void *message_envelope);
+void* k_receive_message(int *sender_id);
 
 #endif /* ! K_MEM_H_ */

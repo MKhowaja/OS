@@ -1,8 +1,7 @@
 #include "k_message.h"
-
+#include "k_process.h"
 #ifdef DEBUG_0
 #include "printf.h"
-#include "k_process.h"
 #endif /* ! DEBUG_0 */
 
 int k_send_message(U32 receiver_pid, void *message_envelope)

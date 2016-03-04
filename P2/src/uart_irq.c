@@ -8,6 +8,10 @@
 #include <LPC17xx.h>
 #include "uart.h"
 #include "uart_polling.h"
+#include "k_process.h"
+#include "k_message.h"
+#include "k_memory.h"
+#include "string.h"
 #ifdef DEBUG_0
 #include "printf.h"
 #endif
@@ -18,10 +22,13 @@ uint8_t *gp_buffer = g_buffer;
 uint8_t g_send_char = 0;
 uint8_t g_char_in;
 uint8_t g_char_out;
+uint32_t buffer_index = 0;
+uint32_t buffer_size = 200; //arbitrarily defined
 
 extern uint32_t g_switch_flag;
 
 extern int k_release_processor(void);
+
 /**
  * @brief: initialize the n_uart
  * NOTES: It only supports UART0. It can be easily extended to support UART1 IRQ.
@@ -182,32 +189,54 @@ RESTORE
  */
 void c_UART0_IRQHandler(void)
 {
-	uint8_t IIR_IntId;	    // Interrupt ID from IIR 		 
-	LPC_UART_TypeDef *pUart = (LPC_UART_TypeDef *)LPC_UART0;
-	
-#ifdef DEBUG_0
-	uart1_put_string("Entering c_UART0_IRQHandler\n\r");
-#endif // DEBUG_0
+	uart_i_process();
+}
 
+void uart_i_process(){
+  uint8_t IIR_IntId;	    // Interrupt ID from IIR 		 
+	LPC_UART_TypeDef *pUart = (LPC_UART_TypeDef *)LPC_UART0;
+	MSGBUF* msg;
+	node* prev_pcb_node = (node*)k_get_current_process();
+//#ifdef DEBUG_0
+//	uart1_put_string("Entering c_UART0_IRQHandler\n\r");
+//#endif // DEBUG_0
+	
+	g_switch_flag = 0;
 	/* Reading IIR automatically acknowledges the interrupt */
 	IIR_IntId = (pUart->IIR) >> 1 ; // skip pending bit in IIR 
+	
 	if (IIR_IntId & IIR_RDA) { // Receive Data Avaialbe
-		/* read UART. Read RBR will clear the interrupt */
-		g_char_in = pUart->RBR;
-#ifdef DEBUG_0
-		uart1_put_string("Reading a char = ");
-		uart1_put_char(g_char_in);
-		uart1_put_string("\n\r");
-#endif // DEBUG_0
-		g_buffer[12] = g_char_in; // nasty hack
-		g_send_char = 1;
 		
-		/* setting the g_switch_flag */
-		if ( g_char_in == 'S' ) {
-			g_switch_flag = 1; 
-		} else {
-			g_switch_flag = 0;
+		/* keyboard input */
+		
+		g_char_in = pUart->RBR;
+//#ifdef DEBUG_0
+//		uart1_put_string("Reading a char = ");
+//		uart1_put_char(g_char_in);
+//		uart1_put_string("\n\r");
+//#endif // DEBUG_0
+		g_send_char = 1;
+		if ((buffer_index < buffer_size - 3) && (g_char_in != '\r')) {
+			if (g_char_in != 8 && g_char_in != 127) {
+				g_buffer[buffer_index++] = g_char_in;
+      }else {
+				// if it's a backspace or delete, make index go back by 1
+				if (buffer_index > 0) {
+					g_buffer[buffer_index--] = '\0';
+				}
+			}
+
+      pUart->THR = g_char_in;
+    }else {
+			
 		}
+		/* setting the g_switch_flag */
+		//if ( g_char_in == 'S' ) {
+		//	g_switch_flag = 1; 
+		//} else {
+		//	g_switch_flag = 0;
+		//}
+		g_switch_flag = 1;
 	} else if (IIR_IntId & IIR_THRE) {
 	/* THRE Interrupt, transmit holding register becomes empty */
 
@@ -236,7 +265,7 @@ void c_UART0_IRQHandler(void)
 	} else {  /* not implemented yet */
 #ifdef DEBUG_0
 			uart1_put_string("Should not get here!\n\r");
-#endif // DEBUG_0
+#endif // DEBUG_0 
 		return;
 	}	
 }

@@ -67,6 +67,8 @@ typedef struct pcb
 } PCB;
 
 /* initialization table item */
+#ifndef PROC_INIT_STRUCT
+#define PROC_INIT_STRUCT
 typedef struct proc_init
 {	
 	int m_pid;	        /* process id */ 
@@ -74,6 +76,7 @@ typedef struct proc_init
 	int m_stack_size;       /* size of stack in words */
 	void (*mpf_start_pc) ();/* entry point of the process */    
 } PROC_INIT;
+#endif
 
 /* user version */
 typedef struct msgbuf

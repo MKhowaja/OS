@@ -13,6 +13,7 @@
 #include "k_message.h"
 #include "k_rtx.h"
 #include "k_memory.h"
+#include "list.h"
 
 #ifdef DEBUG_0
 #include "printf.h"
@@ -20,6 +21,7 @@
 
 /* initialization table item */
 PROC_INIT k_test_procs[NUM_KERNEL_PROCS];
+linkedList cmd_dict;
 
 //cmd dictionary
 typedef struct {
@@ -28,7 +30,11 @@ typedef struct {
 } cmd_dict_node;
 
 
+
 void set_kernel_procs() {
+	//init the cmd list
+	linkedList_init(&cmd_dict);
+
 	k_test_procs[0].m_pid = 0;
 	k_test_procs[0].m_stack_size = 0X100;
 	k_test_procs[0].mpf_start_pc = &nullProc;
@@ -109,7 +115,7 @@ void kcd(void){
         if (msg->msg_type == DEFAULT) {
 
         } else if (msg->msg_type == KCD_REG) {
-        	
+        	k_release_memory_block(msg);
         }
     }
 }

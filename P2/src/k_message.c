@@ -18,7 +18,7 @@ int k_send_message(U32 receiver_pid, void *message_envelope)
 		__enable_irq();
 		return RTX_ERR;
 	}
-	if (receiver_pid < 1 || receiver_pid > NUM_TEST_PROCS){
+	if (receiver_pid < NUM_TEST_PROCS){ // sending to kernel proc not allowed
 		__enable_irq();
 		return RTX_ERR;
 	}
@@ -37,9 +37,14 @@ int k_send_message(U32 receiver_pid, void *message_envelope)
 		return RTX_ERR;
 	}
 	
-	if (pcb->m_state == MSG_BLOCKED){
-		pcb->m_state = RDY;
-		ready_enqueue (pcb);
+	// if (pcb->m_state == MSG_BLOCKED){
+	// 	pcb->m_state = RDY;
+	// 	ready_enqueue (pcb);
+	// }
+	if(handle_blocked_process_ready(MSG_BLOCKED)){
+		__enable_irq();
+		k_release_processor();
+		__disable_irq();
 	}
 	
 	__enable_irq();
@@ -54,6 +59,7 @@ void* k_receive_message(int *sender_id)
 	__disable_irq();
 	current_process = k_get_current_process();
 	while (current_process->m_msg_queue.length == 0){
+		//TODO VERA
 		current_process->m_state = MSG_BLOCKED;
 		__enable_irq();
 		k_release_processor();

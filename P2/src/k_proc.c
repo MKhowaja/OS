@@ -88,14 +88,14 @@ void crt(void){
     MSG_T* msg;
 
     while(1){
-        msg = k_receive_message(NULL);
+        msg = k_receive_message(NULL); //if current process message queue empty, calls release processor
         if(msg->msg_type == CRT_DIS){
-//send msg to uart_i_process
-//we need id of uart_i_process
-            k_send_message(2, msg);
+        //send msg to uart_i_process
+        //we need id of uart_i_process
+            k_send_message(PID_UART_IPROC, msg);
         }
         else{
-//do nothing except releasing msg block	
+            //do nothing except releasing msg block	
             k_release_memory_block(msg);
         }
     }

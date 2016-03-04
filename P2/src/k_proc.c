@@ -35,6 +35,7 @@ void set_kernel_procs() {
 	//init the cmd list
 	linkedList_init(&cmd_dict);
 
+
 	k_test_procs[0].m_pid = 0;
 	k_test_procs[0].m_stack_size = 0X100;
 	k_test_procs[0].mpf_start_pc = &nullProc;
@@ -109,12 +110,20 @@ void kcd(void){
 	int *sender_id;
 	MSG_T* msg;
 
+	int msg_len;
+
+
     while (1) {
         msg = k_receive_message(&sender_id);
 
         if (msg->msg_type == DEFAULT) {
 
         } else if (msg->msg_type == KCD_REG) {
+        	node->pid = sender_id;
+        	msg_len = strlen(msg->mText);
+        	strncpy(node->cmd, msg->mText, msg_len);
+        	linkedList_push_front(&cmd_dict, (node*) node);
+        	
         	k_release_memory_block(msg);
         }
     }

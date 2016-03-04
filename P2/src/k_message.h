@@ -3,7 +3,8 @@
 #include "k_rtx.h"
 
 
-int k_send_message(U32 receiving_pid, void *message_envelope);
+int k_send_message(int receiving_pid, void *message_envelope);
 void* k_receive_message(int *sender_id);
+int delayed_send(int receiver_pid, void *message_envelope, int delay);
 
 #endif /* ! K_MEM_H_ */

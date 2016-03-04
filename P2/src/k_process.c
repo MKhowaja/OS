@@ -294,9 +294,11 @@ int k_set_process_priority(int process_id, int priority){
 					case RDY:
 						linkedList_remove(&ready_queue[old_priority], proc_to_set_priority);
 						ready_enqueue(proc_to_set_priority);
+						break;
 					case MEM_BLOCKED:
 						linkedList_remove(&block_queue[old_priority], proc_to_set_priority);
 						block_enqueue(proc_to_set_priority, proc_to_set_priority->m_state);
+						break;
 					default :
 						break;
 				}
@@ -314,4 +316,62 @@ int get_process_priority(int process_id){
 		}
 	}
 	return -1; //process not found
+}
+
+// typedef enum {
+// 	PRINT_READY=0,
+// 	PRINT_MEM_BLOCKED,
+// 	PRINT_MSG_BLOCKED
+// }PROCESS_QUEUE_ID
+
+void print_queue(PROCESS_QUEUE_ID id){
+	int i;
+	node* temp_node;
+	PCB* temp_pcb;
+	PROC_STATE_E state;
+	linkedList temp_queue[NUM_PRIORITY];
+	switch(id){
+		case PRINT_READY:
+			temp_queue = ready_queue;
+			state = RDY;
+			printf("Printing ready queue...\r\n");
+			break;
+		case PRINT_MEM_BLOCKED:
+			temp_queue = block_queue;
+			state = MEM_BLOCKED;
+			printf("Printing blocked on memory queue...\r\n");
+			break;
+		case PRINT_MSG_BLOCKED:
+			temp_queue = block_queue;
+			state = MSG_BLOCKED;
+			printf("Printing blocked on message queue...\r\n");
+			break;
+		default:
+			printf("INVALID ID TO PRINT QUEUE\r\n");
+			break;
+	}
+
+	for(i = 0; i <= NUM_PRIORITY; i++){
+		printf("Priority: %d\r\n", i);
+		if(temp_queue[i].first != NULL){
+			temp_node = block_queue[i].first;
+			while (temp_node != NULL){
+				temp_pcb = (PCB*)temp_node->value;
+				if (temp_pcb->m_state == state){
+					printf("pid: %d  ", temp_pcb->m_pid);
+				}else if( id == PRINT_READY && (temp_pcb->m_state == MEM_BLOCKED || temp_pcb->m_state == MSG_BLOCKED) ){
+					printf("WTF?!?!?!?!?!?!?! Blocked PCB in ready queue!");
+				}else if( (id == PRINT_MEM_BLOCKED || id == MSG_BLOCKED) && temp_pcb->m_state == RDY){
+					printf("WTF?!?!?!?!?!?!?! Ready PCB in block queue!");
+				}
+				temp_node = temp_node->next;
+			}
+		}
+		printf("\r\n");
+	}
+
+}
+
+void print_current_process(){
+	printf("Current process: %d\r\n", gp_current_process->m_pid);
 }

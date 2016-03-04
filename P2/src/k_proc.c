@@ -21,6 +21,13 @@
 /* initialization table item */
 PROC_INIT k_test_procs[NUM_KERNEL_PROCS];
 
+//cmd dictionary
+typedef struct {
+    uint32_t pid;
+    char cmd[10];
+} cmd_dict_node;
+
+
 void set_kernel_procs() {
 	k_test_procs[0].m_pid = 0;
 	k_test_procs[0].m_stack_size = 0X100;
@@ -80,9 +87,7 @@ void crt(void){
 		if(msg->msg_type == CRT_DIS){
 			//send msg to uart_i_process
 			//we need id of uart_i_process
-			// send_message( pid , msg);
-
-
+			k_send_message(2, msg);
 		}
 		else{
 			//do nothing except releasing msg block	
@@ -91,6 +96,20 @@ void crt(void){
 	}
 }
 
+//command reg
+//input
 void kcd(void){
+	cmd_dict_node *node;
+	int *sender_id;
+	MSG_T* msg;
 
+    while (1) {
+        msg = k_receive_message(&sender_id);
+
+        if (msg->msg_type == DEFAULT) {
+
+        } else if (msg->msg_type == KCD_REG) {
+        	
+        }
+    }
 }

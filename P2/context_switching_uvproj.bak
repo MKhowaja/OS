@@ -422,14 +422,14 @@
               <FilePath>.\src\main_svc.c</FilePath>
             </File>
             <File>
-              <FileName>uart_irq.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\src\uart_irq.c</FilePath>
-            </File>
-            <File>
               <FileName>list.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\src\list.c</FilePath>
+            </File>
+            <File>
+              <FileName>sorted_queue.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\sorted_queue.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -460,6 +460,21 @@
               <FileName>k_proc.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\src\k_proc.c</FilePath>
+            </File>
+            <File>
+              <FileName>k_message.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\k_message.c</FilePath>
+            </File>
+            <File>
+              <FileName>timer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\timer.c</FilePath>
+            </File>
+            <File>
+              <FileName>uart_irq.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\uart_irq.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -946,14 +961,14 @@
               <FilePath>.\src\main_svc.c</FilePath>
             </File>
             <File>
-              <FileName>uart_irq.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\src\uart_irq.c</FilePath>
-            </File>
-            <File>
               <FileName>list.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\src\list.c</FilePath>
+            </File>
+            <File>
+              <FileName>sorted_queue.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\sorted_queue.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -984,6 +999,21 @@
               <FileName>k_proc.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\src\k_proc.c</FilePath>
+            </File>
+            <File>
+              <FileName>k_message.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\k_message.c</FilePath>
+            </File>
+            <File>
+              <FileName>timer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\timer.c</FilePath>
+            </File>
+            <File>
+              <FileName>uart_irq.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\uart_irq.c</FilePath>
             </File>
           </Files>
         </Group>

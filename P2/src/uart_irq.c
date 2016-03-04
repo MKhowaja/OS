@@ -12,6 +12,7 @@
 #include "k_message.h"
 #include "k_memory.h"
 #include "string.h"
+#include "k_rtx.h"
 #ifdef DEBUG_0
 #include "printf.h"
 #endif
@@ -216,8 +217,9 @@ void uart_i_process(){
 //		uart1_put_string("\n\r");
 //#endif // DEBUG_0
 		g_send_char = 1;
+		//for \r \n and \0
 		if ((buffer_index < buffer_size - 3) && (g_char_in != '\r')) {
-			if (g_char_in != 8 && g_char_in != 127) {
+			if (g_char_in != 8 && g_char_in != 127) { //not backspace or delete
 				g_buffer[buffer_index++] = g_char_in;
       }else {
 				// if it's a backspace or delete, make index go back by 1
@@ -228,7 +230,29 @@ void uart_i_process(){
 
       pUart->THR = g_char_in;
     }else {
-			
+			//terminal characters
+			g_buffer[buffer_index++] = '\r';
+			pUart->THR = '\r';
+			g_buffer[buffer_index++] = '\n';
+			pUart->THR = '\n';
+			g_buffer[buffer_index++] = '\0';
+			pUart->THR = '\0';
+
+			// prepare message to kcd to decode
+			msg = (MSGBUF*)k_request_memory_block();
+      if (msg == NULL) {
+				return; //probably shouldn't happen
+			}
+      msg->msg_type = DEFAULT;
+      strncpy(msg->mText, (char*)g_buffer, buffer_index);
+
+			// send message to kcd
+			current_pcb_node = pcb_nodes[PID_UART_IPROC];
+   //    k_send_message_i(3, read_msg);
+   //    current_pcb_node = previous_pcb_node;
+
+   //    reset_g_buffer();
+   //    g_switch_flag = 1;
 		}
 		/* setting the g_switch_flag */
 		//if ( g_char_in == 'S' ) {
@@ -236,7 +260,6 @@ void uart_i_process(){
 		//} else {
 		//	g_switch_flag = 0;
 		//}
-		g_switch_flag = 1;
 	} else if (IIR_IntId & IIR_THRE) {
 	/* THRE Interrupt, transmit holding register becomes empty */
 

@@ -51,6 +51,37 @@ int k_send_message(U32 receiver_pid, void *message_envelope)
 	return RTX_OK;
 }
 
+int k_send_message_nonblocking(U32 receiver_pid, void *message_envelope)
+{
+	int successCode;
+	PCB * pcb;
+	MSG_T* message;
+	PCB * current_process;
+
+	message = (MSG_T*)message_envelope;
+	current_process = k_get_current_process();
+
+	message->sender_pid = current_process->m_pid;
+	message->receiver_pid = receiver_pid;
+	
+	successCode = linkedList_push_back(&(pcb->m_msg_queue), (void *) message);
+	
+	// if (pcb->m_state == MSG_BLOCKED){
+	// 	pcb->m_state = RDY;
+	// 	ready_enqueue (pcb);
+	// }
+	return handle_blocked_process_ready(MSG_BLOCKED);
+
+	// if(handle_blocked_process_ready(MSG_BLOCKED)){
+	// 	__enable_irq();
+	// 	k_release_processor();
+	// 	__disable_irq();
+	// }
+	
+	// __enable_irq();
+	// return RTX_OK;
+}
+
 // Note: sender_id is an output parameter
 void* k_receive_message(int *sender_id)
 {

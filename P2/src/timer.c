@@ -9,7 +9,7 @@
 #include <LPC17xx.h>
 #include "timer.h"
 #include "k_message.h"
-
+#include "k_rtx.h"
 #define BIT(X) (1<<X)
 
 volatile uint32_t g_timer_count = 0; // increment every 1 ms
@@ -103,11 +103,13 @@ uint32_t timer_init(uint8_t n_timer)
  */
 __asm void TIMER0_IRQHandler(void)
 {
+	CPSID i
 	PRESERVE8
 	IMPORT c_TIMER0_IRQHandler
 	PUSH{r4-r11, lr}
 	BL c_TIMER0_IRQHandler
 	POP{r4-r11, pc}
+	CPSIE i
 } 
 /**
  * @brief: c TIMER0 IRQ Handler
@@ -115,25 +117,37 @@ __asm void TIMER0_IRQHandler(void)
 void c_TIMER0_IRQHandler(void)
 {
 	/* ack inttrupt, see section  21.6.1 on pg 493 of LPC17XX_UM */
-	LPC_TIM0->IR = BIT(0);  
-	
+	LPC_TIM0->IR = BIT(0);
 	g_timer_count++ ;
+	timer_i_process();
 }
 
 void timer_i_process(void) {
 	void* current_message;
 	MSG_T* message_to_send;
 	int target_pid;
-	current_message = k_receive_message(NULL);
-	while (current_message!=NULL){
-		queue_add(&sorted_list, (queue_node*) current_message);
-		current_message = k_receive_message(NULL);
-	}
+	int send_flag = 0;
+
+	// current_message = k_receive_message(NULL);
+	// while (current_message!=NULL){
+	// 	queue_add(&sorted_list, (queue_node*) current_message);
+	// 	current_message = k_receive_message(NULL);
+	// }
 	
 	while (((MSG_T*)peek(&sorted_list))-> msg_delay <= g_timer_count){
 		message_to_send = (MSG_T*)queue_pop_front(&sorted_list);
 		target_pid = message_to_send->receiver_pid;
-		k_send_message(target_pid, (void*)message_to_send);
+		send_flag = send_flag | k_send_message_nonblocking(target_pid, (void*)message_to_send);
+	}
+	if (send_flag){
+		__enable_irq();
+		k_release_processor();
+		__disable_irq();
 	}
 }
 
+void expire_list_queue(MSG_T *msg){
+	//absolute time
+	msg->msg_delay = g_timer_count + msg->msg_delay;
+	queue_add(&sorted_list, (queue_node*) msg);
+}

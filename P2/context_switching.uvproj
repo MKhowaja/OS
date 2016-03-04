@@ -457,11 +457,6 @@
               <FilePath>.\src\k_process.c</FilePath>
             </File>
             <File>
-              <FileName>k_proc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\src\k_proc.c</FilePath>
-            </File>
-            <File>
               <FileName>k_message.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\src\k_message.c</FilePath>
@@ -475,6 +470,11 @@
               <FileName>uart_irq.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\src\uart_irq.c</FilePath>
+            </File>
+            <File>
+              <FileName>k_proc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\k_proc.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -996,11 +996,6 @@
               <FilePath>.\src\k_process.c</FilePath>
             </File>
             <File>
-              <FileName>k_proc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\src\k_proc.c</FilePath>
-            </File>
-            <File>
               <FileName>k_message.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\src\k_message.c</FilePath>
@@ -1014,6 +1009,11 @@
               <FileName>uart_irq.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\src\uart_irq.c</FilePath>
+            </File>
+            <File>
+              <FileName>k_proc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\k_proc.c</FilePath>
             </File>
           </Files>
         </Group>

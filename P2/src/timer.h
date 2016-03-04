@@ -9,5 +9,6 @@
 
 extern uint32_t timer_init ( uint8_t n_timer );  /* initialize timer n_timer */
 void timer_i_process(void);
+void expire_list_queue(MSG_T *msg);
 
 #endif /* ! _TIMER_H_ */

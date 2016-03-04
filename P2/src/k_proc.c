@@ -34,6 +34,22 @@ void set_kernel_procs() {
 	k_test_procs[1].m_stack_size = 0X100;
 	k_test_procs[1].mpf_start_pc = &timer_i_process;
 	k_test_procs[1].m_priority = 4;
+
+	k_test_procs[2].m_pid = 2;
+	k_test_procs[2].m_stack_size = 0X100;
+	k_test_procs[2].mpf_start_pc = &uart_i_process;
+	k_test_procs[2].m_priority = 4;
+
+	//i/o process has highest priority since you need response quick
+	k_test_procs[3].m_pid = 3;
+	k_test_procs[3].m_stack_size = 0X100;
+	k_test_procs[3].mpf_start_pc = &kcd;
+	k_test_procs[3].m_priority = HIGH;
+
+	k_test_procs[4].m_pid = 4;
+	k_test_procs[4].m_stack_size = 0X100;
+	k_test_procs[4].mpf_start_pc = &crt;
+	k_test_procs[4].m_priority = HIGH;
 }
 
 void nullProc (void){
@@ -55,7 +71,6 @@ void uart_i_process(){
 
 }
 
-
 //response to crt 
 void crt(void){
 	MSG_T* msg;
@@ -67,7 +82,7 @@ void crt(void){
 			//we need id of uart_i_process
 			// send_message( pid , msg);
 
-			
+
 		}
 		else{
 			//do nothing except releasing msg block	
@@ -76,3 +91,6 @@ void crt(void){
 	}
 }
 
+void kcd(void){
+
+}

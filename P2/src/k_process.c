@@ -54,23 +54,31 @@ static node* node_factory(PCB * pcb){
 	return &node_pool[pcb->m_pid];
 }
 
-int handle_blocked_process_ready(void){
+// find the first blocked on specific state and put it in ready queue, return 1
+// if not found, return 0 
+int handle_blocked_process_ready(PROC_STATE_E state){
 	//U32 current_prority = gp_current_process->m_priority;
 	int i;
 	node* temp_node;
 	PCB* temp_pcb;
 	for(i = 0; i <= NUM_PRIORITY; i++){
 			if(block_queue[i].first != NULL){
-					temp_node = block_queue[i].first;
-					temp_node = linkedList_remove(&block_queue[i], temp_node->value);
+				// check the whole list and see if there is anything blocked on memory
+				temp_node = block_queue[i].first;
+				while (temp_node != NULL){
 					temp_pcb = (PCB*)temp_node->value;
-					temp_pcb->m_state = RDY;
-					ready_enqueue(temp_pcb);
-					return 1;
+					if (temp->pcb->m_state == state){
+						temp_node = linkedList_remove(&block_queue[i], temp_node->value);
+						temp_pcb->m_state = RDY;
+						ready_enqueue(temp_pcb);
+						return 1;
+					}else{
+						temp_node = temp_node->next;
+					}
+				}
 			}
 	}
 	return 0;
-	
 }
 
 PCB * k_get_pcb_from_id (U32 process_id){

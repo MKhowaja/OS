@@ -199,7 +199,7 @@ int k_release_memory_block(void *p_mem_blk) {
 		mem_list.last = free_memory_node;
 	}
 	
-	if(handle_blocked_process_ready()){
+	if(handle_blocked_process_ready(MEM_BLOCKED)){
 		__enable_irq();
 		k_release_processor();
 		__disable_irq();

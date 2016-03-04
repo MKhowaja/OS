@@ -31,7 +31,7 @@ extern unsigned int Image$$RW_IRAM1$$ZI$$Limit;
 extern PCB **gp_pcbs;
 //extern PROC_INIT g_proc_table[NUM_TOTAL_PROCS];
 
-extern int handle_blocked_process_ready(void);
+extern int handle_blocked_process_ready(PROC_STATE_E state);
 extern int k_release_processor(void);
 extern void block_enqueue(PCB * pcb, PROC_STATE_E state);
 

@@ -24,6 +24,8 @@
 #define KEY_BLOCKED_MSG '.'
 #define KEY_MSG_LOG '/'
 
+#define NUM_MSG_BUFFERED 10
+
 
 //#define LOWEST 4
 //#define PROC_BLK_SIZE 0x100 //size of each process' stack
@@ -106,6 +108,16 @@ typedef struct msg_t
 	int msg_delay;				/* message delay */
 	char mText[1];				/* message data */
 } MSG_T;
+
+/* log buffer version */
+typedef struct log_msg_t
+{
+	int sender_pid;				/* sender process id*/
+	int receiver_pid;			/* receiver process id */
+	int msg_type;				/* message type */
+	uint32_t timestamp;				/* The time stamp of the transaction (using the RTX clock) */
+	char mText[16];				/* message data */
+} LOG_MSG_T;
 
 #define SZ_MEM_BLK 128           /* fixed size of memory block 128B default */
 //#define SZ_MEM_BLK_WITH_HEADER SZ_MEM_BLK+0x20

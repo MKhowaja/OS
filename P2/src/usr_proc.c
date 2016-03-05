@@ -235,12 +235,37 @@ void proc6(void)
 
 
 void clock_proc(void){
+	MSGBUF* read_msg;
+	int sender_id;
+	int i;
 	char* cmd = "%w";
+
+	int buf_size;
+	char read_buf[100];
+	buf_size = 100;
+
+
 	MSGBUF* msg = (MSGBUF*)request_memory_block();
 
-
+	//reg cmd
 	msg->msg_type = KCD_REG;
 	strncpy(msg->mText, cmd, strlen(cmd));
 	send_message(PID_KCD, msg);
 
+	while(1){
+		//clear buf
+		for(i = 0; i < buf_size; i++){
+			read_buf[i] = '\0';
+		}
+		//read msg
+		read_msg = receive_message(&sender_id);
+		strncpy(read_buf, read_msg->mText, buffer_size);
+
+		if( strlen(read_buf) < 3 || read_buf[0] != cmd[0] ||  read_buf[1] != cmd[1]){
+			//do nothing, next
+			continue;
+		}
+
+
+	}
 }

@@ -5,6 +5,54 @@
 #include "timer.h"
 #endif /* ! DEBUG_0 */
 
+#define NOT_SET 0xFFFFFFFF
+static LOG_MSG_T send_log_buffer[NUM_MSG_BUFFERED];
+static LOG_MSG_T receive_log_buffer[NUM_MSG_BUFFERED];
+static volatile int send_log_buffer_index = 0;
+static volatile int receive_log_buffer_index = 0;
+
+void message_log_buffer_init(void){
+	int i;
+	for (i = 0; i < NUM_MSG_BUFFERED; i++){
+		send_log_buffer[i].timestamp = NOT_SET;
+		receive_log_buffer[i].timestamp = NOT_SET;
+	}
+}
+
+void update_send_log_buffer(MSG_T* message){
+	send_log_buffer[send_log_buffer_index].sender_pid = message->sender_pid;
+	send_log_buffer[send_log_buffer_index].receiver_pid = message->receiver_pid;
+	send_log_buffer[send_log_buffer_index].msg_type = message->msg_type;
+	// copy the first 16 bytes
+	strncpy(send_log_buffer[send_log_buffer_index].mText, message->mText, 16);
+	// make sure it is NULL terminated
+	send_log_buffer[send_log_buffer_index].mText[16] = '\0';
+	send_log_buffer[send_log_buffer_index].timestamp = get_timer_count();
+	// update the index of the next override
+	send_log_buffer_index = (send_log_buffer_index + 1) % NUM_MSG_BUFFERED;
+}
+
+void update_receive_log_buffer(MSG_T* message){
+	receive_log_buffer_index[receive_log_buffer_index].sender_pid = message->sender_pid;
+	receive_log_buffer_index[receive_log_buffer_index].receiver_pid = message->receiver_pid;
+	receive_log_buffer_index[receive_log_buffer_index].msg_type = message->msg_type;
+	// copy the first 16 bytes
+	strncpy(receive_log_buffer_index[receive_log_buffer_index].mText, message->mText, 16);
+	// make sure it is NULL terminated
+	receive_log_buffer_index[receive_log_buffer_index].mText[16] = '\0';
+	receive_log_buffer_index[receive_log_buffer_index].timestamp = get_timer_count();
+	// update the index of the next override
+	receive_log_buffer_index = (receive_log_buffer_index + 1) % NUM_MSG_BUFFERED;
+}
+
+void print_send_log_buffer(void){
+
+}
+
+void update_receive_log_buffer(void){
+
+}
+
 int k_send_message(int receiver_pid, void *message_envelope)
 {
 	int successCode;
@@ -34,6 +82,7 @@ int k_send_message(int receiver_pid, void *message_envelope)
 	successCode = linkedList_push_back(&(pcb->m_msg_queue), (void *) message);
 	if (successCode == 1) {
 		 //error inserting to list because list was null
+		update_send_log_buffer(message);
 		__enable_irq();
 		return RTX_ERR;
 	}
@@ -136,15 +185,4 @@ int delayed_send(int receiver_pid, void *message_envelope, int delay){
 	__enable_irq();
 	return RTX_OK;
 }
-
-
-
-
-
-
-
-
-
-
-
 

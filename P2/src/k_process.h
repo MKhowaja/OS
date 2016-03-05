@@ -37,6 +37,6 @@ extern void set_test_procs(void);      /* test process initial set up */
 extern void set_kernel_procs(void);      /* kernel process initial set up */
 
 void print_queue(PROCESS_QUEUE_ID id);  	/* Print ready or block queue */
-void print_current_process();				/* Print current process */
+void print_current_process(void);				/* Print current process */
 
 #endif /* ! K_PROCESS_H_ */

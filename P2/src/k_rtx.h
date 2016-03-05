@@ -23,7 +23,7 @@
 #define KEY_BLOCKED_MEM ','
 #define KEY_BLOCKED_MSG '.'
 #define KEY_MSG_LOG '/'
-#endif
+
 
 //#define LOWEST 4
 //#define PROC_BLK_SIZE 0x100 //size of each process' stack

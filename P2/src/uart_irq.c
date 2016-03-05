@@ -211,7 +211,7 @@ void uart_i_process(){
   uint8_t IIR_IntId;	    // Interrupt ID from IIR 		 
 	LPC_UART_TypeDef *pUart = (LPC_UART_TypeDef *)LPC_UART0;
 	MSGBUF* msg;
-	PCB* current_process;
+	//PCB* current_process;
 	PCB* prev_pcb_node = k_get_current_process();
 	
 //#ifdef DEBUG_0
@@ -222,16 +222,11 @@ void uart_i_process(){
 	/* Reading IIR automatically acknowledges the interrupt */
 	IIR_IntId = (pUart->IIR) >> 1 ; // skip pending bit in IIR 
 	
-	if (IIR_IntId & IIR_RDA) { // Receive Data Avaialbe
+	if (IIR_IntId & IIR_RDA) { // interrupt Id and Receive Data Avaialbe
 		
 		/* keyboard input */
 		
 		g_char_in = pUart->RBR;
-//#ifdef DEBUG_0
-//		uart1_put_string("Reading a char = ");
-//		uart1_put_char(g_char_in);
-//		uart1_put_string("\n\r");
-//#endif // DEBUG_0
 		g_send_char = 1;
 		//for \r \n and \0
 		if ((buffer_index < buffer_size - 3) && (g_char_in != '\r')) {
@@ -306,6 +301,7 @@ void uart_i_process(){
 				
 		
 	} else if (IIR_IntId & IIR_THRE) {
+	// interrupt Id and THRE Interrupt, transmit holding register becomes empty
 
 		if (*gp_buffer != '\0' ) {
 			g_char_out = *gp_buffer;
@@ -313,24 +309,25 @@ void uart_i_process(){
 			pUart->THR = g_char_out;
 			gp_buffer++;
 		} else {
-			k_release_memory_block_nonpreempt((void*)message);
-			message = NULL;
-            gp_buffer = "\0"; // now we don't point to invalid memory
+			// k_release_memory_block_nonpreempt((void*)message);
+			// message = NULL;
+   //          gp_buffer = "\0"; // now we don't point to invalid memory
 
-            message = k_receive_message_nonpreempt(NULL);
+   //          message = k_receive_message_nonpreempt(NULL);
 
 
-			if (message != NULL) {
-	                gp_buffer = (uint8_t*)message->msg_data;
-	                g_char_out = *gp_buffer;
-            		pUart->THR = g_char_out;
-            		gp_buffer++;
-	        } 
-	        else {
+			// if (message != NULL) {
+	  //               gp_buffer = (uint8_t*)message->msg_data;
+	  //               g_char_out = *gp_buffer;
+   //          		pUart->THR = g_char_out;
+   //          		gp_buffer++;
+	  //       } 
+	  //       else {
 				pUart->IER ^= IER_THRE; // toggle the IER_THRE bit 
 				pUart->THR = '\0';
 				g_send_char = 0;
-			}
+				gp_buffer = g_buffer; //comment this out if uncommenting above code
+//			}
 		}
 
 	} else {

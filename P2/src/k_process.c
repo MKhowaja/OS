@@ -329,46 +329,61 @@ void print_queue(PROCESS_QUEUE_ID id){
 	node* temp_node;
 	PCB* temp_pcb;
 	PROC_STATE_E state;
-	linkedList temp_queue[NUM_PRIORITY];
 	switch(id){
 		case PRINT_READY:
-			temp_queue = ready_queue;
 			state = RDY;
 			printf("Printing ready queue...\r\n");
 			break;
 		case PRINT_MEM_BLOCKED:
-			temp_queue = block_queue;
 			state = MEM_BLOCKED;
 			printf("Printing blocked on memory queue...\r\n");
 			break;
 		case PRINT_MSG_BLOCKED:
-			temp_queue = block_queue;
 			state = MSG_BLOCKED;
 			printf("Printing blocked on message queue...\r\n");
 			break;
 		default:
 			printf("INVALID ID TO PRINT QUEUE\r\n");
-			break;
+			return;
 	}
 
-	for(i = 0; i <= NUM_PRIORITY; i++){
-		printf("Priority: %d\r\n", i);
-		if(temp_queue[i].first != NULL){
-			temp_node = block_queue[i].first;
-			while (temp_node != NULL){
-				temp_pcb = (PCB*)temp_node->value;
-				if (temp_pcb->m_state == state){
-					printf("pid: %d  ", temp_pcb->m_pid);
-				}else if( id == PRINT_READY && (temp_pcb->m_state == MEM_BLOCKED || temp_pcb->m_state == MSG_BLOCKED) ){
-					printf("WTF?!?!?!?!?!?!?! Blocked PCB in ready queue!");
-				}else if( (id == PRINT_MEM_BLOCKED || id == MSG_BLOCKED) && temp_pcb->m_state == RDY){
-					printf("WTF?!?!?!?!?!?!?! Ready PCB in block queue!");
+	if (id == PRINT_READY){ // ready queue
+		for(i = 0; i <= NUM_PRIORITY; i++){
+			printf("Priority: %d\r\n", i);
+			if(ready_queue[i].first != NULL){
+				temp_node = block_queue[i].first;
+				while (temp_node != NULL){
+					temp_pcb = (PCB*)temp_node->value;
+					if (temp_pcb->m_state == state){
+						printf("pid: %d  ", temp_pcb->m_pid);
+					}else if( temp_pcb->m_state == MEM_BLOCKED || temp_pcb->m_state == MSG_BLOCKED ){
+						printf("WTF?!?!?!?!?!?!?! Blocked PCB in ready queue!");
+					}
+					temp_node = temp_node->next;
 				}
-				temp_node = temp_node->next;
 			}
+			printf("\r\n");
 		}
-		printf("\r\n");
+	}else{ // block queue
+		for(i = 0; i <= NUM_PRIORITY; i++){
+			printf("Priority: %d\r\n", i);
+			if(block_queue[i].first != NULL){
+				temp_node = block_queue[i].first;
+				while (temp_node != NULL){
+					temp_pcb = (PCB*)temp_node->value;
+					if (temp_pcb->m_state == state){
+						printf("pid: %d  ", temp_pcb->m_pid);
+					}else if( temp_pcb->m_state == RDY){
+						printf("WTF?!?!?!?!?!?!?! Ready PCB in block queue!");
+					}
+					temp_node = temp_node->next;
+				}
+			}
+			printf("\r\n");
+		}
 	}
+
+	
 
 }
 

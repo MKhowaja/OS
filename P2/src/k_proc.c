@@ -39,7 +39,7 @@ void set_kernel_procs() {
     for (i = 0; i < 200; i++) {
         msg_data[i] = '\0';
     }
-
+    //TODO REMOVE I PROCESSES FROM SCHEDULER
     k_test_procs[0].m_pid = 0;
     k_test_procs[0].m_stack_size = 0X100;
     k_test_procs[0].mpf_start_pc = &nullProc;

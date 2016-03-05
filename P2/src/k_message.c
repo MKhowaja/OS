@@ -46,17 +46,40 @@ void update_receive_log_buffer(MSG_T* message){
 }
 
 void print_send_log_buffer(void){
-
+	int i;
+	for (i = 0; i < NUM_MSG_BUFFERED; i++){
+		if (send_log_buffer[i].timestamp != NOT_SET){
+			printf("Sender pid: %d, Receiver pid: %d, Message type: %d, First 16 bytes: %s, timestamp: %d \r\n", 
+				send_log_buffer[i].sender_pid,
+				send_log_buffer[i].receiver_pid,
+				send_log_buffer[i].msg_type, 
+				send_log_buffer[i].mText,
+				send_log_buffer[i].timestamp
+			);
+		}
+	}
 }
 
-//void update_receive_log_buffer(void){
 
-//}
+void print_receive_log_buffer(void){
+	int j;
+	for (i = 0; i < NUM_MSG_BUFFERED; i++){
+		if (receive_log_buffer[i].timestamp != NOT_SET){
+			printf("Sender pid: %d, Receiver pid: %d, Message type: %d, First 16 bytes: %s, timestamp: %d \r\n", 
+				receive_log_buffer[i].sender_pid,
+				receive_log_buffer[i].receiver_pid,
+				receive_log_buffer[i].msg_type, 
+				receive_log_buffer[i].mText,
+				receive_log_buffer[i].timestamp
+			);
+		}
+	}
+}
 
 int k_send_message(int receiver_pid, void *message_envelope)
 {
 	int successCode;
-	PCB * pcb;
+	PCB * receiver_pcb;
 	MSG_T* message;
 	PCB * current_process;
 		
@@ -71,15 +94,15 @@ int k_send_message(int receiver_pid, void *message_envelope)
 		__enable_irq();
 		return RTX_ERR;
 	}
-	pcb = k_get_pcb_from_id ((U32) receiver_pid);
-	if (pcb == NULL){
+	receiver_pcb = k_get_pcb_from_id ((U32) receiver_pid);
+	if (receiver_pcb == NULL){
 		__enable_irq();
 		return RTX_ERR;
 	}
 	message->sender_pid = current_process->m_pid;
 	message->receiver_pid = receiver_pid;
 	
-	successCode = linkedList_push_back(&(pcb->m_msg_queue), (void *) message);
+	successCode = linkedList_push_back(&(receiver_pcb->m_msg_queue), (void *) message);
 	if (successCode == 1) {
 		 //error inserting to list because list was null
 		update_send_log_buffer(message);
@@ -92,7 +115,9 @@ int k_send_message(int receiver_pid, void *message_envelope)
 	// 	ready_enqueue (pcb);
 	// }
 	// check if there is process blocked on msg
-	if(handle_blocked_process_ready(MSG_BLOCKED)){
+
+	//if(handle_blocked_process_ready(MSG_BLOCKED)){
+	if(handle_msg_blocked_process_ready(receiver_pcb)){
 		__enable_irq();
 		k_release_processor();
 		__disable_irq();

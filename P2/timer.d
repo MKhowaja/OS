@@ -7,6 +7,7 @@ timer.o: C:\Software\Keil\ARM\CMSIS\Include\core_cmFunc.h
 timer.o: C:\Software\Keil\ARM\Inc\NXP\LPC17xx\system_LPC17xx.h
 timer.o: src\timer.h
 timer.o: src\sorted_queue.h
-timer.o: src\k_message.h
+timer.o: src\k_process.h
 timer.o: src\k_rtx.h
 timer.o: src\list.h
+timer.o: src\k_message.h

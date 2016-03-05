@@ -18,6 +18,7 @@ queue sorted_list;
 /**
  * @brief: initialize timer. Only timer 0 is supported
  */
+
 uint32_t timer_init(uint8_t n_timer) 
 {
 	LPC_TIM_TypeDef *pTimer;
@@ -123,7 +124,6 @@ void c_TIMER0_IRQHandler(void)
 }
 
 void timer_i_process(void) {
-	void* current_message;
 	MSG_T* message_to_send;
 	int target_pid;
 	int send_flag = 0;
@@ -137,7 +137,7 @@ void timer_i_process(void) {
 	while (((MSG_T*)peek(&sorted_list))-> msg_delay <= g_timer_count){
 		message_to_send = (MSG_T*)queue_pop_front(&sorted_list);
 		target_pid = message_to_send->receiver_pid;
-		send_flag = send_flag | k_send_message_nonblocking(target_pid, (void*)message_to_send);
+		send_flag = send_flag | k_send_message_nonpreempt(target_pid, (void*)message_to_send);
 	}
 	if (send_flag){
 		__enable_irq();

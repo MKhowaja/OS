@@ -210,3 +210,35 @@ int k_release_memory_block(void *p_mem_blk) {
 // 	// return SUCCESS_CODE
  	return RTX_OK;
 }
+
+int k_release_memory_block_nonpreempt(void *p_mem_blk) {
+	MemNode* free_memory_node;
+	MemNode* mem_traverse;
+#ifdef DEBUG_0 
+	printf("k_release_memory_block_nonpreempt: releasing block @ 0x%x\n", p_mem_blk);
+#endif /* ! DEBUG_0 */
+
+	if (!(p_end <= p_mem_blk && p_mem_blk < gp_stack && ((U32)p_mem_blk - (U32)p_end) % SZ_MEM_BLK == 0)) {
+    return RTX_ERR;
+  }
+	mem_traverse = mem_list.first;
+	while (mem_traverse != NULL) {
+		if (mem_traverse == p_mem_blk){
+			return RTX_ERR;
+		}
+		mem_traverse = mem_traverse->next;
+	}
+ 	free_memory_node = (MemNode*) p_mem_blk;
+	free_memory_node -> next = NULL;
+	
+	if (mem_list.last !=NULL) {
+		mem_list.last -> next = free_memory_node;
+		mem_list.last = free_memory_node;
+	}
+	else {
+		mem_list.first = free_memory_node;
+		mem_list.last = free_memory_node;
+	}
+
+ 	return RTX_OK;
+}

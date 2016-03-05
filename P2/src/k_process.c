@@ -67,7 +67,7 @@ int handle_blocked_process_ready(PROC_STATE_E state){
 				temp_node = block_queue[i].first;
 				while (temp_node != NULL){
 					temp_pcb = (PCB*)temp_node->value;
-					if (temp->pcb->m_state == state){
+					if (temp_pcb->m_state == state){
 						temp_node = linkedList_remove(&block_queue[i], temp_node->value);
 						temp_pcb->m_state = RDY;
 						ready_enqueue(temp_pcb);

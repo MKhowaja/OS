@@ -6,9 +6,10 @@ k_proc.o: src\uart_def.h
 k_proc.o: src\k_proc.h
 k_proc.o: src\timer.h
 k_proc.o: src\sorted_queue.h
-k_proc.o: src\k_message.h
+k_proc.o: src\k_process.h
 k_proc.o: src\k_rtx.h
 k_proc.o: src\list.h
+k_proc.o: src\k_message.h
 k_proc.o: src\k_memory.h
 k_proc.o: C:\Software\Keil\ARM\ARMCC\bin\..\include\string.h
 k_proc.o: src\uart.h

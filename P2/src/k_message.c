@@ -53,9 +53,8 @@ int k_send_message(int receiver_pid, void *message_envelope)
 	return RTX_OK;
 }
 
-int k_send_message_nonblocking(U32 receiver_pid, void *message_envelope)
+int k_send_message_nonpreempt(U32 receiver_pid, void *message_envelope)
 {
-	int successCode;
 	PCB * pcb;
 	MSG_T* message;
 	PCB * current_process;
@@ -66,7 +65,7 @@ int k_send_message_nonblocking(U32 receiver_pid, void *message_envelope)
 	message->sender_pid = current_process->m_pid;
 	message->receiver_pid = receiver_pid;
 	
-	successCode = linkedList_push_back(&(pcb->m_msg_queue), (void *) message);
+	linkedList_push_back(&(pcb->m_msg_queue), (void *) message);
 	
 	// if (pcb->m_state == MSG_BLOCKED){
 	// 	pcb->m_state = RDY;
@@ -107,19 +106,10 @@ void* k_receive_message(int *sender_id)
 	return (void*) message;
 }
 
-/* kernel version */
-typedef struct msg_t
-{
-	int sender_pid;				/* sender process id*/
-	int receiver_pid;			/* receiver process id */
-	int msg_type;					/* message type */
-	int msg_delay;				/* message delay */
-	char mText[1];				/* message data */
-} MSG_T;
-
 int delayed_send(int receiver_pid, void *message_envelope, int delay){
 	MSG_T* message;
-	PCB * current_process, pcb;
+	PCB * current_process;
+	PCB * pcb;
 	__disable_irq();
 	if (message_envelope == NULL){
 		__enable_irq();

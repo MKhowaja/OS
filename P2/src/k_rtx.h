@@ -19,6 +19,12 @@
 #define NUM_TEST_PROCS 6
 #define NUM_TOTAL_PROCS NUM_KERNEL_PROCS+NUM_TEST_PROCS
 
+#define KEY_READY '!'
+#define KEY_BLOCKED_MEM ','
+#define KEY_BLOCKED_MSG '.'
+#define KEY_MSG_LOG '/'
+#endif
+
 //#define LOWEST 4
 //#define PROC_BLK_SIZE 0x100 //size of each process' stack
 
@@ -47,7 +53,13 @@ typedef enum {
     MSG_BLOCKED, //waiting on message
     INTERRUPTED,
     EXIT
-} PROC_STATE_E;  
+} PROC_STATE_E;
+
+typedef enum {
+	PRINT_READY=0,
+	PRINT_MEM_BLOCKED,
+	PRINT_MSG_BLOCKED
+}PROCESS_QUEUE_ID;
 
 /*
   PCB data structure definition.

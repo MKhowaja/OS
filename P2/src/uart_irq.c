@@ -7,6 +7,7 @@
 
 #include <LPC17xx.h>
 #include "uart.h"
+#include "rtx.h"
 #include "uart_polling.h"
 #include "k_process.h"
 #include "k_message.h"
@@ -18,17 +19,18 @@
 #endif
 
 
-uint8_t g_buffer[]= "You Typed a Q\n\r";
-uint8_t *gp_buffer = g_buffer;
+MSG_T* message;
+uint8_t *gp_buffer = "\0";
 uint8_t g_send_char = 0;
 uint8_t g_char_in;
 uint8_t g_char_out;
 uint32_t buffer_index = 0;
 uint32_t buffer_size = 200; //arbitrarily defined
-
+uint8_t g_buffer[200];
 extern uint32_t g_switch_flag;
 
 extern int k_release_processor(void);
+void reset_g_buffer(void);
 
 /**
  * @brief: initialize the n_uart
@@ -39,6 +41,7 @@ extern int k_release_processor(void);
 int uart_irq_init(int n_uart) {
 
 	LPC_UART_TypeDef *pUart;
+	reset_g_buffer();
 
 	if ( n_uart ==0 ) {
 		/*
@@ -193,11 +196,24 @@ void c_UART0_IRQHandler(void)
 	uart_i_process();
 }
 
+void reset_g_buffer() {
+    uint32_t i;
+
+    buffer_index = 0;
+
+    for (i = 0; i < buffer_size; i++) {
+        g_buffer[i] = '\0';
+    }
+}
+
+
 void uart_i_process(){
   uint8_t IIR_IntId;	    // Interrupt ID from IIR 		 
 	LPC_UART_TypeDef *pUart = (LPC_UART_TypeDef *)LPC_UART0;
 	MSGBUF* msg;
-	node* prev_pcb_node = (node*)k_get_current_process();
+	PCB* current_process;
+	PCB* prev_pcb_node = k_get_current_process();
+	
 //#ifdef DEBUG_0
 //	uart1_put_string("Entering c_UART0_IRQHandler\n\r");
 //#endif // DEBUG_0
@@ -247,47 +263,79 @@ void uart_i_process(){
       strncpy(msg->mText, (char*)g_buffer, buffer_index);
 
 			// send message to kcd
-			current_pcb_node = pcb_nodes[PID_UART_IPROC];
-   //    k_send_message_i(3, read_msg);
-   //    current_pcb_node = previous_pcb_node;
+			k_send_message_nonpreempt(PID_KCD, msg);
 
-   //    reset_g_buffer();
-   //    g_switch_flag = 1;
+      reset_g_buffer();
+      g_switch_flag = 1;
 		}
-		/* setting the g_switch_flag */
-		//if ( g_char_in == 'S' ) {
-		//	g_switch_flag = 1; 
-		//} else {
-		//	g_switch_flag = 0;
-		//}
+		#ifdef _DEBUG_HOTKEYS
+		if ( g_char_in == KEY_READY ||
+                g_char_in == KEY_BLOCKED_MEM ||
+                g_char_in == KEY_BLOCKED_MSG ||
+                g_char_in == KEY_MSG_LOG)) {
+
+			printf("----------------------------------------------\r\n");
+			print_current_process();
+			switch (g_char_in) {
+                case KEY_READY:
+                    printf("READY QUEUE:\r\n");
+                    print_queue(PRINT_READY);
+                    break;
+
+                case KEY_BLOCKED_MEM:
+                    printf("MEM BLOCKED QUEUE:\r\n");
+                    print_queue(PRINT_MEM_BLOCKED);
+                    break;
+
+                case KEY_BLOCKED_MSG:
+                    printf("MESSAGE BLOCKED QUEUE:\r\n");
+                    print_queue(PRINT_MSG_BLOCKED);
+                    break;
+
+                case KEY_MSG_LOG:
+                	//TODO output 10 most recent sent and received messages
+                    //handle
+                    break;
+
+                default:
+                    break;
+            }
+		}
+		printf("----------------------------------------------\r\n");
+		#endif
+				
+		
 	} else if (IIR_IntId & IIR_THRE) {
-	/* THRE Interrupt, transmit holding register becomes empty */
 
 		if (*gp_buffer != '\0' ) {
 			g_char_out = *gp_buffer;
-#ifdef DEBUG_0
-			//uart1_put_string("Writing a char = ");
-			//uart1_put_char(g_char_out);
-			//uart1_put_string("\n\r");
-			
-			// you could use the printf instead
-			printf("Writing a char = %c \n\r", g_char_out);
-#endif // DEBUG_0			
+
 			pUart->THR = g_char_out;
 			gp_buffer++;
 		} else {
-#ifdef DEBUG_0
-			uart1_put_string("Finish writing. Turning off IER_THRE\n\r");
-#endif // DEBUG_0
-			pUart->IER ^= IER_THRE; // toggle the IER_THRE bit 
-			pUart->THR = '\0';
-			g_send_char = 0;
-			gp_buffer = g_buffer;		
+			k_release_memory_block_nonpreempt((void*)message);
+			message = NULL;
+            gp_buffer = "\0"; // now we don't point to invalid memory
+
+            message = k_receive_message_nonpreempt(NULL);
+
+
+			if (message != NULL) {
+	                gp_buffer = (uint8_t*)message->msg_data;
+	                g_char_out = *gp_buffer;
+            		pUart->THR = g_char_out;
+            		gp_buffer++;
+	        } 
+	        else {
+				pUart->IER ^= IER_THRE; // toggle the IER_THRE bit 
+				pUart->THR = '\0';
+				g_send_char = 0;
+			}
 		}
-	      
-	} else {  /* not implemented yet */
+
+	} else {
 #ifdef DEBUG_0
-			uart1_put_string("Should not get here!\n\r");
+			printf("Could not handle interrupt in uart_i_process!\r\n");
 #endif // DEBUG_0 
 		return;
 	}	

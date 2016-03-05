@@ -91,11 +91,14 @@ typedef struct proc_init
 #endif
 
 /* user version */
+#ifndef MSG_BUF
+#define MSG_BUF
 typedef struct msgbuf
 {
 	int msg_type;
 	char mText[1];
 } MSGBUF;
+#endif
 
 /* kernel version */
 typedef struct msg_t

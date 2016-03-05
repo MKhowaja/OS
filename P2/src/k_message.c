@@ -1,5 +1,6 @@
 #include "k_message.h"
 #include "k_process.h"
+#include "string.h"
 #ifdef DEBUG_0
 #include "printf.h"
 #include "timer.h"
@@ -62,7 +63,7 @@ void print_send_log_buffer(void){
 
 
 void print_receive_log_buffer(void){
-	int j;
+	int i;
 	for (i = 0; i < NUM_MSG_BUFFERED; i++){
 		if (receive_log_buffer[i].timestamp != NOT_SET){
 			printf("Sender pid: %d, Receiver pid: %d, Message type: %d, First 16 bytes: %s, timestamp: %d \r\n", 

@@ -20,6 +20,7 @@ void set_test_procs() {
 	}
 	passed_test[5] = 1;
   
+	
 	g_test_procs[0].mpf_start_pc = &proc1;
 	g_test_procs[0].m_priority   = HIGH;
 	

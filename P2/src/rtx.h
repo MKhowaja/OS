@@ -26,6 +26,7 @@
 #define LOWEST  3
 
 /* Process IDs */
+/*
 #define PID_NULL 					0	
 #define PID_CLOCK  				1
 #define PID_UART_IPROC   	2
@@ -42,6 +43,27 @@
 #define PID_A    11
 #define PID_B    12
 #define PID_C    13
+*/
+
+/* Process IDs */
+#define PID_NULL 0
+#define PID_P1   1
+#define PID_P2   2
+#define PID_P3   3
+#define PID_P4   4
+#define PID_P5   5
+#define PID_P6   6
+#define PID_A    7
+#define PID_B    8
+#define PID_C    9
+#define PID_SET_PRIO     10
+#define PID_CLOCK        11
+#define PID_KCD          12
+#define PID_CRT          13
+#define PID_TIMER_IPROC  14
+#define PID_UART_IPROC   15
+
+
 
 #define DEFAULT 0
 #define KCD_REG 1

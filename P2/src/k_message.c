@@ -33,24 +33,46 @@ void update_send_log_buffer(MSG_T* message){
 }
 
 void update_receive_log_buffer(MSG_T* message){
-	receive_log_buffer_index[receive_log_buffer_index].sender_pid = message->sender_pid;
-	receive_log_buffer_index[receive_log_buffer_index].receiver_pid = message->receiver_pid;
-	receive_log_buffer_index[receive_log_buffer_index].msg_type = message->msg_type;
+	receive_log_buffer[receive_log_buffer_index].sender_pid = message->sender_pid;
+	receive_log_buffer[receive_log_buffer_index].receiver_pid = message->receiver_pid;
+	receive_log_buffer[receive_log_buffer_index].msg_type = message->msg_type;
 	// copy the first 16 bytes
-	strncpy(receive_log_buffer_index[receive_log_buffer_index].mText, message->mText, 16);
+	strncpy(receive_log_buffer[receive_log_buffer_index].mText, message->mText, 16);
 	// make sure it is NULL terminated
-	receive_log_buffer_index[receive_log_buffer_index].mText[16] = '\0';
-	receive_log_buffer_index[receive_log_buffer_index].timestamp = get_timer_count();
+	receive_log_buffer[receive_log_buffer_index].mText[16] = '\0';
+	receive_log_buffer[receive_log_buffer_index].timestamp = get_timer_count();
 	// update the index of the next override
 	receive_log_buffer_index = (receive_log_buffer_index + 1) % NUM_MSG_BUFFERED;
 }
 
 void print_send_log_buffer(void){
-
+	int i;
+	for (i = 0; i < NUM_MSG_BUFFERED; i++){
+		if (send_log_buffer[i].timestamp != NOT_SET){
+			printf("Sender pid: %d, Receiver pid: %d, Message type: %d, First 16 bytes: %s, timestamp: %d \r\n", 
+				send_log_buffer[i].sender_pid,
+				send_log_buffer[i].receiver_pid,
+				send_log_buffer[i].msg_type, 
+				send_log_buffer[i].mText,
+				send_log_buffer[i].timestamp
+			);
+		}
+	}
 }
 
-void update_receive_log_buffer(void){
-
+void print_receive_log_buffer(void){
+	int j;
+	for (i = 0; i < NUM_MSG_BUFFERED; i++){
+		if (receive_log_buffer[i].timestamp != NOT_SET){
+			printf("Sender pid: %d, Receiver pid: %d, Message type: %d, First 16 bytes: %s, timestamp: %d \r\n", 
+				receive_log_buffer[i].sender_pid,
+				receive_log_buffer[i].receiver_pid,
+				receive_log_buffer[i].msg_type, 
+				receive_log_buffer[i].mText,
+				receive_log_buffer[i].timestamp
+			);
+		}
+	}
 }
 
 int k_send_message(int receiver_pid, void *message_envelope)

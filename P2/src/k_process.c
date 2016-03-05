@@ -62,22 +62,46 @@ int handle_blocked_process_ready(PROC_STATE_E state){
 	node* temp_node;
 	PCB* temp_pcb;
 	for(i = 0; i <= NUM_PRIORITY; i++){
-			if(block_queue[i].first != NULL){
-				// check the whole list and see if there is anything blocked on memory
-				temp_node = block_queue[i].first;
-				while (temp_node != NULL){
-					temp_pcb = (PCB*)temp_node->value;
-					if (temp_pcb->m_state == state){
-						temp_node = linkedList_remove(&block_queue[i], temp_node->value);
-						temp_pcb->m_state = RDY;
-						ready_enqueue(temp_pcb);
-						return 1;
-					}else{
-						temp_node = temp_node->next;
-					}
+		if(block_queue[i].first != NULL){
+			// check the whole list and see if there is anything blocked on memory
+			temp_node = block_queue[i].first;
+			while (temp_node != NULL){
+				temp_pcb = (PCB*)temp_node->value;
+				if (temp_pcb->m_state == state){
+					temp_node = linkedList_remove(&block_queue[i], temp_node->value);
+					temp_pcb->m_state = RDY;
+					ready_enqueue(temp_pcb);
+					return 1;
+				}else{
+					temp_node = temp_node->next;
 				}
 			}
+		}
 	}
+	return 0;
+}
+
+// find the pcb in the block queue, if not found return 0
+// if found but not blocked on message, return 0
+// if blocked on message, unblock, put in ready queue and return 1
+int handle_msg_blocked_process_ready(PCB* receiver_pcb){
+	int i;
+	node* temp_node;
+	PCB* temp_pcb;
+	if (receiver_pcb->m_state != MSG_BLOCKED){
+		return 0;
+	}
+	for(i = 0; i <= NUM_PRIORITY; i++){
+		if (linkedList_contain(&block_queue[i], receiver_pcb)){
+			temp_node =  linkedList_remove(&block_queue[i], receiver_pcb);
+			temp_pcb = (PCB*)temp_node->value;
+			temp_pcb->m_state = RDY;
+			ready_enqueue(temp_pcb);
+			return 1;
+		}
+	}
+	// Shouldn't happen!!!! Blocked on message but not in block queues??????
+	printf("Panic! handle_msg_blocked_process_ready: Blocked on message but not in block queues!");
 	return 0;
 }
 

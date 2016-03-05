@@ -78,7 +78,7 @@ void print_receive_log_buffer(void){
 int k_send_message(int receiver_pid, void *message_envelope)
 {
 	int successCode;
-	PCB * pcb;
+	PCB * receiver_pcb;
 	MSG_T* message;
 	PCB * current_process;
 		
@@ -93,15 +93,15 @@ int k_send_message(int receiver_pid, void *message_envelope)
 		__enable_irq();
 		return RTX_ERR;
 	}
-	pcb = k_get_pcb_from_id ((U32) receiver_pid);
-	if (pcb == NULL){
+	receiver_pcb = k_get_pcb_from_id ((U32) receiver_pid);
+	if (receiver_pcb == NULL){
 		__enable_irq();
 		return RTX_ERR;
 	}
 	message->sender_pid = current_process->m_pid;
 	message->receiver_pid = receiver_pid;
 	
-	successCode = linkedList_push_back(&(pcb->m_msg_queue), (void *) message);
+	successCode = linkedList_push_back(&(receiver_pcb->m_msg_queue), (void *) message);
 	if (successCode == 1) {
 		 //error inserting to list because list was null
 		update_send_log_buffer(message);
@@ -114,7 +114,9 @@ int k_send_message(int receiver_pid, void *message_envelope)
 	// 	ready_enqueue (pcb);
 	// }
 	// check if there is process blocked on msg
-	if(handle_blocked_process_ready(MSG_BLOCKED)){
+
+	//if(handle_blocked_process_ready(MSG_BLOCKED)){
+	if(handle_msg_blocked_process_ready(receiver_pcb)){
 		__enable_irq();
 		k_release_processor();
 		__disable_irq();
@@ -177,7 +179,7 @@ void* k_receive_message(int *sender_id)
 	return (void*) message;
 }
 
-int delayed_send(int receiver_pid, void *message_envelope, int delay){
+int k_delayed_send(int receiver_pid, void *message_envelope, int delay){
 	MSG_T* message;
 	PCB * current_process;
 	PCB * pcb;

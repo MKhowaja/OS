@@ -39,4 +39,7 @@ extern void set_kernel_procs(void);      /* kernel process initial set up */
 void print_queue(PROCESS_QUEUE_ID id);  	/* Print ready or block queue */
 void print_current_process(void);				/* Print current process */
 
+
+int handle_blocked_process_ready(PROC_STATE_E state);
+int handle_msg_blocked_process_ready(PCB* receiver_pcb);
 #endif /* ! K_PROCESS_H_ */

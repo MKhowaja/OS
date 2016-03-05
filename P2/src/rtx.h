@@ -66,6 +66,17 @@ typedef struct proc_init
 } PROC_INIT;
 #endif
 
+
+/* user version */
+#ifndef MSG_BUF
+#define MSG_BUF
+typedef struct msgbuf
+{
+	int msg_type;
+	char mText[1];
+} MSGBUF;
+#endif
+
 /* ----- RTX User API ----- */
 #define __SVC_0  __svc_indirect(0)
 

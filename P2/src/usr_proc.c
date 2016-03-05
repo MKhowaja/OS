@@ -232,3 +232,15 @@ void proc6(void)
 		release_processor();
 	}
 }
+
+
+void clock_proc(void){
+	char* cmd = "%w";
+	MSGBUF* msg = (MSGBUF*)request_memory_block();
+
+
+	msg->msg_type = KCD_REG;
+	strncpy(msg->mText, cmd, strlen(cmd));
+	send_message(PID_KCD, msg);
+
+}

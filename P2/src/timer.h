@@ -13,5 +13,6 @@ extern uint32_t timer_init ( uint8_t n_timer );  /* initialize timer n_timer */
 void timer_i_process(void);
 void expire_list_queue(MSG_T *msg);
 extern int handle_blocked_process_ready(PROC_STATE_E state);
+uint32_t get_timer_count(void); /* getter of current time */
 
 #endif /* ! _TIMER_H_ */

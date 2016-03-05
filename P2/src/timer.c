@@ -151,3 +151,7 @@ void expire_list_queue(MSG_T *msg){
 	msg->msg_delay = g_timer_count + msg->msg_delay;
 	queue_add(&sorted_list, (queue_node*) msg);
 }
+
+uint32_t get_timer_count(void){
+	return g_timer_count;
+}

@@ -109,7 +109,7 @@ int handle_msg_blocked_process_ready(PCB* receiver_pcb){
 
 PCB * k_get_pcb_from_id (U32 process_id){
 	int i;
-	for ( i = 0; i < NUM_TEST_PROCS; i++ ) {
+	for ( i = 0; i < NUM_TOTAL_PROCS; i++ ) {
 		if ((gp_pcbs[i])->m_pid == process_id){ //find process with id process_id
 			return (gp_pcbs[i]); //return priority of found process
 		}

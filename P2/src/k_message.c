@@ -91,10 +91,7 @@ int k_send_message(int receiver_pid, void *message_envelope)
 		return RTX_ERR;
 	}
 	message = (MSG_T*)message_envelope;
-	if (receiver_pid < NUM_TEST_PROCS){ // sending to kernel proc not allowed
-		__enable_irq();
-		return RTX_ERR;
-	}
+
 	receiver_pcb = k_get_pcb_from_id ((U32) receiver_pid);
 	if (receiver_pcb == NULL){
 		__enable_irq();
@@ -195,10 +192,7 @@ int k_delayed_send(int receiver_pid, void *message_envelope, int delay){
 		__enable_irq();
 		return RTX_ERR;
 	}
-	if (receiver_pid < NUM_TEST_PROCS){ // sending to kernel proc not allowed
-		__enable_irq();
-		return RTX_ERR;
-	}
+	
 	pcb = k_get_pcb_from_id ((U32) receiver_pid);
 	if (pcb == NULL){
 		__enable_irq();

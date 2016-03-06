@@ -109,10 +109,18 @@ void print_receive_log_buffer(void){
 
 int k_send_message(int receiver_pid, void *message_envelope)
 {
+	
 	PCB * receiver_pcb;
 	MSG_BUF* message;
 	PCB * current_process;
+	#ifdef DEBUG_0
+        printf("Entering k_send_message\r\n");
+  #endif /* DEBUG_0 */
 	__disable_irq();
+	
+	#ifdef DEBUG_0
+        printf("k_send_message: irq disabled\r\n");
+  #endif /* DEBUG_0 */
 	current_process = k_get_current_process();
 	if (message_envelope == NULL){
 		__enable_irq();
@@ -145,23 +153,25 @@ int k_send_message_nonpreempt(U32 receiver_pid, void *message_envelope)
 {
 	PCB * receiver_pcb;
 	MSG_BUF* message;
-	PCB * current_process;
+	//PCB * current_process;
 
 	message = (MSG_BUF*)message_envelope;
-	current_process = k_get_current_process();
+	//current_process = k_get_current_process();
 
 	receiver_pcb = k_get_pcb_from_id ((U32) receiver_pid);
 	if (receiver_pcb == NULL){
 		return RTX_ERR;
 	}
 	
-	message->sender_pid = current_process->m_pid;
+	// comment out sender_pid because delay send may have a different current running process 
+	// this function is also used in uart_irq, not sure if this hack works, keep that in mind
+	//message->sender_pid = current_process->m_pid;
 	message->receiver_pid = receiver_pid;
 	message->mp_next = NULL;
 	
 	message_enque(receiver_pcb, message);
 	
-	return handle_blocked_process_ready(MSG_BLOCKED);
+	return handle_msg_blocked_process_ready(receiver_pcb);
 }
 
 // Note: sender_id is an output parameter
@@ -169,7 +179,13 @@ void* k_receive_message(int *sender_id)
 {
 	MSG_BUF* message;
 	PCB * current_process;
+	#ifdef DEBUG_0
+        printf("Entering k_receive_message\r\n");
+  #endif /* DEBUG_0 */
 	__disable_irq();
+	#ifdef DEBUG_0
+        printf("k_receive_message: irq disabled\r\n");
+  #endif /* DEBUG_0 */
 	current_process = k_get_current_process();
 	while (current_process->msg_queue == NULL){
 		//Setting state to msg blocked will cause scheduler to put process in blocked queue
@@ -196,8 +212,16 @@ int k_delayed_send(int receiver_pid, void *message_envelope, int delay){
 	MSG_BUF* message;
 	PCB * current_process;
 	PCB * pcb;
+	#ifdef DEBUG_0
+        printf("Entering k_delayed_send\r\n");
+  #endif /* DEBUG_0 */
 	
 	__disable_irq();
+	
+	#ifdef DEBUG_0
+        printf("k_delayed_send: irq disabled\r\n");
+  #endif /* DEBUG_0 */
+	
 	if (message_envelope == NULL){
 		__enable_irq();
 		return RTX_ERR;

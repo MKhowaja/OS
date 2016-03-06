@@ -63,9 +63,9 @@ void set_test_procs() {
 	g_test_procs[5].mpf_start_pc = &proc_p2_6;
 	g_test_procs[5].m_priority   = LOWEST;
 	
-	g_test_procs[6].m_pid = PID_CLOCK;
-  g_test_procs[6].m_priority = LOWEST;// HIGH;
-  g_test_procs[6].mpf_start_pc = &clock_proc;
+	//g_test_procs[6].m_pid = PID_CLOCK;
+  //g_test_procs[6].m_priority = LOWEST;// HIGH;
+  //g_test_procs[6].mpf_start_pc = &clock_proc;
 	
 	uart1_init();
 }
@@ -280,14 +280,14 @@ context switch
 
 void proc_p2_1(void) {
 	MSG_BUF *msg = NULL;
-	char* send_msg = "Blah1";
-	char* receive_msg;
-	char* endptr;
-	int* sender_id;
+	char send_msg[6] = "Blah1";
+	char receive_msg[6];
+//	char* endptr;
+	int sender_id;
 	
-	#ifdef DEBUG_0
-		 printf("%ld\n", strtoimax(" -123junk",&endptr,10));
-	#endif /* DEBUG_0 */
+	//#ifdef DEBUG_0
+		 //printf("%ld\n", strtoimax(" -123junk",&endptr,10));
+	//#endif /* DEBUG_0 */
 	
 	msg = (MSG_BUF *) request_memory_block();
 	strncpy(msg->mtext, send_msg, strlen(send_msg)+1);
@@ -298,9 +298,9 @@ void proc_p2_1(void) {
 	#endif /* DEBUG_0 */
 	send_message(PID_P3,msg);
 	
-	msg = (MSG_BUF*) receive_message(sender_id);
+	msg = (MSG_BUF*) receive_message(&sender_id);
 	#ifdef DEBUG_0
-		printf("proc2 got message from proc %d : %s",(*sender_id), msg->mtext);
+		printf("proc2 got message from proc %d : %s",(sender_id), msg->mtext);
 	#endif /* DEBUG_0 */
 	strncpy(receive_msg, msg->mtext, strlen(msg->mtext)+1);
 	
@@ -325,8 +325,9 @@ block since try to recieve after delay send
 void proc_p2_2(void) {
 
 	MSG_BUF *msg = NULL;
-	char* send_msg = "Blah2";
-	char* receive_msg;
+	char send_msg[6] = "Blah2";
+	char receive_msg[6];
+	int sender_id;
 	
 	msg = (MSG_BUF *) request_memory_block();
 	strncpy(msg->mtext,send_msg,strlen(send_msg)+1);
@@ -337,7 +338,7 @@ void proc_p2_2(void) {
 		printf("proc2 send message to itself: %s", msg->mtext);
 	#endif /* DEBUG_0 */
 	
-	msg = receive_message(NULL);
+	msg = receive_message(&sender_id);
 	#ifdef DEBUG_0
 		printf("proc2 got message from itself: %s", msg->mtext);
 	#endif /* DEBUG_0 */
@@ -363,13 +364,13 @@ send msg to proc4
 */
 void proc_p2_3(void) {
 	MSG_BUF *msg = NULL;
-	char* send_msg = "Blah3";
-	char* receive_msg;
-	int* sender_id;
+	char send_msg[6] = "Blah3";
+	char receive_msg[6];
+	int sender_id;
 	
-	msg = (MSG_BUF*)receive_message(sender_id);
+	msg = (MSG_BUF*)receive_message(&sender_id);
 	#ifdef DEBUG_0
-		printf("proc3 got message from proc %d : %s",(*sender_id), msg->mtext);
+		printf("proc3 got message from proc %d : %s",(sender_id), msg->mtext);
 	#endif /* DEBUG_0 */
 	strncpy(receive_msg, msg->mtext, 6);
 	
@@ -401,13 +402,13 @@ switch to proc
 */
 void proc_p2_4(void) {
 	MSG_BUF *msg = NULL;
-	char* send_msg = "Blah4";
-	char* receive_msg;
-	int* sender_id;
+	char send_msg[6] = "Blah4";
+	char receive_msg[6];
+	int sender_id;
 	
-	msg = receive_message(sender_id);
+	msg = receive_message(&sender_id);
 	#ifdef DEBUG_0
-		printf("proc4 got message from proc %d : %s",(*sender_id), msg->mtext);
+		printf("proc4 got message from proc %d : %s",(sender_id), msg->mtext);
 	#endif /* DEBUG_0 */
 	strncpy(receive_msg, msg->mtext, strlen(msg->mtext)+1);
 	
@@ -455,7 +456,11 @@ void proc_p2_5(void) {
 
 
 void proc_p2_6(void) {
-    
+    while(1){
+			uart1_put_string("proc6 says yooo \r\n");
+			
+			release_processor();
+		}
     
 }
 
@@ -473,7 +478,7 @@ void clock_proc(void){
     int minute;
     int sec;
     int running;
-    char* cmd = "%w";
+    char cmd[3] = "%w";
 
     int buf_size;
     char buf[100];

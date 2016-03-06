@@ -137,10 +137,15 @@ U32 *alloc_stack(U32 size_b)
 void *k_request_memory_block(void) {
 	MemNode* memory_block;
 #ifdef DEBUG_0 
-	printf("k_request_memory_block: entering...\n");
+	printf("k_request_memory_block: entering...\r\n");
 #endif /* ! DEBUG_0 */
 	// atomic ( on ) ;
 	__disable_irq();
+	
+	#ifdef DEBUG_0 
+	printf("k_request_memory_block: irq disabled\r\n");
+#endif /* ! DEBUG_0 */
+	
 	// while ( no memory block is available ) {
 	while(mem_list.first == NULL){
 		// set the state to block so scheduler will handle it
@@ -166,7 +171,7 @@ void *k_request_memory_block(void) {
 void *k_request_memory_block_nonpreempt(void) {
 	MemNode* memory_block;
 #ifdef DEBUG_0 
-	printf("k_request_memory_block_nonpreempt: entering...\n");
+	printf("k_request_memory_block_nonpreempt: entering...\r\n");
 #endif /* ! DEBUG_0 */
 
 	// while ( no memory block is available ) just return {
@@ -191,12 +196,16 @@ int k_release_memory_block(void *p_mem_blk) {
 	MemNode* free_memory_node;
 	MemNode* mem_traverse;
 #ifdef DEBUG_0 
-	printf("k_release_memory_block: releasing block @ 0x%x\n", p_mem_blk);
+	printf("k_release_memory_block: releasing block @ 0x%x\r\n", p_mem_blk);
 #endif /* ! DEBUG_0 */
 	
 
 // 	// atomic ( on ) ;
  	__disable_irq();
+	
+	#ifdef DEBUG_0 
+	printf("k_release_memory_block: irq_disabled @ 0x%x\r\n", p_mem_blk);
+#endif /* ! DEBUG_0 */
 
 // 	// if ( memory block pointer is not valid )
 // 	// return ERROR_CODE ;
@@ -240,7 +249,7 @@ int k_release_memory_block_nonpreempt(void *p_mem_blk) {
 	MemNode* free_memory_node;
 	MemNode* mem_traverse;
 #ifdef DEBUG_0 
-	printf("k_release_memory_block_nonpreempt: releasing block @ 0x%x\n", p_mem_blk);
+	printf("k_release_memory_block_nonpreempt: releasing block @ 0x%x\r\n", p_mem_blk);
 #endif /* ! DEBUG_0 */
 
 	if (!(p_end <= p_mem_blk && p_mem_blk < gp_stack && ((U32)p_mem_blk - (U32)p_end) % SZ_MEM_BLK == 0)) {

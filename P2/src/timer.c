@@ -14,6 +14,7 @@
 
 volatile uint32_t g_timer_count = 0; // increment every 1 ms
 MSG_BUF* sorted_queue = NULL;
+int send_flag;
 
 /**
  * @brief: initialize timer. Only timer 0 is supported
@@ -105,6 +106,7 @@ __asm void TIMER0_IRQHandler(void)
 {
 	/*having problem here which disables irq
 	in receive message*/
+	
 	CPSID i //disable irq
 	PRESERVE8
 	IMPORT c_TIMER0_IRQHandler
@@ -112,6 +114,7 @@ __asm void TIMER0_IRQHandler(void)
 	BL c_TIMER0_IRQHandler
 	CPSIE i //enable irq
 	POP{r4-r11, pc}
+	
 } 
 /**
  * @brief: c TIMER0 IRQ Handler
@@ -125,15 +128,19 @@ void c_TIMER0_IRQHandler(void)
 }
 
 void timer_i_process(void) {
+	//PCB * current_process;
+	//PCB *	receiver_process;
 	MSG_BUF* message_to_send;
 	int target_pid;
-	int send_flag = 0;
-
+	//int send_flag = 0;
+	send_flag = 0;
 	// current_message = k_receive_message(NULL);
 	// while (current_message!=NULL){
 	// 	queue_add(&sorted_list, (queue_node*) current_message);
 	// 	current_message = k_receive_message(NULL);
 	// }
+	
+	//current_process = k_get_current_process();
 	
 	while (sorted_queue!= NULL && sorted_queue-> msg_delay <= g_timer_count){
 		message_to_send = sorted_queue;

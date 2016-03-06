@@ -29,4 +29,7 @@ void stress_test_proc_b(void);
 void stress_test_proc_c(void);
 
 
+//wall clock user test process
+void clock_proc(void);
+
 #endif /* USR_PROC_H_ */

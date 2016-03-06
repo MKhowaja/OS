@@ -16,7 +16,7 @@
 #define NULL 0
 
 #define NUM_KERNEL_PROCS 5
-#define NUM_TEST_PROCS 6
+#define NUM_TEST_PROCS 7
 #define NUM_TOTAL_PROCS NUM_KERNEL_PROCS+NUM_TEST_PROCS
 
 #define KEY_READY '!'

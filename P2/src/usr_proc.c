@@ -38,6 +38,12 @@ void set_test_procs() {
     
     g_test_procs[5].mpf_start_pc = &proc6;
     g_test_procs[5].m_priority   = LOWEST;
+
+    g_test_procs[6].m_pid = PID_CLOCK;
+    g_test_procs[6].m_priority = HIGH;
+    g_test_procs[6].mpf_start_pc = &clock_proc;
+
+
     
     //g_test_procs[0].m_pid = PID_P1;  ;
     //g_test_procs[0].mpf_start_pc = &proc_p2_1;

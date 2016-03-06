@@ -204,11 +204,13 @@ int k_release_memory_block(void *p_mem_blk) {
 // 	// if ( memory block pointer is not valid )
 // 	// return ERROR_CODE ;
 	if (!(p_end <= p_mem_blk && p_mem_blk < gp_stack && ((U32)p_mem_blk - (U32)p_end) % SZ_MEM_BLK == 0)) {
+		__enable_irq();
     return RTX_ERR;
   }
 	mem_traverse = mem_list.first;
 	while (mem_traverse != NULL) {
 		if (mem_traverse == p_mem_blk){
+			__enable_irq();
 			return RTX_ERR;
 		}
 		mem_traverse = mem_traverse->next;

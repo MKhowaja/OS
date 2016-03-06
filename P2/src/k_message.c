@@ -171,7 +171,7 @@ void* k_receive_message(int *sender_id)
 	__disable_irq();
 	current_process = k_get_current_process();
 	while (current_process->m_msg_queue.length == 0){
-		//TODO VERA
+		//Setting state to msg blocked will cause scheduler to put process in blocked queue
 		current_process->m_state = MSG_BLOCKED;
 		__enable_irq();
 		k_release_processor();

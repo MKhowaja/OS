@@ -123,10 +123,10 @@ void process_init()
 	}
 	
 	for(i = NUM_TEST_PROCS; i < NUM_TOTAL_PROCS; i++){
-		g_proc_table[i].m_pid = k_test_procs[i].m_pid;
-		g_proc_table[i].m_stack_size = k_test_procs[i].m_stack_size;
-		g_proc_table[i].mpf_start_pc = k_test_procs[i].mpf_start_pc;
-		g_proc_table[i].m_priority = k_test_procs[i].m_priority;
+		g_proc_table[i].m_pid = k_test_procs[i-NUM_TEST_PROCS].m_pid;
+		g_proc_table[i].m_stack_size = k_test_procs[i-NUM_TEST_PROCS].m_stack_size;
+		g_proc_table[i].mpf_start_pc = k_test_procs[i-NUM_TEST_PROCS].mpf_start_pc;
+		g_proc_table[i].m_priority = k_test_procs[i-NUM_TEST_PROCS].m_priority;
 	}
   
 	/* initilize exception stack frame (i.e. initial context) for each process */
@@ -271,9 +271,11 @@ int k_set_process_priority(int process_id, int priority){
 					case RDY:
 						linkedList_remove(&ready_queue[old_priority], proc_to_set_priority);
 						ready_enqueue(proc_to_set_priority);
+						break;
 					case MEM_BLOCKED:
 						linkedList_remove(&block_queue[old_priority], proc_to_set_priority);
 						block_enqueue(proc_to_set_priority, proc_to_set_priority->m_state);
+						break;
 					default :
 						break;
 				}

@@ -421,6 +421,7 @@ void proc_p2_5(void) {
 		printf("Entering proc5, proc5 says hello\r\n");
 	#endif /* DEBUG_0 */
 
+	
 	p_mem_blk1 = request_memory_block();
 	#ifdef DEBUG_0
 		printf("proc3: p_mem_blk=0x%x\r\n", p_mem_blk1);

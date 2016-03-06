@@ -15,6 +15,7 @@
 #include "list.h"
 #include "string.h"
 #include "uart.h"
+#include <LPC17xx.h>
 
 #ifdef DEBUG_0
 #include "printf.h"
@@ -86,17 +87,19 @@ void nullProc (void){
 //response to crt 
 void crt(void){
     MSG_T* msg;
+		LPC_UART_TypeDef *pUart = (LPC_UART_TypeDef*)LPC_UART0;
 
     while(1){
-        msg = k_receive_message(NULL); //if current process message queue empty, calls release processor
+        msg = receive_message(NULL); //if current process message queue empty, calls release processor
         if(msg->msg_type == CRT_DIS){
         //send msg to uart_i_process
         //we need id of uart_i_process
-            k_send_message(PID_UART_IPROC, msg);
+            send_message(PID_UART_IPROC, msg);
+						pUart ->IER = pUart ->IER | IER_THRE;
         }
         else{
             //do nothing except releasing msg block	
-            k_release_memory_block(msg);
+            release_memory_block(msg);
         }
     }
 }
@@ -118,7 +121,7 @@ void kcd(void){
     }
 
     while (1) {
-        msg = k_receive_message(sender_id);
+        msg = receive_message(sender_id);
 
         if (msg->msg_type == DEFAULT) {
             msg_len = strlen(msg->mText);
@@ -140,7 +143,7 @@ void kcd(void){
                         msg = (MSGBUF*)request_memory_block();
                         msg->msg_type = DEFAULT;
                         strncpy(msg->mText, msg_data, msg_len);
-                        k_send_message(cmd_node->pid, msg);
+                        send_message(cmd_node->pid, msg);
                         break; //leave loop if found
                     }
                     list_traverse = list_traverse->next;
@@ -159,7 +162,7 @@ void kcd(void){
             msg_len = strlen(msg->mText);
             strncpy(cmd_node->cmd, msg->mText, msg_len);
             linkedList_push_front(&cmd_dict, (node*) cmd_node);
-            k_release_memory_block(msg);
+            release_memory_block(msg);
         }
     }
 }

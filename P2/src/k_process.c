@@ -215,7 +215,7 @@ PCB *scheduler(void){
 	//node *blocked_process_node;
 	//PCB *blocked_process;
 	int i;
-	if(gp_current_process != NULL && gp_current_process->m_state != MEM_BLOCKED){
+	if(gp_current_process != NULL && (gp_current_process->m_state != MEM_BLOCKED && gp_current_process->m_state != MSG_BLOCKED)){
 		gp_current_process->m_state = RDY;
 		ready_enqueue(gp_current_process);
 	} // current process was set to block on memory, should be in block queue

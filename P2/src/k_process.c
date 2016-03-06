@@ -178,8 +178,9 @@ void process_init()
 	/* initilize exception stack frame (i.e. initial context) for each process */
 	for ( i = 0; i < NUM_TOTAL_PROCS; i++ ) {
 		int j;
-		gp_pcbs[i]->m_pid = g_proc_table[i].m_pid;
 		gp_pcbs[i]->m_state = NEW;
+		gp_pcbs[i]->m_pid = g_proc_table[i].m_pid;
+		
 		gp_pcbs[i]->m_priority = g_proc_table[i].m_priority;
 		linkedList_init(&gp_pcbs[i]->m_msg_queue);
 		sp = alloc_stack((g_proc_table[i]).m_stack_size);

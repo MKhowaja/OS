@@ -65,6 +65,7 @@ extern PCB* gp_current_process;
 void memory_init(void)
 {
 	int i;
+	int num_total_procs;
 	U32 current_heap_location;
 	MemNode* new_memory_node;
 	p_end = (U8 *)&Image$$RW_IRAM1$$ZI$$Limit;
@@ -74,6 +75,7 @@ void memory_init(void)
 
 	/* allocate memory for pcb pointers   */
 	gp_pcbs = (PCB **)p_end;
+	num_total_procs = NUM_TOTAL_PROCS;
 	p_end += NUM_TOTAL_PROCS * sizeof(PCB *);
   
 	for ( i = 0; i < NUM_TOTAL_PROCS; i++ ) {

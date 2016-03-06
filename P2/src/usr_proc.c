@@ -2,6 +2,7 @@
 #include "uart_polling.h"
 #include "usr_proc.h"
 #include "string.h"
+#include <stdlib.h>
 
 #ifdef DEBUG_0
 #include "printf.h"
@@ -63,9 +64,9 @@ void set_test_procs() {
 	g_test_procs[5].mpf_start_pc = &proc_p2_6;
 	g_test_procs[5].m_priority   = LOWEST;
 	
-	//g_test_procs[6].m_pid = PID_CLOCK;
-  //g_test_procs[6].m_priority = LOWEST;// HIGH;
-  //g_test_procs[6].mpf_start_pc = &clock_proc;
+	g_test_procs[6].m_pid = PID_CLOCK;
+  g_test_procs[6].m_priority = HIGH;
+  g_test_procs[6].mpf_start_pc = &clock_proc;
 	
 	uart1_init();
 }
@@ -480,6 +481,8 @@ void clock_proc(void){
     int running;
     char cmd[3] = "%w";
 
+    char buf_to_int[3];
+
     int buf_size;
     char buf[100];
     buf_size = 100;
@@ -548,9 +551,23 @@ void clock_proc(void){
                 running = 1;
             }
             else if(buf[2] == 'W'){
-                hour =0;// substring_toi(&buf[4], 2);
-                minute=0;// = substring_toi(&buf[7], 2);
-                //sec += substring_toi(&buf[10], 2);
+                // 0 1 2 3 4 5 6 7 8 9 A B
+                // % W S _ H H : M M : S S
+                buf_to_int[0] = buf[4];
+                buf_to_int[1] = buf[5]; 
+                buf_to_int[2] = '\0';
+                hour = atoi(buf_to_int);
+
+                buf_to_int[0] = buf[7];
+                buf_to_int[1] = buf[8];
+                buf_to_int[2] = '\0';
+
+                minute = atoi(buf_to_int);
+
+                buf_to_int[0] = buf[10];
+                buf_to_int[1] = buf[11];
+                buf_to_int[2] = '\0';
+                sec = atoi(buf_to_int);
 
                 track_time = hour * 3600 + minute * 60 + sec;
 

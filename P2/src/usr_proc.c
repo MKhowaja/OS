@@ -1,6 +1,7 @@
 #include "rtx.h"
 #include "uart_polling.h"
 #include "usr_proc.h"
+#include "string.h"
 
 #ifdef DEBUG_0
 #include "printf.h"
@@ -8,14 +9,18 @@
 
 /* initialization table item */
 PROC_INIT g_test_procs[NUM_TEST_PROCS];
+int passed_test[NUM_TEST_PROCS];
 
 void set_test_procs() {
 	int i;
 	for( i = 0; i < NUM_TEST_PROCS; i++ ) {
 		g_test_procs[i].m_pid=(U32)(i+1);
 		g_test_procs[i].m_stack_size=0x200;
+		passed_test[i] = 0;
 	}
+	passed_test[5] = 1;
   
+	
 	g_test_procs[0].mpf_start_pc = &proc1;
 	g_test_procs[0].m_priority   = HIGH;
 	
@@ -33,6 +38,30 @@ void set_test_procs() {
 	
 	g_test_procs[5].mpf_start_pc = &proc6;
 	g_test_procs[5].m_priority   = LOWEST;
+	
+	//g_test_procs[0].m_pid = PID_P1;  ;
+	//g_test_procs[0].mpf_start_pc = &proc_p2_1;
+	//g_test_procs[0].m_priority   = HIGH;
+	
+	//g_test_procs[1].m_pid = PID_P2;
+	//g_test_procs[1].mpf_start_pc = &proc_p2_2;
+	//g_test_procs[1].m_priority   = MEDIUM;
+	
+	//g_test_procs[2].m_pid = PID_P3;
+	//g_test_procs[2].mpf_start_pc = &proc_p2_3;
+	//g_test_procs[2].m_priority   = MEDIUM;
+	
+	//g_test_procs[3].m_pid = PID_P4;
+	//g_test_procs[3].mpf_start_pc = &proc_p2_4;
+	//g_test_procs[3].m_priority   = LOW;
+	
+	//g_test_procs[4].m_pid = PID_P5;
+	//g_test_procs[4].mpf_start_pc = &proc_p2_5;
+	//g_test_procs[4].m_priority   = LOW;
+	
+	//g_test_procs[5].m_pid= PID_P6;
+	//g_test_procs[5].mpf_start_pc = &proc_p2_6;
+	//g_test_procs[5].m_priority   = LOWEST;
 	
 	uart1_init();
 }
@@ -200,7 +229,8 @@ void proc4(void)
 	}
 }
 
-void proc5(){
+void proc5()
+{
 	#ifdef DEBUG_0
 		printf("Entering proc5\r\n");
 	#endif
@@ -233,9 +263,170 @@ void proc6(void)
 	}
 }
 
+/*
+proc1:
+HIGH
+send msg ti proc2
+receive msg from proc#
+get blocked until get message
+release msg
+set priority to lowest
+context switch
+*/
+
+void proc_p2_1(void) {
+	MSGBUF *msg = NULL;
+	char* send_msg = "Blah1";
+	char* receive_msg;
+	int* sender_id;
+	
+	msg = request_memory_block();
+	strncpy(msg->mText, send_msg, strlen(send_msg));
+	
+	#ifdef DEBUG_0
+		printf("proc2 send message to proc %d : %s" , PID_P3, msg->mText);
+	#endif /* DEBUG_0 */
+	send_message(PID_P3,msg);
+	
+	msg = (MSGBUF*) receive_message(sender_id);
+	#ifdef DEBUG_0
+		printf("proc2 got message from proc %d : %s",(*sender_id), msg->mText);
+	#endif /* DEBUG_0 */
+	strncpy(receive_msg, msg->mText, strlen(msg->mText));
+	
+	release_memory_block(msg);
+	msg = NULL;
+	set_process_priority(PID_P1, LOWEST);
+	
+	while(1) {
+		uart1_put_string("proc1: \r\n");
+		release_processor();
+	}
+	
+}
+
+/*
+Proc2:
+MEDIUM
+use delay_send to itself
+delay 1 second
+block since try to recieve after delay send
+*/
+void proc_p2_2(void) {
+	MSGBUF *msg = NULL;
+	char* send_msg = "Blah2";
+	char* receive_msg;
+	
+	
+	msg = (MSGBUF *) request_memory_block();
+	strncpy(msg->mText,send_msg,strlen(send_msg));
+	
+	delayed_send(PID_P2,msg,1000);
+	#ifdef DEBUG_0
+		printf("proc2 send message to itself: %s", msg->mText);
+	#endif /* DEBUG_0 */
+	
+	msg = receive_message(NULL);
+	#ifdef DEBUG_0
+		printf("proc2 got message from itself: %s", msg->mText);
+	#endif /* DEBUG_0 */
+	strncpy(receive_msg,msg->mText,strlen(msg->mText));
+	release_memory_block(msg);
+	
+	//verify receive_msg == send_msg
+	while(1) {
+		uart1_put_string("proc2: \r\n");
+		release_processor();
+	}
+}
+
+/*
+reciver message from proc1, doesn't block
+set proc2 prority to LOW
+proc4 get run
+send msg to proc4
+
+
+*/
+void proc_p2_3(void) {
+	MSGBUF *msg = NULL;
+	char* send_msg = "Blah3";
+	char* receive_msg;
+	int* sender_id;
+	
+	msg = receive_message(sender_id);
+	#ifdef DEBUG_0
+		printf("proc3 got message from proc %d : %s",(*sender_id), msg->mText);
+	#endif /* DEBUG_0 */
+	strncpy(receive_msg, msg->mText, strlen(msg->mText));
+	
+	set_process_priority(PID_P2, LOW);
+	
+	strncpy(msg->mText, send_msg, strlen(send_msg));
+	#ifdef DEBUG_0
+		printf("proc3 send message to itself: %s", msg->mText);
+	#endif /* DEBUG_0 */
+	send_message(PID_P4, msg);
+	
+	set_process_priority(PID_P3, LOWEST);
+	
+	while(1) {
+		uart1_put_string("proc3: \r\n");
+		release_processor();
+	}
+	
+}
+
+/*
+Proc4:
+receive message, message comes from proc3
+block
+proc3 get run
+send message to proc1
+switch to proc
+
+*/
+void proc_p2_4(void) {
+	MSGBUF *msg = NULL;
+	char* send_msg = "Blah4";
+	char* receive_msg;
+	int* sender_id;
+	
+	msg = receive_message(sender_id);
+	#ifdef DEBUG_0
+		printf("proc4 got message from proc %d : %s",(*sender_id), msg->mText);
+	#endif /* DEBUG_0 */
+	strncpy(receive_msg, msg->mText, strlen(msg->mText));
+	
+	strncpy(msg->mText, send_msg, strlen(send_msg));
+	#ifdef DEBUG_0
+		printf("proc4 send message to proc %d : %s" , PID_P3, msg->mText);
+	#endif /* DEBUG_0 */
+	send_message(PID_P1, msg);
+	
+	
+	set_process_priority(PID_P4, LOWEST);
+	while(1) {
+		uart1_put_string("proc4: \r\n");
+		release_processor();
+	}	
+}
+
+void proc_p2_5(void) {
+	
+	
+}
+
+
+void proc_p2_6(void) {
+	
+	
+}
+
 
 void clock_proc(void){
 	MSGBUF* read_msg;
+	MSGBUF* msg;
 	int sender_id;
 	int i;
 	char* cmd = "%w";
@@ -245,7 +436,7 @@ void clock_proc(void){
 	buf_size = 100;
 
 
-	MSGBUF* msg = (MSGBUF*)request_memory_block();
+	msg = (MSGBUF*)request_memory_block();
 
 	//reg cmd
 	msg->msg_type = KCD_REG;
@@ -259,11 +450,30 @@ void clock_proc(void){
 		}
 		//read msg
 		read_msg = receive_message(&sender_id);
-		strncpy(read_buf, read_msg->mText, buffer_size);
+		strncpy(read_buf, read_msg->mText, buf_size);
 
 		if( strlen(read_buf) < 3 || read_buf[0] != cmd[0] ||  read_buf[1] != cmd[1]){
 			//do nothing, next
 			continue;
+		}
+		
+		switch(read_buf[2]){
+			case 'R': {
+				
+				
+			}
+			
+			case 'W': {
+				
+				
+			}
+			
+			case 'T': {
+				
+				
+			}
+			
+			
 		}
 
 

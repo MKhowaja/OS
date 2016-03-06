@@ -1,5 +1,6 @@
 #include "k_message.h"
 #include "k_process.h"
+#include "string.h"
 #ifdef DEBUG_0
 #include "printf.h"
 #include "timer.h"
@@ -60,8 +61,9 @@ void print_send_log_buffer(void){
 	}
 }
 
+
 void print_receive_log_buffer(void){
-	int j;
+	int i;
 	for (i = 0; i < NUM_MSG_BUFFERED; i++){
 		if (receive_log_buffer[i].timestamp != NOT_SET){
 			printf("Sender pid: %d, Receiver pid: %d, Message type: %d, First 16 bytes: %s, timestamp: %d \r\n", 
@@ -135,6 +137,11 @@ int k_send_message_nonpreempt(U32 receiver_pid, void *message_envelope)
 	message = (MSG_T*)message_envelope;
 	current_process = k_get_current_process();
 
+	pcb = k_get_pcb_from_id ((U32) receiver_pid);
+	if (pcb == NULL){
+		return RTX_ERR;
+	}
+	
 	message->sender_pid = current_process->m_pid;
 	message->receiver_pid = receiver_pid;
 	

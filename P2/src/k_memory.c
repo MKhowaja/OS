@@ -164,6 +164,30 @@ void *k_request_memory_block(void) {
 	return (void *)memory_block;
 }
 
+void *k_request_memory_block_nonpreempt(void) {
+	MemNode* memory_block;
+#ifdef DEBUG_0 
+	printf("k_request_memory_block_nonpreempt: entering...\n");
+#endif /* ! DEBUG_0 */
+
+	// while ( no memory block is available ) just return {
+	if(mem_list.first == NULL){
+		return NULL;
+	}
+	memory_block = mem_list.first;
+	// update the heap ;
+	if (mem_list.first == mem_list.last){
+		mem_list.first = NULL;
+		mem_list.last = NULL;
+	}
+	else {
+		mem_list.first = mem_list.first->next;
+	}
+
+	return (void *)memory_block;
+}
+
+
 int k_release_memory_block(void *p_mem_blk) {
 	MemNode* free_memory_node;
 	MemNode* mem_traverse;

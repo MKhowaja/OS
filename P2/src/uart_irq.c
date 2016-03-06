@@ -250,7 +250,7 @@ void uart_i_process(){
 			pUart->THR = '\0';
 
 			// prepare message to kcd to decode
-			msg = (MSGBUF*)k_request_memory_block();
+			msg = (MSGBUF*) k_request_memory_block_nonpreempt();
       if (msg == NULL) {
 				return; //probably shouldn't happen
 			}

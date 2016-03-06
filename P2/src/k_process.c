@@ -171,18 +171,18 @@ void process_init()
 	}
 	
 	for(i = NUM_TEST_PROCS; i < NUM_TOTAL_PROCS; i++){
-		g_proc_table[i].m_pid = k_test_procs[i].m_pid;
-		g_proc_table[i].m_stack_size = k_test_procs[i].m_stack_size;
-		g_proc_table[i].mpf_start_pc = k_test_procs[i].mpf_start_pc;
-		g_proc_table[i].m_priority = k_test_procs[i].m_priority;
+		g_proc_table[i].m_pid = k_test_procs[i-NUM_TEST_PROCS].m_pid;
+		g_proc_table[i].m_stack_size = k_test_procs[i-NUM_TEST_PROCS].m_stack_size;
+		g_proc_table[i].mpf_start_pc = k_test_procs[i-NUM_TEST_PROCS].mpf_start_pc;
+		g_proc_table[i].m_priority = k_test_procs[i-NUM_TEST_PROCS].m_priority;
 	}
   
 	/* initilize exception stack frame (i.e. initial context) for each process */
 	for ( i = 0; i < NUM_TOTAL_PROCS; i++ ) {
 		int j;
-		(gp_pcbs[i])->m_pid = (g_proc_table[i]).m_pid;
-		(gp_pcbs[i])->m_state = NEW;
-		(gp_pcbs[i])->m_priority = (g_proc_table[i]).m_priority;
+		gp_pcbs[i]->m_pid = g_proc_table[i].m_pid;
+		gp_pcbs[i]->m_state = NEW;
+		gp_pcbs[i]->m_priority = g_proc_table[i].m_priority;
 		linkedList_init(&gp_pcbs[i]->m_msg_queue);
 		sp = alloc_stack((g_proc_table[i]).m_stack_size);
 		*(--sp)  = INITIAL_xPSR;      // user process initial xPSR  

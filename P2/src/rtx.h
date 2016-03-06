@@ -26,6 +26,7 @@
 #define LOWEST  3
 
 /* Process IDs */
+/*
 #define PID_NULL 					0	
 #define PID_CLOCK  				1
 #define PID_UART_IPROC   	2
@@ -42,6 +43,27 @@
 #define PID_A    11
 #define PID_B    12
 #define PID_C    13
+*/
+
+/* Process IDs */
+#define PID_NULL 0
+#define PID_P1   1
+#define PID_P2   2
+#define PID_P3   3
+#define PID_P4   4
+#define PID_P5   5
+#define PID_P6   6
+#define PID_A    7
+#define PID_B    8
+#define PID_C    9
+#define PID_SET_PRIO     10
+#define PID_CLOCK        11
+#define PID_KCD          12
+#define PID_CRT          13
+#define PID_TIMER_IPROC  14
+#define PID_UART_IPROC   15
+
+
 
 #define DEFAULT 0
 #define KCD_REG 1
@@ -116,10 +138,9 @@ extern void *k_receive_message(int *p_pid);
 extern void *_receive_message(U32 p_func, void *p_pid) __SVC_0;
 
 /* Timing Service */
-// extern int k_delayed_send(int pid, void *p_msg, int delay);
-// #define delayed_send(pid, p_msg, delay) _delayed_send((U32)k_delayed_send, pid, p_msg, delay)
-// extern int _delayed_send(U32 p_func, int pid, void *p_msg, int delay) __SVC_0;  
-// #endif /* !RTX_H_ */
+extern int k_delayed_send(int pid, void *p_msg, int delay);
+#define delayed_send(pid, p_msg, delay) _delayed_send((U32)k_delayed_send, pid, p_msg, delay)
+extern int _delayed_send(U32 p_func, int pid, void *p_msg, int delay) __SVC_0;  
 
 
 #endif /* !RTX_H_ */

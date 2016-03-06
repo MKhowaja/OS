@@ -40,7 +40,7 @@ void set_kernel_procs() {
         msg_data[i] = '\0';
     }
     //TODO REMOVE I PROCESSES FROM SCHEDULER
-    k_test_procs[0].m_pid = 0;
+    k_test_procs[0].m_pid = PID_NULL;
     k_test_procs[0].m_stack_size = 0X100;
     k_test_procs[0].mpf_start_pc = &nullProc;
     k_test_procs[0].m_priority = 4;//LOWEST;
@@ -48,23 +48,23 @@ void set_kernel_procs() {
     k_test_procs[0].mpf_start_pc = &nullProc;
     //add timer i process to k_test_procs
 
-    k_test_procs[1].m_pid = 1;
+    k_test_procs[1].m_pid = PID_TIMER_IPROC;
     k_test_procs[1].m_stack_size = 0X100;
     k_test_procs[1].mpf_start_pc = &timer_i_process;
     k_test_procs[1].m_priority = 4;
 
-    k_test_procs[2].m_pid = 2;
+    k_test_procs[2].m_pid = PID_UART_IPROC;
     k_test_procs[2].m_stack_size = 0X100;
     k_test_procs[2].mpf_start_pc = &uart_i_process;
     k_test_procs[2].m_priority = 4;
 
     //i/o process has highest priority since you need response quick
-    k_test_procs[3].m_pid = 3;
+    k_test_procs[3].m_pid = PID_KCD;
     k_test_procs[3].m_stack_size = 0X100;
     k_test_procs[3].mpf_start_pc = &kcd;
     k_test_procs[3].m_priority = HIGH;
 
-    k_test_procs[4].m_pid = 4;
+    k_test_procs[4].m_pid = PID_CRT;
     k_test_procs[4].m_stack_size = 0X100;
     k_test_procs[4].mpf_start_pc = &crt;
     k_test_procs[4].m_priority = HIGH;

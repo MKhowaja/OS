@@ -118,7 +118,7 @@ typedef struct log_msg_t
 	int sender_pid;				/* sender process id*/
 	int receiver_pid;			/* receiver process id */
 	int msg_type;				/* message type */
-	uint32_t timestamp;				/* The time stamp of the transaction (using the RTX clock) */
+	U32 timestamp;				/* The time stamp of the transaction (using the RTX clock) */
 	char mText[17];				/* message data */
 } LOG_MSG_T;
 

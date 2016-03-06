@@ -16,4 +16,17 @@ void proc4(void);
 void proc5(void);
 void proc6(void);
 
+
+void proc_p2_1(void);
+void proc_p2_2(void);
+void proc_p2_3(void);
+void proc_p2_4(void);
+void proc_p2_5(void);
+void proc_p2_6(void);
+
+void stress_test_proc_a(void);
+void stress_test_proc_b(void);
+void stress_test_proc_c(void);
+
+
 #endif /* USR_PROC_H_ */

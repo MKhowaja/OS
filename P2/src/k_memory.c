@@ -145,9 +145,8 @@ void *k_request_memory_block(void) {
 	__disable_irq();
 	// while ( no memory block is available ) {
 	while(mem_list.first == NULL){
-		// put PCB on b l o c k e d _ r e s o u r c e _ q ;
+		// set the state to block so scheduler will handle it
 		gp_current_process->m_state = MEM_BLOCKED;
-		// set process state to B L O C K E D _ O N _ R E S O U R C E ;
 		__enable_irq();
 		k_release_processor();
 		__disable_irq();

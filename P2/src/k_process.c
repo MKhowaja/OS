@@ -325,6 +325,7 @@ int k_set_process_priority(int process_id, int priority){
 						ready_enqueue(proc_to_set_priority);
 						break;
 					case MEM_BLOCKED:
+					case MSG_BLOCKED:
 						linkedList_remove(&block_queue[old_priority], proc_to_set_priority);
 						block_enqueue(proc_to_set_priority, proc_to_set_priority->m_state);
 						break;

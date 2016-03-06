@@ -53,11 +53,11 @@ void set_test_procs() {
 	
 	g_test_procs[3].m_pid = PID_P4;
 	g_test_procs[3].mpf_start_pc = &proc_p2_4;
-	g_test_procs[3].m_priority   = LOW;
+	g_test_procs[3].m_priority   = MEDIUM;
 	
 	g_test_procs[4].m_pid = PID_P5;
 	g_test_procs[4].mpf_start_pc = &proc_p2_5;
-	g_test_procs[4].m_priority   = LOW;
+	g_test_procs[4].m_priority   = MEDIUM;
 	
 	g_test_procs[5].m_pid= PID_P6;
 	g_test_procs[5].mpf_start_pc = &proc_p2_6;

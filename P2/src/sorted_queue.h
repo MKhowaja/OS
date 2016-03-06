@@ -16,8 +16,8 @@ typedef struct {
 } queue;
 
 int queue_init(queue* list);
-int queue_add(queue* list, queue_node* new_node); //node has value to be inserted in sorted order
-queue_node* queue_pop_front(queue* list);
-queue_node* peek (queue* list);
+int queue_add(queue* list, void* data); //node has value to be inserted in sorted order
+void* queue_pop_front(queue* list);
+void* peek (queue* list);
 
 #endif

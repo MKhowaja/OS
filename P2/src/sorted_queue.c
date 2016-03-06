@@ -13,15 +13,17 @@ int queue_init(queue* list) {
     return 0;
 }
 
-int queue_add(queue* list, queue_node* new_node) {
+int queue_add(queue* list, void* data) {
 		queue_node* prevNode;
-		MSG_T* tempMessageNode;
-		MSG_T* newMessageNode;
+		queue_node* new_node;
+		MSG_BUF* tempMessageNode;
+		MSG_BUF* newMessageNode;
     if (list == NULL) {
         return 1;
     }
 		new_node->next = NULL;
 		new_node->prev = NULL;
+		new_node->value = data;
 		list->length++;
 		prevNode = list->first;
 		if (prevNode == NULL){
@@ -29,17 +31,17 @@ int queue_add(queue* list, queue_node* new_node) {
 				list->last = new_node;
 				return 0;
 		}
-		tempMessageNode = (MSG_T*) prevNode;
-		newMessageNode = (MSG_T*)new_node;
+		tempMessageNode = (MSG_BUF*) prevNode->value;
+		newMessageNode = (MSG_BUF*)new_node->value;
 		if (newMessageNode->msg_delay < tempMessageNode->msg_delay){
 				new_node->next = list->first;
 				list->first = new_node;
 		}
 		else {
-				tempMessageNode = (MSG_T*) prevNode->next;
+				tempMessageNode = (MSG_BUF*) prevNode->next->value;
 				while (tempMessageNode!=NULL && tempMessageNode->msg_delay < newMessageNode->msg_delay){
 						prevNode= prevNode->next;
-						tempMessageNode = (MSG_T*) prevNode->next;
+						tempMessageNode = (MSG_BUF*) prevNode->next->value;
 				}
 				new_node->next = prevNode->next;
 				prevNode->next = new_node;
@@ -51,7 +53,7 @@ int queue_add(queue* list, queue_node* new_node) {
     return 0;
 }
 
-queue_node* queue_pop_front(queue* list) {
+void* queue_pop_front(queue* list) {
 		queue_node* first_node;
     queue_node* second_node;
 
@@ -75,9 +77,9 @@ queue_node* queue_pop_front(queue* list) {
 
     list->length--;
 
-    return first_node;
+    return first_node->value;
 }
 
-queue_node* peek (queue* list) {
-		return list->first;
+void* peek (queue* list) {
+		return list->first->value;
 }

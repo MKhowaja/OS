@@ -9,5 +9,6 @@ timer.o: src\timer.h
 timer.o: src\sorted_queue.h
 timer.o: src\k_process.h
 timer.o: src\k_rtx.h
+timer.o: src\common.h
 timer.o: src\list.h
 timer.o: src\k_message.h

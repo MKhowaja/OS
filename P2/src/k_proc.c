@@ -86,12 +86,12 @@ void nullProc (void){
 
 //response to crt 
 void crt(void){
-    MSG_T* msg;
+    MSG_BUF* msg;
 		LPC_UART_TypeDef *pUart = (LPC_UART_TypeDef*)LPC_UART0;
 
     while(1){
         msg = receive_message(NULL); //if current process message queue empty, calls release processor
-        if(msg->msg_type == CRT_DIS){
+        if(msg->mtype == CRT_DISPLAY){
         //send msg to uart_i_process
         //we need id of uart_i_process
             send_message(PID_UART_IPROC, msg);
@@ -111,7 +111,7 @@ void kcd(void){
     int i;
     cmd_dict_node *cmd_node;
     int *sender_id;
-    MSGBUF* msg;
+    MSG_BUF* msg;
     char* itr;
     int msg_len;
     char buffer[10];
@@ -123,9 +123,9 @@ void kcd(void){
     while (1) {
         msg = receive_message(sender_id);
 
-        if (msg->msg_type == DEFAULT) {
-            msg_len = strlen(msg->mText);
-            strncpy(msg_data, msg->mText, msg_len);
+        if (msg->mtype == DEFAULT) {
+            msg_len = strlen(msg->mtext);
+            strncpy(msg_data, msg->mtext, msg_len);
             itr = msg_data;
             if (msg_data[0] == '%') {
                 while (*itr != ' ' && *itr != '\r') {
@@ -140,9 +140,9 @@ void kcd(void){
                 while (list_traverse!=NULL){
                     cmd_node = (cmd_dict_node*)list_traverse;
                     if (strcmp(cmd_node->cmd, buffer) > 0) {
-                        msg = (MSGBUF*)request_memory_block();
-                        msg->msg_type = DEFAULT;
-                        strncpy(msg->mText, msg_data, msg_len);
+                        msg = (MSG_BUF*)request_memory_block();
+                        msg->mtype = DEFAULT;
+                        strncpy(msg->mtext, msg_data, msg_len);
                         send_message(cmd_node->pid, msg);
                         break; //leave loop if found
                     }
@@ -157,10 +157,10 @@ void kcd(void){
                 msg_data[i] = '\0';
             }
             continue;
-        } else if (msg->msg_type == KCD_REG) {
+        } else if (msg->mtype == KCD_REG) {
             cmd_node->pid = *sender_id;
-            msg_len = strlen(msg->mText);
-            strncpy(cmd_node->cmd, msg->mText, msg_len);
+            msg_len = strlen(msg->mtext);
+            strncpy(cmd_node->cmd, msg->mtext, msg_len);
             linkedList_push_front(&cmd_dict, (node*) cmd_node);
             release_memory_block(msg);
         }

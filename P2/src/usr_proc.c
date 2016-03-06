@@ -275,24 +275,25 @@ context switch
 */
 
 void proc_p2_1(void) {
-	MSGBUF *msg = NULL;
+	MSG_BUF *msg = NULL;
 	char* send_msg = "Blah1";
 	char* receive_msg;
 	int* sender_id;
 	
-	msg = (MSGBUF *) request_memory_block();
-	strncpy(msg->mText, send_msg, strlen(send_msg));
+	msg = (MSG_BUF *) request_memory_block();
+	strncpy(msg->mtext, send_msg, strlen(send_msg)+1);
+	msg->mtype = DEFAULT;
 	
 	#ifdef DEBUG_0
-		printf("proc2 send message to proc %d : %s" , PID_P3, msg->mText);
+		printf("proc2 send message to proc %d : %s" , PID_P3, msg->mtext);
 	#endif /* DEBUG_0 */
 	send_message(PID_P3,msg);
 	
-	msg = (MSGBUF*) receive_message(sender_id);
+	msg = (MSG_BUF*) receive_message(sender_id);
 	#ifdef DEBUG_0
-		printf("proc2 got message from proc %d : %s",(*sender_id), msg->mText);
+		printf("proc2 got message from proc %d : %s",(*sender_id), msg->mtext);
 	#endif /* DEBUG_0 */
-	strncpy(receive_msg, msg->mText, strlen(msg->mText));
+	strncpy(receive_msg, msg->mtext, strlen(msg->mtext)+1);
 	
 	release_memory_block(msg);
 	msg = NULL;
@@ -313,23 +314,24 @@ delay 1 second
 block since try to recieve after delay send
 */
 void proc_p2_2(void) {
-	MSGBUF *msg = NULL;
+	MSG_BUF *msg = NULL;
 	char* send_msg = "Blah2";
 	char* receive_msg;
 	
-	msg = (MSGBUF *) request_memory_block();
-	strncpy(msg->mText,send_msg,strlen(send_msg));
+	msg = (MSG_BUF *) request_memory_block();
+	strncpy(msg->mtext,send_msg,strlen(send_msg)+1);
+	msg->mtype = DEFAULT;
 	
 	delayed_send(PID_P2,msg,1000);
 	#ifdef DEBUG_0
-		printf("proc2 send message to itself: %s", msg->mText);
+		printf("proc2 send message to itself: %s", msg->mtext);
 	#endif /* DEBUG_0 */
 	
 	msg = receive_message(NULL);
 	#ifdef DEBUG_0
-		printf("proc2 got message from itself: %s", msg->mText);
+		printf("proc2 got message from itself: %s", msg->mtext);
 	#endif /* DEBUG_0 */
-	strncpy(receive_msg,msg->mText,strlen(msg->mText));
+	strncpy(receive_msg,msg->mtext,strlen(msg->mtext)+1);
 	release_memory_block(msg);
 	
 	set_process_priority(PID_P2, LOWEST);
@@ -350,22 +352,22 @@ send msg to proc4
 
 */
 void proc_p2_3(void) {
-	MSGBUF *msg = NULL;
+	MSG_BUF *msg = NULL;
 	char* send_msg = "Blah3";
 	char* receive_msg;
 	int* sender_id;
 	
-	msg = receive_message(sender_id);
+	msg = (MSG_BUF*)receive_message(sender_id);
 	#ifdef DEBUG_0
-		printf("proc3 got message from proc %d : %s",(*sender_id), msg->mText);
+		printf("proc3 got message from proc %d : %s",(*sender_id), msg->mtext);
 	#endif /* DEBUG_0 */
-	strncpy(receive_msg, msg->mText, strlen(msg->mText));
+	strncpy(receive_msg, msg->mtext, 6);
 	
 	set_process_priority(PID_P2, LOW);
 	
-	strncpy(msg->mText, send_msg, strlen(send_msg));
+	strncpy(msg->mtext, send_msg, strlen(send_msg)+1);
 	#ifdef DEBUG_0
-		printf("proc3 send message to itself: %s", msg->mText);
+		printf("proc3 send message to itself: %s", msg->mtext);
 	#endif /* DEBUG_0 */
 	send_message(PID_P4, msg);
 	
@@ -388,20 +390,20 @@ switch to proc
 
 */
 void proc_p2_4(void) {
-	MSGBUF *msg = NULL;
+	MSG_BUF *msg = NULL;
 	char* send_msg = "Blah4";
 	char* receive_msg;
 	int* sender_id;
 	
 	msg = receive_message(sender_id);
 	#ifdef DEBUG_0
-		printf("proc4 got message from proc %d : %s",(*sender_id), msg->mText);
+		printf("proc4 got message from proc %d : %s",(*sender_id), msg->mtext);
 	#endif /* DEBUG_0 */
-	strncpy(receive_msg, msg->mText, strlen(msg->mText));
+	strncpy(receive_msg, msg->mtext, strlen(msg->mtext)+1);
 	
-	strncpy(msg->mText, send_msg, strlen(send_msg));
+	strncpy(msg->mtext, send_msg, strlen(send_msg)+1);
 	#ifdef DEBUG_0
-		printf("proc4 send message to proc %d : %s" , PID_P3, msg->mText);
+		printf("proc4 send message to proc %d : %s" , PID_P3, msg->mtext);
 	#endif /* DEBUG_0 */
 	send_message(PID_P1, msg);
 	
@@ -448,8 +450,8 @@ void proc_p2_6(void) {
 
 
 void clock_proc(void){
-	MSGBUF* read_msg;
-	MSGBUF* msg;
+	MSG_BUF* read_msg;
+	MSG_BUF* msg;
 	int sender_id;
 	int i;
 	char* cmd = "%w";
@@ -459,11 +461,11 @@ void clock_proc(void){
 	buf_size = 100;
 
 
-	msg = (MSGBUF*)request_memory_block();
+	msg = (MSG_BUF*)request_memory_block();
 
 	//reg cmd
-	msg->msg_type = KCD_REG;
-	strncpy(msg->mText, cmd, strlen(cmd));
+	msg->mtype = KCD_REG;
+	strncpy(msg->mtext, cmd, strlen(cmd)+1);
 	send_message(PID_KCD, msg);
 
 	while(1){
@@ -473,7 +475,7 @@ void clock_proc(void){
 		}
 		//read msg
 		read_msg = receive_message(&sender_id);
-		strncpy(read_buf, read_msg->mText, buf_size);
+		strncpy(read_buf, read_msg->mtext, buf_size);
 
 		if( strlen(read_buf) < 3 || read_buf[0] != cmd[0] ||  read_buf[1] != cmd[1]){
 			//do nothing, next

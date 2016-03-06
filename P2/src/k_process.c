@@ -184,7 +184,8 @@ void process_init()
 		gp_pcbs[i]->m_pid = g_proc_table[i].m_pid;
 		
 		gp_pcbs[i]->m_priority = g_proc_table[i].m_priority;
-		linkedList_init(&gp_pcbs[i]->m_msg_queue);
+		//linkedList_init(&gp_pcbs[i]->m_msg_queue);
+		gp_pcbs[i]->msg_queue = NULL;
 		sp = alloc_stack((g_proc_table[i]).m_stack_size);
 		*(--sp)  = INITIAL_xPSR;      // user process initial xPSR  
 		*(--sp)  = (U32)((g_proc_table[i]).mpf_start_pc); // PC contains the entry point of the process
@@ -251,7 +252,9 @@ int process_switch(PCB *p_pcb_old)
 	state = gp_current_process->m_state;
 	if (state == NEW) {
 		if (gp_current_process != p_pcb_old && p_pcb_old->m_state != NEW) {
-			p_pcb_old->m_state = RDY;
+			if (p_pcb_old->m_state != MEM_BLOCKED && p_pcb_old->m_state != MSG_BLOCKED){
+				p_pcb_old->m_state = RDY;
+			}
 			//ready_enqueue(p_pcb_old);
 			p_pcb_old->mp_sp = (U32 *) __get_MSP();
 		}
@@ -263,8 +266,10 @@ int process_switch(PCB *p_pcb_old)
 	/* The following will only execute if the if block above is FALSE */
 
 	if (gp_current_process != p_pcb_old) {
-		if (state == RDY){ 		
-			p_pcb_old->m_state = RDY; 
+		if (state == RDY){ 	
+			if (p_pcb_old->m_state != MEM_BLOCKED && p_pcb_old->m_state != MSG_BLOCKED){
+				p_pcb_old->m_state = RDY; 
+			}
 			p_pcb_old->mp_sp = (U32 *) __get_MSP(); // save the old process's sp
 			gp_current_process->m_state = RUN;
 			//ready_enqueue(p_pcb_old);

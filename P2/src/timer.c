@@ -13,7 +13,7 @@
 #define BIT(X) (1<<X)
 
 volatile uint32_t g_timer_count = 0; // increment every 1 ms
-queue sorted_list;
+MSG_BUF* sorted_queue = NULL;
 
 /**
  * @brief: initialize timer. Only timer 0 is supported
@@ -23,7 +23,6 @@ uint32_t timer_init(uint8_t n_timer)
 {
 	LPC_TIM_TypeDef *pTimer;
 	if (n_timer == 0) {
-		queue_init(&sorted_list);
 		/*
 		Steps 1 & 2: system control configuration.
 		Under CMSIS, system_LPC17xx.c does these two steps
@@ -104,6 +103,8 @@ uint32_t timer_init(uint8_t n_timer)
  */
 __asm void TIMER0_IRQHandler(void)
 {
+	/*having problem here which disables irq
+	in receive message*/
 	CPSID i //disable irq
 	PRESERVE8
 	IMPORT c_TIMER0_IRQHandler
@@ -124,7 +125,7 @@ void c_TIMER0_IRQHandler(void)
 }
 
 void timer_i_process(void) {
-	MSG_T* message_to_send;
+	MSG_BUF* message_to_send;
 	int target_pid;
 	int send_flag = 0;
 
@@ -134,8 +135,9 @@ void timer_i_process(void) {
 	// 	current_message = k_receive_message(NULL);
 	// }
 	
-	while (((MSG_T*)peek(&sorted_list))-> msg_delay <= g_timer_count){
-		message_to_send = (MSG_T*)queue_pop_front(&sorted_list);
+	while (sorted_queue!= NULL && sorted_queue-> msg_delay <= g_timer_count){
+		message_to_send = sorted_queue;
+		sorted_queue = (MSG_BUF*)sorted_queue->mp_next;
 		target_pid = message_to_send->receiver_pid;
 		send_flag = send_flag | k_send_message_nonpreempt(target_pid, (void*)message_to_send);
 	}
@@ -146,10 +148,29 @@ void timer_i_process(void) {
 	}
 }
 
-void expire_list_queue(MSG_T *msg){
+void expire_list_enqueue(MSG_BUF *msg){
 	//absolute time
+	MSG_BUF* message_iter = NULL;
 	msg->msg_delay = g_timer_count + msg->msg_delay;
-	queue_add(&sorted_list, (queue_node*) msg);
+	msg->mp_next=NULL;
+	if (sorted_queue == NULL) {
+		sorted_queue = msg;
+	} else{
+		message_iter = sorted_queue;
+		if (msg->msg_delay <= message_iter->msg_delay){
+			msg->mp_next = message_iter;
+			sorted_queue = msg;
+		}
+		else {
+			while (message_iter->mp_next != NULL && msg->msg_delay > ((MSG_BUF*)(message_iter->mp_next))->msg_delay){
+				message_iter = (MSG_BUF*)message_iter->mp_next;
+			}
+			msg->mp_next = message_iter->mp_next;
+			message_iter->mp_next = msg;
+		}
+	}
+	
+	//queue_add(&sorted_list, (void*) msg);
 }
 
 uint32_t get_timer_count(void){

@@ -19,7 +19,7 @@
 #endif
 
 
-MSG_T* message;
+MSG_BUF* message;
 uint8_t *gp_buffer = "\0";
 uint8_t g_send_char = 0;
 uint8_t g_char_in;
@@ -35,7 +35,7 @@ void reset_g_buffer(void);
 /**
  * @brief: initialize the n_uart
  * NOTES: It only supports UART0. It can be easily extended to support UART1 IRQ.
- * The step number in the comments matches the item number in Section 14.1 on pg 298
+ * The step number in the comments matches the item number in SectioMSG_BUFn 14.1 on pg 298
  * of LPC17xx_UM
  */
 int uart_irq_init(int n_uart) {
@@ -210,7 +210,7 @@ void reset_g_buffer() {
 void uart_i_process(){
   uint8_t IIR_IntId;	    // Interrupt ID from IIR 		 
 	LPC_UART_TypeDef *pUart = (LPC_UART_TypeDef *)LPC_UART0;
-	MSGBUF* msg;
+	MSG_BUF* msg;
 	//PCB* current_process;
 	PCB* prev_pcb_node = k_get_current_process();
 	
@@ -250,12 +250,12 @@ void uart_i_process(){
 			pUart->THR = '\0';
 
 			// prepare message to kcd to decode
-			msg = (MSGBUF*) k_request_memory_block_nonpreempt();
+			msg = (MSG_BUF*) k_request_memory_block_nonpreempt();
       if (msg == NULL) {
 				return; //probably shouldn't happen
 			}
-      msg->msg_type = DEFAULT;
-      strncpy(msg->mText, (char*)g_buffer, buffer_index);
+      msg->mtype = DEFAULT;
+      strncpy(msg->mtext, (char*)g_buffer, buffer_index);
 
 			// send message to kcd
 			k_send_message_nonpreempt(PID_KCD, msg);

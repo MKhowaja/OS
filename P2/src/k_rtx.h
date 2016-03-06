@@ -7,17 +7,17 @@
  
 #ifndef K_RTX_H_
 #define K_RTX_H_
-
+#include "common.h"
 /*----- Definitations -----*/
 
-#define RTX_ERR -1
-#define RTX_OK  0
+// #define RTX_ERR -1
+// #define RTX_OK  0
 
-#define NULL 0
+// #define NULL 0
 
-#define NUM_KERNEL_PROCS 5
-#define NUM_TEST_PROCS 6
-#define NUM_TOTAL_PROCS (NUM_KERNEL_PROCS+NUM_TEST_PROCS)
+// #define NUM_KERNEL_PROCS 5
+// #define NUM_TEST_PROCS 6
+// #define NUM_TOTAL_PROCS (NUM_KERNEL_PROCS+NUM_TEST_PROCS)
 
 #define KEY_READY '!'
 #define KEY_BLOCKED_MEM ','
@@ -75,52 +75,45 @@ typedef struct pcb
 	U32 m_pid;		/* process id */
 	int m_priority;
 	PROC_STATE_E m_state;   /* state of the process */
-	linkedList m_msg_queue;
+	//linkedList m_msg_queue;
+	MSG_BUF* msg_queue;
 	//stack size?
 	//whether process is i-process?
 } PCB;
 
-/* initialization table item */
-#ifndef PROC_INIT_STRUCT
-#define PROC_INIT_STRUCT
-typedef struct proc_init
-{	
-	int m_pid;	        /* process id */ 
-	int m_priority;         /* initial priority, not used in this example. */ 
-	int m_stack_size;       /* size of stack in words */
-	void (*mpf_start_pc) ();/* entry point of the process */    
-} PROC_INIT;
-#endif
-
 /* user version */
-#ifndef MSG_BUF
-#define MSG_BUF
-typedef struct msgbuf
-{
-	int msg_type;
-	char mText[1];
-} MSGBUF;
-#endif
+// #ifndef MSG_BUF
+// #define MSG_BUF
 
-/* kernel version */
-typedef struct msg_t
-{
-	int sender_pid;				/* sender process id*/
-	int receiver_pid;			/* receiver process id */
-	int msg_type;					/* message type */
-	int msg_delay;				/* message delay */
-	char mText[1];				/* message data */
-} MSG_T;
+// //typedef struct msgbuf
+// //{
+// //	int mtype;
+// //	char mtext[1];
+// //} MSG_BUF;
+
+
+// /* kernel version */
+// typedef struct msg_t
+// {
+// 	int sender_pid;				 sender process id
+// 	int receiver_pid;			/* receiver process id */
+// 	int msg_delay;				/* message delay */
+// 	int mtype;					/* message type */
+// 	char mtext[5];				/* message data */
+// } MSG_BUF;
+// #endif
+
+
 
 /* log buffer version */
 typedef struct log_msg_t
 {
 	int sender_pid;				/* sender process id*/
 	int receiver_pid;			/* receiver process id */
-	int msg_type;				/* message type */
+	int mtype;				/* message type */
 	U32 timestamp;				/* The time stamp of the transaction (using the RTX clock) */
-	char mText[17];				/* message data */
-} LOG_MSG_T;
+	char mtext[17];				/* message data */
+} LOG_MSG_BUF;
 
 #define SZ_MEM_BLK 128           /* fixed size of memory block 128B default */
 //#define SZ_MEM_BLK_WITH_HEADER SZ_MEM_BLK+0x20

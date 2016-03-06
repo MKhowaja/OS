@@ -105,6 +105,8 @@ int handle_msg_blocked_process_ready(PCB* receiver_pcb){
 	return 0;
 }
 
+
+
 PCB * k_get_pcb_from_id (U32 process_id){
 	int i;
 	for ( i = 0; i < NUM_TEST_PROCS; i++ ) {
@@ -215,13 +217,15 @@ PCB *scheduler(void){
 	if(gp_current_process != NULL && gp_current_process->m_state != MEM_BLOCKED){
 		gp_current_process->m_state = RDY;
 		ready_enqueue(gp_current_process);
-	}else if(gp_current_process != NULL && gp_current_process->m_state == MEM_BLOCKED){
+	} // current process was set to block on memory, should be in block queue
+	else if(gp_current_process != NULL && gp_current_process->m_state == MEM_BLOCKED){
 		block_enqueue(gp_current_process, MEM_BLOCKED);
+	} // current process was set to block on message, should be in block queue
+	else if(gp_current_process != NULL && gp_current_process->m_state == MSG_BLOCKED){
+		block_enqueue(gp_current_process, MSG_BLOCKED);
 	}
 	for ( i = 0; i <= NUM_PRIORITY; i++ ){
-	
 		if (ready_queue[i].first != NULL){
-			
 			// pop off the first ready process with highest priority
 			node* firstProcess = linkedList_pop_front(&ready_queue[i]);
 			return (PCB *)firstProcess->value;

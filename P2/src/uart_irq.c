@@ -19,9 +19,8 @@
 #endif
 
 
-MSG_BUF* message;
-uint8_t *gp_buffer = "\0";
-uint8_t g_send_char = 0;
+MSG_BUF* message = NULL;
+uint8_t *gp_buffer = "\0"; //pointer to beginning of sent message from CRT
 uint8_t g_char_in;
 uint8_t g_char_out;
 uint32_t buffer_index = 0;
@@ -174,6 +173,7 @@ int uart_irq_init(int n_uart) {
  */
 __asm void UART0_IRQHandler(void)
 {
+	CPSID i //disable irq
 	PRESERVE8
 	IMPORT c_UART0_IRQHandler
 	IMPORT k_release_processor
@@ -183,6 +183,7 @@ __asm void UART0_IRQHandler(void)
 	LDR R4, [R4]
 	MOV R5, #0     
 	CMP R4, R5
+	CPSIE i //enable irq
 	BEQ  RESTORE    ; if g_switch_flag == 0, then restore the process that was interrupted
 	BL k_release_processor  ; otherwise (i.e g_switch_flag == 1, then switch to the other process)
 RESTORE
@@ -206,13 +207,20 @@ void reset_g_buffer() {
     }
 }
 
+void set_g_buffer(char * input){
+	//strcpy(g_buffer, input);
+}
 
 void uart_i_process(){
   uint8_t IIR_IntId;	    // Interrupt ID from IIR 		 
 	LPC_UART_TypeDef *pUart = (LPC_UART_TypeDef *)LPC_UART0;
 	MSG_BUF* msg;
 	//PCB* current_process;
+	int sender_id;
+	int ret = 0;
 	PCB* prev_pcb_node = k_get_current_process();
+	PCB* current_process;
+	
 	
 //#ifdef DEBUG_0
 //	uart1_put_string("Entering c_UART0_IRQHandler\n\r");
@@ -222,25 +230,22 @@ void uart_i_process(){
 	/* Reading IIR automatically acknowledges the interrupt */
 	IIR_IntId = (pUart->IIR) >> 1 ; // skip pending bit in IIR 
 	
-	if (IIR_IntId & IIR_RDA) { // interrupt Id and Receive Data Avaialbe
-		
+	if (IIR_IntId & IIR_RDA) { // interrupt Id and Receive Data Available
 		/* keyboard input */
-		
 		g_char_in = pUart->RBR;
-		g_send_char = 1;
 		//for \r \n and \0
 		if ((buffer_index < buffer_size - 3) && (g_char_in != '\r')) {
 			if (g_char_in != 8 && g_char_in != 127) { //not backspace or delete
 				g_buffer[buffer_index++] = g_char_in;
-      }else {
+      		}else {
 				// if it's a backspace or delete, make index go back by 1
 				if (buffer_index > 0) {
 					g_buffer[buffer_index--] = '\0';
 				}
 			}
 
-      pUart->THR = g_char_in;
-    }else {
+      		pUart->THR = g_char_in;
+    	}else {
 			//terminal characters
 			g_buffer[buffer_index++] = '\r';
 			pUart->THR = '\r';
@@ -251,23 +256,26 @@ void uart_i_process(){
 
 			// prepare message to kcd to decode
 			msg = (MSG_BUF*) k_request_memory_block_nonpreempt();
-      if (msg == NULL) {
-				return; //probably shouldn't happen
-			}
-      msg->mtype = DEFAULT;
-      strncpy(msg->mtext, (char*)g_buffer, buffer_index);
+      		if (msg != NULL) {
+			
+						msg->mtype = DEFAULT;
+		      	strncpy(msg->mtext, (char*)g_buffer, buffer_index);
 
-			// send message to kcd
-			k_send_message_nonpreempt(PID_KCD, msg);
-
-      reset_g_buffer();
-      g_switch_flag = 1;
+						current_process = k_get_current_process();
+						msg->sender_pid = current_process->m_pid;
+						// send message to kcd
+						k_send_message_nonpreempt(PID_KCD, msg);
+			    
+						g_switch_flag = 1;
+						
+		    }
+				reset_g_buffer();
 		}
 		#ifdef _DEBUG_HOTKEYS
-		if ( g_char_in == KEY_READY ||
+		if (( g_char_in == KEY_READY ||
                 g_char_in == KEY_BLOCKED_MEM ||
                 g_char_in == KEY_BLOCKED_MSG ||
-                g_char_in == KEY_MSG_LOG)) {
+                g_char_in == KEY_MSG_LOG) && buffer_index == 4) {
 
 			printf("----------------------------------------------\r\n");
 			print_current_process();
@@ -298,42 +306,39 @@ void uart_i_process(){
 		}
 		printf("----------------------------------------------\r\n");
 		#endif
-				
+
 		
 	} else if (IIR_IntId & IIR_THRE) {
 	// interrupt Id and THRE Interrupt, transmit holding register becomes empty
+		// Should only get here from send message from CRT PROC
+			if (message != NULL){
+					ret = k_release_memory_block_nonpreempt((void*)message);
+					if (ret == 1) {
+							g_switch_flag = 1;
+					}					
+			}
+			message = NULL;
 
-		if (*gp_buffer != '\0' ) {
-			g_char_out = *gp_buffer;
-
-			pUart->THR = g_char_out;
-			gp_buffer++;
-		} else {
-			// k_release_memory_block_nonpreempt((void*)message);
-			// message = NULL;
-   //          gp_buffer = "\0"; // now we don't point to invalid memory
-
-   //          message = k_receive_message_nonpreempt(NULL);
-
-
-			// if (message != NULL) {
-	  //               gp_buffer = (uint8_t*)message->msg_data;
-	  //               g_char_out = *gp_buffer;
-   //          		pUart->THR = g_char_out;
-   //          		gp_buffer++;
-	  //       } 
-	  //       else {
-				pUart->IER ^= IER_THRE; // toggle the IER_THRE bit 
-				pUart->THR = '\0';
-				g_send_char = 0;
-				gp_buffer = g_buffer; //comment this out if uncommenting above code
-//			}
-		}
-
+      message = k_receive_message_nonblocking(&sender_id);
+			if (message != NULL) {
+          gp_buffer = (uint8_t*)message->mtext; //pointer to beginning of sent message from CRT
+					while (*gp_buffer != '\0'){				
+						g_char_out = *gp_buffer;
+						pUart->THR = g_char_out; //prints to CRT
+						gp_buffer++; 
+					}
+	  	} 
+	  	else { //no message to receive
+					#ifdef DEBUG_0
+							printf("Did not receive any message from CRT!\r\n");
+					#endif // DEBUG_0 
+					pUart->IER ^= IER_THRE; // toggle the IER_THRE (interrupt) bit 
+					pUart->THR = '\0'; //only send null terminal to CRT
+			}
 	} else {
-#ifdef DEBUG_0
-			printf("Could not handle interrupt in uart_i_process!\r\n");
-#endif // DEBUG_0 
-		return;
+			#ifdef DEBUG_0
+					printf("Could not handle interrupt in uart_i_process!\r\n");
+			#endif // DEBUG_0 
+			return;
 	}	
 }

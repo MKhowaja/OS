@@ -23,20 +23,20 @@
 
 /* initialization table item */
 PROC_INIT k_test_procs[NUM_KERNEL_PROCS];
-linkedList cmd_dict;
 
 //cmd dictionary
-typedef struct {
+typedef struct cmd_dict_node{
     uint32_t pid;
     char cmd[10];
-} cmd_dict_node;
+} CMD_DICT_NODE;
+
+static CMD_DICT_NODE command_buffer [NUM_COMMANDS];
+static int command_buffer_index = 0;
 
 char msg_data [200]; //arbitrarily chose size 200
 
 void set_kernel_procs() {
     int i;
-//init the cmd list
-    linkedList_init(&cmd_dict);
     for (i = 0; i < 200; i++) {
         msg_data[i] = '\0';
     }
@@ -74,9 +74,13 @@ void set_kernel_procs() {
 
 void nullProc (void){
     int ret_val;
+		#ifdef DEBUG_0 
     printf("Null Process Start\n");
+		#endif
     while (1){
+			#ifdef DEBUG_0 
         printf("while loop start");
+			#endif
         ret_val = release_processor();
         #ifdef DEBUG_0
         printf("nullProc: ret_val=%d\n", ret_val);
@@ -88,14 +92,16 @@ void nullProc (void){
 void crt(void){
     MSG_BUF* msg;
 		LPC_UART_TypeDef *pUart = (LPC_UART_TypeDef*)LPC_UART0;
+		int sender_id;
 
     while(1){
-        msg = receive_message(NULL); //if current process message queue empty, calls release processor
+        msg = receive_message(&sender_id); //if current process message queue empty, calls release processor
         if(msg->mtype == CRT_DISPLAY){
         //send msg to uart_i_process
         //we need id of uart_i_process
+            //set_g_buffer(msg->mtext);
             send_message(PID_UART_IPROC, msg);
-						pUart ->IER = pUart ->IER | IER_THRE;
+						pUart ->IER = pUart->IER | IER_THRE;
         }
         else{
             //do nothing except releasing msg block	
@@ -109,25 +115,33 @@ void crt(void){
 //input
 void kcd(void){
     int i;
-    cmd_dict_node *cmd_node;
-    int *sender_id;
+		int j;
+		int k;
+    //cmd_dict_node *cmd_node;
+    int sender_id;
     MSG_BUF* msg;
     char* itr;
     int msg_len;
     char buffer[10];
-    node * list_traverse;
-    for (i = 0; i < 10; i++) {
+	
+    for (i = 0; i < 10; i++) { //null out buffer
         buffer[i] = '\0';
     }
 
     while (1) {
-        msg = receive_message(sender_id);
+        msg = receive_message(&sender_id);
 
         if (msg->mtype == DEFAULT) {
+            //send_message(PID_CRT,msg); //Doing this immediately in UART
+            i = 0;
+
             msg_len = strlen(msg->mtext);
             strncpy(msg_data, msg->mtext, msg_len);
             itr = msg_data;
             if (msg_data[0] == '%') {
+								#ifdef DEBUG_0 
+								printf("debug *itr %s\r\n",*itr);
+								#endif
                 while (*itr != ' ' && *itr != '\r') {
                     if (*itr == '\0') {
                         *itr++;
@@ -135,19 +149,38 @@ void kcd(void){
                         buffer[i++] = *itr++;
                     }
                 }
-
-                list_traverse = cmd_dict.first;
-                while (list_traverse!=NULL){
-                    cmd_node = (cmd_dict_node*)list_traverse;
-                    if (strcmp(cmd_node->cmd, buffer) > 0) {
-                        msg = (MSG_BUF*)request_memory_block();
-                        msg->mtype = DEFAULT;
-                        strncpy(msg->mtext, msg_data, msg_len);
-                        send_message(cmd_node->pid, msg);
-                        break; //leave loop if found
-                    }
-                    list_traverse = list_traverse->next;
+								release_memory_block(msg);
+								msg = NULL;
+                if (i < 7){ //buffer length
+										buffer[i++] = '\r';
+										buffer[i++] = '\n';
+                    buffer[i++] = '\0';
+                    for (i = 0; i < command_buffer_index; i++){
+											msg_len = strlen(command_buffer[i].cmd);
+											k = 1;
+											for(j = 0; j < msg_len; j++){
+												if (command_buffer[i].cmd[j] == buffer[j]){
+													continue;
+												}
+												else {
+													k = 0;
+													break;
+												}
+											}
+                        if (k == 1){
+                            msg = (MSG_BUF*) request_memory_block();
+                            msg->mtype = DEFAULT;
+                            strcpy(msg->mtext, msg_data);
+                            send_message(command_buffer[i].pid, msg);
+													#ifdef DEBUG_0 
+                            printf ("Sent message with command %d\r\n", i);
+													#endif
+                            break;
+                        }
+                    }    
                 }
+
+                
             }
 
             for (i = 0; i < 10; i++) {
@@ -158,11 +191,23 @@ void kcd(void){
             }
             continue;
         } else if (msg->mtype == KCD_REG) {
-            cmd_node->pid = *sender_id;
-            msg_len = strlen(msg->mtext);
-            strncpy(cmd_node->cmd, msg->mtext, msg_len);
-            linkedList_push_front(&cmd_dict, (node*) cmd_node);
+            if (command_buffer_index < NUM_COMMANDS){
+                command_buffer[command_buffer_index].pid = sender_id;
+                strcpy(command_buffer[command_buffer_index].cmd, msg->mtext);
+                command_buffer_index = (command_buffer_index + 1);
+                
+            }
+            else {
+								#ifdef DEBUG_0 
+                printf("Command is full\r\n");
+								#endif
+            }
             release_memory_block(msg);
+        }
+        else{
+            //has to be CRT DISPLAY
+            //msg no need to change
+            send_message(PID_CRT,msg);
         }
     }
 }

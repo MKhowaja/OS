@@ -531,6 +531,11 @@
               <FileType>1</FileType>
               <FilePath>.\src\usr_proc_B.c</FilePath>
             </File>
+            <File>
+              <FileName>usr_clock.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\usr_clock.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -887,7 +892,7 @@
             <uSurpInc>0</uSurpInc>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>DEBUG_0, K_MSG_ENV</Define>
+              <Define>K_MSG_ENV</Define>
               <Undefine></Undefine>
               <IncludePath></IncludePath>
             </VariousControls>
@@ -1031,7 +1036,7 @@
                   <RVCTZI>0</RVCTZI>
                   <RVCTOtherData>0</RVCTOtherData>
                   <ModuleSelection>0</ModuleSelection>
-                  <IncludeInBuild>1</IncludeInBuild>
+                  <IncludeInBuild>0</IncludeInBuild>
                   <AlwaysBuild>2</AlwaysBuild>
                   <GenerateAssemblyFile>2</GenerateAssemblyFile>
                   <AssembleAssemblyFile>2</AssembleAssemblyFile>
@@ -1109,6 +1114,11 @@
                   </Cads>
                 </FileArmAds>
               </FileOption>
+            </File>
+            <File>
+              <FileName>usr_clock.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\usr_clock.c</FilePath>
             </File>
           </Files>
         </Group>

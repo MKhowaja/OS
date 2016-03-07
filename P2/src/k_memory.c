@@ -248,13 +248,19 @@ int k_release_memory_block(void *p_mem_blk) {
 int k_release_memory_block_nonpreempt(void *p_mem_blk) {
 	MemNode* free_memory_node;
 	MemNode* mem_traverse;
+	if (p_mem_blk == NULL){
+		#ifdef DEBUG_0 
+		printf("Release Memory Block Nonpreempt block was NULL. THIS SHOULD NEVER HAPPEN PANIC PANIC PANIC!!!\r\n");
+		#endif
+		return RTX_ERR;
+	}
 #ifdef DEBUG_0 
 	printf("k_release_memory_block_nonpreempt: releasing block @ 0x%x\r\n", p_mem_blk);
 #endif /* ! DEBUG_0 */
 
 	if (!(p_end <= p_mem_blk && p_mem_blk < gp_stack && ((U32)p_mem_blk - (U32)p_end) % SZ_MEM_BLK == 0)) {
-    return RTX_ERR;
-  }
+    	return RTX_ERR;
+ 	}
 	mem_traverse = mem_list.first;
 	while (mem_traverse != NULL) {
 		if (mem_traverse == p_mem_blk){
@@ -274,5 +280,5 @@ int k_release_memory_block_nonpreempt(void *p_mem_blk) {
 		mem_list.last = free_memory_node;
 	}
 
- 	return RTX_OK;
+ 	return handle_blocked_process_ready(MEM_BLOCKED);
 }

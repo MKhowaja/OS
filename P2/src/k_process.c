@@ -101,7 +101,9 @@ int handle_msg_blocked_process_ready(PCB* receiver_pcb){
 		}
 	}
 	// Shouldn't happen!!!! Blocked on message but not in block queues??????
+	#ifdef DEBUG_0 
 	printf("Panic! handle_msg_blocked_process_ready: Blocked on message but not in block queues!");
+	#endif
 	return 0;
 }
 
@@ -215,10 +217,10 @@ void process_init()
  */
 PCB *scheduler(void){
 	
-	
 	//node *blocked_process_node;
 	//PCB *blocked_process;
 	int i;
+	node* firstProcess;
 	if(gp_current_process != NULL && (gp_current_process->m_state != MEM_BLOCKED && gp_current_process->m_state != MSG_BLOCKED)){
 		gp_current_process->m_state = RDY;
 		ready_enqueue(gp_current_process);
@@ -232,7 +234,7 @@ PCB *scheduler(void){
 	for ( i = 0; i <= NUM_PRIORITY; i++ ){
 		if (ready_queue[i].first != NULL){
 			// pop off the first ready process with highest priority
-			node* firstProcess = linkedList_pop_front(&ready_queue[i]);
+			firstProcess = linkedList_pop_front(&ready_queue[i]);
 			return (PCB *)firstProcess->value;
 		}
 	}
@@ -395,61 +397,84 @@ void print_queue(PROCESS_QUEUE_ID id){
 	switch(id){
 		case PRINT_READY:
 			state = RDY;
+			#ifdef DEBUG_0 
 			printf("Printing ready queue...\r\n");
+			#endif
 			break;
 		case PRINT_MEM_BLOCKED:
 			state = MEM_BLOCKED;
+			#ifdef DEBUG_0 
 			printf("Printing blocked on memory queue...\r\n");
+			#endif
 			break;
 		case PRINT_MSG_BLOCKED:
 			state = MSG_BLOCKED;
+			#ifdef DEBUG_0 
 			printf("Printing blocked on message queue...\r\n");
+			#endif
 			break;
 		default:
+			#ifdef DEBUG_0 
 			printf("INVALID ID TO PRINT QUEUE\r\n");
+			#endif
 			return;
 	}
 
 	if (id == PRINT_READY){ // ready queue
 		for(i = 0; i <= NUM_PRIORITY; i++){
+			#ifdef DEBUG_0 
 			printf("Priority: %d\r\n", i);
+			#endif
 			if(ready_queue[i].first != NULL){
 				temp_node = block_queue[i].first;
 				while (temp_node != NULL){
 					temp_pcb = (PCB*)temp_node->value;
 					if (temp_pcb->m_state == state){
+						#ifdef DEBUG_0 
 						printf("pid: %d  ", temp_pcb->m_pid);
+						#endif
 					}else if( temp_pcb->m_state == MEM_BLOCKED || temp_pcb->m_state == MSG_BLOCKED ){
+						#ifdef DEBUG_0 
 						printf("WTF?!?!?!?!?!?!?! Blocked PCB in ready queue!");
+						#endif
 					}
 					temp_node = temp_node->next;
 				}
 			}
+			#ifdef DEBUG_0 
 			printf("\r\n");
+			#endif
 		}
 	}else{ // block queue
 		for(i = 0; i <= NUM_PRIORITY; i++){
+			#ifdef DEBUG_0 
 			printf("Priority: %d\r\n", i);
+			#endif
 			if(block_queue[i].first != NULL){
 				temp_node = block_queue[i].first;
 				while (temp_node != NULL){
 					temp_pcb = (PCB*)temp_node->value;
 					if (temp_pcb->m_state == state){
+						#ifdef DEBUG_0 
 						printf("pid: %d  ", temp_pcb->m_pid);
+						#endif
 					}else if( temp_pcb->m_state == RDY){
+						#ifdef DEBUG_0 
 						printf("WTF?!?!?!?!?!?!?! Ready PCB in block queue!");
+						#endif
 					}
 					temp_node = temp_node->next;
 				}
 			}
+			#ifdef DEBUG_0 
 			printf("\r\n");
+			#endif
 		}
 	}
-
-	
-
 }
 
 void print_current_process(){
+	#ifdef DEBUG_0 
 	printf("Current process: %d\r\n", gp_current_process->m_pid);
+	#endif
 }

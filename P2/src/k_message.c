@@ -3,14 +3,14 @@
 #include "string.h"
 #ifdef DEBUG_0
 #include "printf.h"
-#include "timer.h"
 #endif /* ! DEBUG_0 */
+#include "timer.h"
 
 #define NOT_SET 0xFFFFFFFF
 static LOG_MSG_BUF send_log_buffer[NUM_MSG_BUFFERED];
 static LOG_MSG_BUF receive_log_buffer[NUM_MSG_BUFFERED];
-static volatile int send_log_buffer_index = 0;
-static volatile int receive_log_buffer_index = 0;
+static int send_log_buffer_index = 0;
+static int receive_log_buffer_index = 0;
 
 void message_log_buffer_init(void){
 	int i;
@@ -26,9 +26,9 @@ void update_send_log_buffer(MSG_BUF* message){
 	send_log_buffer[send_log_buffer_index].mtype = message->mtype;
 	// copy the first 16 bytes
 	strncpy(send_log_buffer[send_log_buffer_index].mtext, message->mtext, 16);
-	// make sure it is NULL terminated
+	//make sure it is NULL terminated
 	send_log_buffer[send_log_buffer_index].mtext[16] = '\0';
-	send_log_buffer[send_log_buffer_index].timestamp = get_timer_count();
+	//send_log_buffer[send_log_buffer_index].timestamp = get_timer_count();
 	// update the index of the next override
 	send_log_buffer_index = (send_log_buffer_index + 1) % NUM_MSG_BUFFERED;
 }
@@ -37,11 +37,11 @@ void update_receive_log_buffer(MSG_BUF* message){
 	receive_log_buffer[receive_log_buffer_index].sender_pid = message->sender_pid;
 	receive_log_buffer[receive_log_buffer_index].receiver_pid = message->receiver_pid;
 	receive_log_buffer[receive_log_buffer_index].mtype = message->mtype;
-	// copy the first 16 bytes
+	// // copy the first 16 bytes
 	strncpy(receive_log_buffer[receive_log_buffer_index].mtext, message->mtext, 16);
 	// make sure it is NULL terminated
 	receive_log_buffer[receive_log_buffer_index].mtext[16] = '\0';
-	receive_log_buffer[receive_log_buffer_index].timestamp = get_timer_count();
+	//receive_log_buffer[receive_log_buffer_index].timestamp = get_timer_count();
 	// update the index of the next override
 	receive_log_buffer_index = (receive_log_buffer_index + 1) % NUM_MSG_BUFFERED;
 }
@@ -50,13 +50,15 @@ void print_send_log_buffer(void){
 	int i;
 	for (i = 0; i < NUM_MSG_BUFFERED; i++){
 		if (send_log_buffer[i].timestamp != NOT_SET){
-			printf("Sender pid: %d, Receiver pid: %d, Message type: %d, First 16 bytes: %s, timestamp: %d \r\n", 
+				#ifdef DEBUG_0 
+				printf("Sender pid: %d, Receiver pid: %d, Message type: %d, First 16 bytes: %s, timestamp: %d \r\n", 
 				send_log_buffer[i].sender_pid,
 				send_log_buffer[i].receiver_pid,
 				send_log_buffer[i].mtype, 
 				send_log_buffer[i].mtext,
 				send_log_buffer[i].timestamp
 			);
+			#endif
 		}
 	}
 }
@@ -96,13 +98,15 @@ void print_receive_log_buffer(void){
 	int i;
 	for (i = 0; i < NUM_MSG_BUFFERED; i++){
 		if (receive_log_buffer[i].timestamp != NOT_SET){
-			printf("Sender pid: %d, Receiver pid: %d, Message type: %d, First 16 bytes: %s, timestamp: %d \r\n", 
+				#ifdef DEBUG_0 
+					printf("Sender pid: %d, Receiver pid: %d, Message type: %d, First 16 bytes: %s, timestamp: %d \r\n", 
 				receive_log_buffer[i].sender_pid,
 				receive_log_buffer[i].receiver_pid,
 				receive_log_buffer[i].mtype, 
 				receive_log_buffer[i].mtext,
 				receive_log_buffer[i].timestamp
 			);
+			#endif
 		}
 	}
 }
@@ -185,7 +189,7 @@ void* k_receive_message(int *sender_id)
 	__disable_irq();
 	#ifdef DEBUG_0
         printf("k_receive_message: irq disabled\r\n");
-  #endif /* DEBUG_0 */
+  	#endif /* DEBUG_0 */
 	current_process = k_get_current_process();
 	while (current_process->msg_queue == NULL){
 		//Setting state to msg blocked will cause scheduler to put process in blocked queue
@@ -197,14 +201,46 @@ void* k_receive_message(int *sender_id)
 	//msg queue not empty 
 	//message = (MSG_BUF*) linkedList_pop_front(&(current_process->m_msg_queue));
 	message = message_deque(current_process);
+
 	if (message == NULL){
-		printf("PANIC RECEIVE MESSAGE WAS NULL");
-	}
-	
-	if (message->sender_pid != NULL){
+		#ifdef DEBUG_0
+			printf("PANIC RECEIVE MESSAGE WAS NULL\r\n");
+		#endif /* DEBUG_0 */
+	}else if (message->sender_pid != NULL){
 		*sender_id = message->sender_pid;
 	}
 	__enable_irq();
+	return (void*) message;
+}
+
+//SHOULD ONLY BE USED BY UART_I_PROC
+void* k_receive_message_nonblocking(int *sender_id){
+	MSG_BUF* message;
+	PCB * receiver_pcb;
+	#ifdef DEBUG_0
+        printf("Entering k_receive_message non blocking\r\n");
+  	#endif /* DEBUG_0 */
+	receiver_pcb = k_get_pcb_from_id(PID_UART_IPROC);
+	if (receiver_pcb == NULL){
+		#ifdef DEBUG_0
+			printf("PANIC UART PCB WAS NULL IN RECEIVE MESSAGE NONBLOCKING\r\n");
+		#endif /* DEBUG_0 */
+		return NULL;
+	}
+	else if (receiver_pcb->msg_queue == NULL){
+		#ifdef DEBUG_0
+			printf("No message for UART to receive\r\n");
+		#endif /* DEBUG_0 */
+		return NULL;
+	}
+	message = message_deque(receiver_pcb);
+	if (message == NULL){
+		#ifdef DEBUG_0
+			printf("PANIC UART RECEIVE MESSAGE WAS NULL\r\n");
+		#endif /* DEBUG_0 */
+	}else if (message->sender_pid != NULL){
+		*sender_id = message->sender_pid;
+	}
 	return (void*) message;
 }
 

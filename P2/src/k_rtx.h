@@ -36,6 +36,9 @@
 it is used in k_process.c*/
 #define NUM_PRIORITY 5
 
+/* Command Constants*/
+#define NUM_COMMANDS 10
+
 #ifdef DEBUG_0
 #define USR_SZ_STACK 0x200         /* user proc stack size 512B   */
 #else

@@ -12,7 +12,7 @@ k_proc.o: src\k_rtx.h
 k_proc.o: src\list.h
 k_proc.o: src\k_message.h
 k_proc.o: src\k_memory.h
-k_proc.o: C:\Software\Keil\ARM\ARMCC\bin\..\include\string.h
+k_proc.o: src\string.h
 k_proc.o: src\uart.h
 k_proc.o: C:\Software\Keil\ARM\Inc\NXP\LPC17xx\LPC17xx.h
 k_proc.o: C:\Software\Keil\ARM\CMSIS\Include\core_cm3.h

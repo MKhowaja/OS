@@ -15,6 +15,6 @@ uart_irq.o: src\k_rtx.h
 uart_irq.o: src\list.h
 uart_irq.o: src\k_message.h
 uart_irq.o: src\k_memory.h
-uart_irq.o: C:\Software\Keil\ARM\ARMCC\bin\..\include\string.h
+uart_irq.o: src\string.h
 uart_irq.o: src\printf.h
 uart_irq.o: C:\Software\Keil\ARM\ARMCC\bin\..\include\stdarg.h

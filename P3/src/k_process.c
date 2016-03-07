@@ -47,7 +47,7 @@ extern PROC_INIT k_test_procs[NUM_KERNEL_PROCS];
 static linkedList ready_queue[NUM_PRIORITY];
 static linkedList block_queue[NUM_PRIORITY];
 // Assume: pid mapping
-static node node_pool[NUM_TOTAL_PROCS];
+static node node_pool[16];
 
 static node* node_factory(PCB * pcb){
 	//can't just use m_pority here since all the process has the same prority, 
@@ -376,6 +376,16 @@ int k_set_process_priority(int process_id, int priority){
 }
 
 int get_process_priority(int process_id){
+	int i;
+	for ( i = 0; i < NUM_TEST_PROCS; i++ ) {
+		if ((gp_pcbs[i])->m_pid == process_id){ //find process with id process_id
+			return (gp_pcbs[i])->m_priority; //return priority of found process
+		}
+	}
+	return -1; //process not found
+}
+
+int k_get_process_priority(int process_id){
 	int i;
 	for ( i = 0; i < NUM_TEST_PROCS; i++ ) {
 		if ((gp_pcbs[i])->m_pid == process_id){ //find process with id process_id

@@ -9,13 +9,6 @@
 #define USR_PROC_H
 
 void set_test_procs(void);
-void proc1(void);
-void proc2(void);
-void proc3(void);
-void proc4(void);
-void proc5(void);
-void proc6(void);
-
 
 void proc_p2_1(void);
 void proc_p2_2(void);
@@ -23,6 +16,9 @@ void proc_p2_3(void);
 void proc_p2_4(void);
 void proc_p2_5(void);
 void proc_p2_6(void);
+
+void set_process_proc(void);
+void test_proc_for_set_process_proc(void);
 
 void stress_test_proc_a(void);
 void stress_test_proc_b(void);

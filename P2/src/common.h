@@ -16,9 +16,8 @@
 #define NULL 0
 #define RTX_ERR -1
 #define RTX_OK 0
-//#define NUM_TEST_PROCS 6
 #define NUM_KERNEL_PROCS 5
-#define NUM_TEST_PROCS 1
+#define NUM_TEST_PROCS 6
 #define NUM_TOTAL_PROCS (NUM_KERNEL_PROCS+NUM_TEST_PROCS)
 
 /* Process IDs */

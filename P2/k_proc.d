@@ -19,3 +19,5 @@ k_proc.o: C:\Software\Keil\ARM\CMSIS\Include\core_cm3.h
 k_proc.o: C:\Software\Keil\ARM\CMSIS\Include\core_cmInstr.h
 k_proc.o: C:\Software\Keil\ARM\CMSIS\Include\core_cmFunc.h
 k_proc.o: C:\Software\Keil\ARM\Inc\NXP\LPC17xx\system_LPC17xx.h
+k_proc.o: src\printf.h
+k_proc.o: C:\Software\Keil\ARM\ARMCC\bin\..\include\stdarg.h

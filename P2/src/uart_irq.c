@@ -275,7 +275,7 @@ void uart_i_process(){
 		if (( g_char_in == KEY_READY ||
                 g_char_in == KEY_BLOCKED_MEM ||
                 g_char_in == KEY_BLOCKED_MSG ||
-                g_char_in == KEY_MSG_LOG) && buffer_index == 4) {
+                g_char_in == KEY_MSG_LOG) && buffer_index == 1) {
 
 			printf("----------------------------------------------\r\n");
 			print_current_process();

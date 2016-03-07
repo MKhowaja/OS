@@ -11,6 +11,7 @@
 /* initialization table item */
 PROC_INIT g_test_procs[NUM_TEST_PROCS];
 int passed_test[NUM_TEST_PROCS];
+int isFinished = 0;
 
 void set_test_procs() {
 	int i;
@@ -308,6 +309,9 @@ void proc_p2_1(void) {
 	release_memory_block(msg);
 	msg = NULL;
 	set_process_priority(PID_P1, LOWEST);
+	if(strcmp(receive_msg,"Blah4") == 0 && sender_id == PID_P4){
+			passed_test[0] = 1;
+	}
 	
 	while(1) {
 		uart1_put_string("proc1: \r\n");
@@ -348,6 +352,10 @@ void proc_p2_2(void) {
 	
 	set_process_priority(PID_P2, LOWEST);
 
+	if(strcmp(receive_msg,"Blah2") == 0 && sender_id == PID_P2){
+			passed_test[1] = 1;
+			isFinished = 1;
+	}
     //verify receive_msg == send_msg
     while(1) {
         uart1_put_string("proc2: \r\n");
@@ -385,6 +393,10 @@ void proc_p2_3(void) {
 	
 	set_process_priority(PID_P3, LOWEST);
 	
+	if(strcmp(receive_msg,"Blah1") == 0 && sender_id == PID_P1){
+			passed_test[2] = 1;
+	}
+	
 	while(1) {
 		uart1_put_string("proc3: \r\n");
 		release_processor();
@@ -421,6 +433,11 @@ void proc_p2_4(void) {
 	
 	
 	set_process_priority(PID_P4, LOWEST);
+	
+	if(strcmp(receive_msg,"Blah3") == 0 && sender_id == PID_P3){
+			passed_test[3] = 1;
+	}
+	
 	while(1) {
 		uart1_put_string("proc4: \r\n");
 		release_processor();
@@ -447,6 +464,11 @@ void proc_p2_5(void) {
 	#endif /* DEBUG_0 */
 
 	set_process_priority(PID_P5, LOWEST);	
+	
+	if(ret_val == RTX_OK){
+			passed_test[4] = 1;
+	}
+	
 	while(1) {
 		uart1_put_string("proc5 says yo \r\n");
 		release_processor();
@@ -457,9 +479,29 @@ void proc_p2_5(void) {
 
 
 void proc_p2_6(void) {
+		int i;
+		int success = 0;
+		int fail = 0;
     while(1){
 			uart1_put_string("proc6 says yooo \r\n");
-			
+			#ifdef DEBUG_0
+			if(isFinished){
+				printf("START\r\n");
+				for(i=0; i < NUM_TEST_PROCS; i++){
+					if(passed_test[i] == 1){
+						printf("test %d OK\r\n", i+1);
+						success += 1;
+					}else{
+						printf("test %d FAIL\r\n",i+1);
+						fail += 1;
+					}
+				}
+				printf("%d/%d tests OK \r\n",success,NUM_TEST_PROCS);
+				printf("%d/%d tests FAIL \r\n",fail,NUM_TEST_PROCS);
+				printf("END\r\n");
+				isFinished = 0;
+			}
+			#endif
 			release_processor();
 		}
     

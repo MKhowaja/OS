@@ -20,6 +20,8 @@
 
 #ifdef DEBUG_0 	
 #include "printf.h"
+#elif _DEBUG_HOTKEYS
+#include "printf.h"
 #endif /* DEBUG_0 */
 
 /* ----- Global Variables ----- */
@@ -61,7 +63,7 @@ int handle_blocked_process_ready(PROC_STATE_E state){
 	int i;
 	node* temp_node;
 	PCB* temp_pcb;
-	for(i = 0; i <= NUM_PRIORITY; i++){
+	for(i = 0; i < NUM_PRIORITY; i++){
 		if(block_queue[i].first != NULL){
 			// check the whole list and see if there is anything blocked on memory
 			temp_node = block_queue[i].first;
@@ -91,7 +93,7 @@ int handle_msg_blocked_process_ready(PCB* receiver_pcb){
 	if (receiver_pcb->m_state != MSG_BLOCKED){
 		return 0;
 	}
-	for(i = 0; i <= NUM_PRIORITY; i++){
+	for(i = 0; i < NUM_PRIORITY; i++){
 		if (linkedList_contain(&block_queue[i], receiver_pcb)){
 			temp_node =  linkedList_remove(&block_queue[i], receiver_pcb);
 			temp_pcb = (PCB*)temp_node->value;
@@ -231,7 +233,7 @@ PCB *scheduler(void){
 	else if(gp_current_process != NULL && gp_current_process->m_state == MSG_BLOCKED){
 		block_enqueue(gp_current_process, MSG_BLOCKED);
 	}
-	for ( i = 0; i <= NUM_PRIORITY; i++ ){
+	for ( i = 0; i < NUM_PRIORITY; i++ ){
 		if (ready_queue[i].first != NULL){
 			// pop off the first ready process with highest priority
 			firstProcess = linkedList_pop_front(&ready_queue[i]);
@@ -397,57 +399,57 @@ void print_queue(PROCESS_QUEUE_ID id){
 	switch(id){
 		case PRINT_READY:
 			state = RDY;
-			#ifdef DEBUG_0 
+			#ifdef _DEBUG_HOTKEYS
 			printf("Printing ready queue...\r\n");
 			#endif
 			break;
 		case PRINT_MEM_BLOCKED:
 			state = MEM_BLOCKED;
-			#ifdef DEBUG_0 
+			#ifdef _DEBUG_HOTKEYS
 			printf("Printing blocked on memory queue...\r\n");
 			#endif
 			break;
 		case PRINT_MSG_BLOCKED:
 			state = MSG_BLOCKED;
-			#ifdef DEBUG_0 
+			#ifdef _DEBUG_HOTKEYS
 			printf("Printing blocked on message queue...\r\n");
 			#endif
 			break;
 		default:
-			#ifdef DEBUG_0 
+			#ifdef _DEBUG_HOTKEYS
 			printf("INVALID ID TO PRINT QUEUE\r\n");
 			#endif
 			return;
 	}
 
 	if (id == PRINT_READY){ // ready queue
-		for(i = 0; i <= NUM_PRIORITY; i++){
-			#ifdef DEBUG_0 
+		for(i = 0; i < NUM_PRIORITY; i++){
+			#ifdef _DEBUG_HOTKEYS
 			printf("Priority: %d\r\n", i);
 			#endif
 			if(ready_queue[i].first != NULL){
-				temp_node = block_queue[i].first;
+				temp_node = ready_queue[i].first;
 				while (temp_node != NULL){
 					temp_pcb = (PCB*)temp_node->value;
 					if (temp_pcb->m_state == state){
-						#ifdef DEBUG_0 
+						#ifdef _DEBUG_HOTKEYS
 						printf("pid: %d  ", temp_pcb->m_pid);
 						#endif
 					}else if( temp_pcb->m_state == MEM_BLOCKED || temp_pcb->m_state == MSG_BLOCKED ){
-						#ifdef DEBUG_0 
+						#ifdef _DEBUG_HOTKEYS
 						printf("WTF?!?!?!?!?!?!?! Blocked PCB in ready queue!");
 						#endif
 					}
 					temp_node = temp_node->next;
 				}
 			}
-			#ifdef DEBUG_0 
+			#ifdef _DEBUG_HOTKEYS
 			printf("\r\n");
 			#endif
 		}
 	}else{ // block queue
-		for(i = 0; i <= NUM_PRIORITY; i++){
-			#ifdef DEBUG_0 
+		for(i = 0; i < NUM_PRIORITY; i++){
+			#ifdef _DEBUG_HOTKEYS
 			printf("Priority: %d\r\n", i);
 			#endif
 			if(block_queue[i].first != NULL){
@@ -455,18 +457,18 @@ void print_queue(PROCESS_QUEUE_ID id){
 				while (temp_node != NULL){
 					temp_pcb = (PCB*)temp_node->value;
 					if (temp_pcb->m_state == state){
-						#ifdef DEBUG_0 
+						#ifdef _DEBUG_HOTKEYS
 						printf("pid: %d  ", temp_pcb->m_pid);
 						#endif
 					}else if( temp_pcb->m_state == RDY){
-						#ifdef DEBUG_0 
+						#ifdef _DEBUG_HOTKEYS
 						printf("WTF?!?!?!?!?!?!?! Ready PCB in block queue!");
 						#endif
 					}
 					temp_node = temp_node->next;
 				}
 			}
-			#ifdef DEBUG_0 
+			#ifdef _DEBUG_HOTKEYS
 			printf("\r\n");
 			#endif
 		}

@@ -375,16 +375,6 @@ int k_set_process_priority(int process_id, int priority){
 	return k_release_processor();  //process not found
 }
 
-int get_process_priority(int process_id){
-	int i;
-	for ( i = 0; i < NUM_TEST_PROCS; i++ ) {
-		if ((gp_pcbs[i])->m_pid == process_id){ //find process with id process_id
-			return (gp_pcbs[i])->m_priority; //return priority of found process
-		}
-	}
-	return -1; //process not found
-}
-
 int k_get_process_priority(int process_id){
 	int i;
 	for ( i = 0; i < NUM_TEST_PROCS; i++ ) {

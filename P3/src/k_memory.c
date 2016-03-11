@@ -65,7 +65,7 @@ extern PCB* gp_current_process;
 void memory_init(void)
 {
 	int i;
-	U32 current_heap_location;
+	U32* current_heap_location;
 	MemNode* new_memory_node;
 	p_end = (U8 *)&Image$$RW_IRAM1$$ZI$$Limit;
   
@@ -96,7 +96,7 @@ void memory_init(void)
 //	linkedList_init(&free_list); // initialize linked list
 	heap_start = (U32*)p_end;
 	mem_list.first = (MemNode*) heap_start;
-	current_heap_location = (U32)heap_start;
+	current_heap_location = heap_start;
 	new_memory_node = mem_list.first;
 	for (i = 0; i < NUM_MEM; i++){
 		new_memory_node = (MemNode*) current_heap_location;

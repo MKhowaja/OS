@@ -72,7 +72,7 @@ typedef struct msgbuf
 	int sender_pid;		/* sender pid */
 	int receiver_pid;		/* receiver pid */
 	int msg_delay;				/* message delay */
-	int m_kdata[5];		/* extra 20B kernel data place holder */
+	int m_kdata[4];		/* extra 20B kernel data place holder */
 #endif
 	int mtype;              /* user defined message type */
 	char mtext[5];          /* body of the message */

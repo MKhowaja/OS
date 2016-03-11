@@ -289,3 +289,119 @@ void proc_p2_6(void) {
 		}
     
 }
+
+
+void stress_test_proc_a(void)
+{
+	MSG_BUF *msg;
+	int sender_id, num;
+	char *cmd = "%Z";
+
+	//initialize msg_buf that would be send to kcd to register
+	msg = (MSG_BUF *) request_memory_block();
+	msg->mtype = KCD_REG;
+	msg->mtext[0] = '%';
+	msg->mtext[1] = 'Z';
+	msg->mtext[2] = '\0';
+
+	send_message(PID_KCD, msg);
+
+	while(1){
+		msg = receive_message(&sender_id);
+		if(msg->mtext[0] == '%' && msg->mtext[1] == 'Z'){
+			release_memory_block(msg);
+			break;
+		}else{
+			release_memory_block(msg);
+		}
+	}
+
+	num = 0;
+
+	while(1){
+		msg =(MSG_BUF *) request_memory_block();
+		msg->mtype = COUNT_REPORT;
+		//TODO: need to check if the msg->mtext can be converted back to int in PROCESS c
+		sprintf(msg->mtext, "%d\0", num);
+		send_message(PID_B, msg);
+		num++;
+		release_processor();
+	}
+}
+
+
+
+void stress_test_proc_b(void)
+{
+	MSG_BUF *msg;
+	int sender_id;
+
+	while(1){
+		msg = (MSG_BUF *) receive_message(&sender_id);
+		send_message(PID_C, msg);
+	}
+}
+
+
+void stress_test_proc_c(void)
+{
+	MSG_BUF *msg_p;
+	MSG_BUF *msg_q;
+	MSG_BUF *msg_queue[NUM_MEM];
+	char message[10] = "Process C";
+	int first_msg;
+	int last_msg;
+	int sender_id, i;
+
+	for(i = 0; i < NUM_MEM; i++){
+		msg_queue[i] = NULL;
+	}
+
+	while(1) {
+		if(msg_queue[first_msg] == NULL){ //if msg_queue is empty, receive a msg
+			msg_p = (MSG_BUF *) receive_message(&sender_id);
+		}else{
+			msg_q = msg_queue[first_msg];
+			msg_queue[first_msg] = NULL;
+			first_msg = (first_msg+1)%NUM_MEM;
+		}
+
+		if(msg_p->mtype == COUNT_REPORT){
+			if(atoi(msg_p->mtext)%20==0){
+				//send message to crt display
+				msg.mtype = CRT_DISPLAY;
+				strncpy(msg->mtext, message, strlen(message) + 1);
+				send_message(PID_CRT,msg);
+
+				//hibernate for 10 sec
+				//request msg and delayed send for 10 sec
+				msg_q = (MSG_BUF *) request_memory_block();
+				msg_q->mtype = WAKEUP10;
+				delayed_send(PID_C, msg_q, 10000);
+				while(1){
+					p = (MSG_BUF *) receive_message();
+					if(p.mtype == WAKEUP10){
+						break;
+					}
+					else{
+						if(msg_queue[last_msg]!=NULL){
+							last_msg = (last_msg++)%NUM_MEM;
+						}
+						msg[last_msg] = p;
+
+					}
+				}
+			}
+		}
+		release_memory_block(msg_p);
+		release_processor();
+	}
+
+
+}
+
+
+
+
+
+

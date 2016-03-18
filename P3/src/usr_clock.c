@@ -24,6 +24,12 @@ void set_test_procs() {
 	
 	uart1_init();
 }
+int isNum(char c){
+	if(48 <= c && c <= 57){
+		return 1;
+¨	}
+	return 0;
+}
 
 void clock_proc(void){
     MSG_BUF* read_msg;//read in 
@@ -96,7 +102,10 @@ void clock_proc(void){
             release_memory_block(read_msg);
 
             if( strlen(buf) < 3 || buf[0] != cmd[0] ||  buf[1] != cmd[1]){
-                //do nothing, next
+                //cannot handle this case
+							  #ifdef DEBUG_0
+										printf("ERROR! cannot handle the command do not starts with %s or length less than 3 \r\n");
+								#endif /* DEBUG_0 */
                 continue;
             }
 
@@ -114,35 +123,49 @@ void clock_proc(void){
             else if(buf[2] == 'S'){
                 // 0 1 2 3 4 5 6 7 8 9 A B
                 // % W S _ H H : M M : S S
-                buf_to_int[0] = buf[4];
-                buf_to_int[1] = buf[5]; 
-                buf_to_int[2] = '\0';
-                hour = atoi(buf_to_int);
+								if(buf[6] == ':' && buf[9] == ':' && isNum(buf[4]) && isNum(buf[5]) &&
+									isNum(buf[7])&& isNum(buf[8]) && isNum(buf[10]) && isNum(buf[11]) ){
+									buf_to_int[0] = buf[4];
+									buf_to_int[1] = buf[5]; 
+									buf_to_int[2] = '\0';
+									hour = atoi(buf_to_int);
 
-                buf_to_int[0] = buf[7];
-                buf_to_int[1] = buf[8];
-                buf_to_int[2] = '\0';
+									buf_to_int[0] = buf[7];
+									buf_to_int[1] = buf[8];
+									buf_to_int[2] = '\0';
 
-                minute = atoi(buf_to_int);
+									minute = atoi(buf_to_int);
 
-                buf_to_int[0] = buf[10];
-                buf_to_int[1] = buf[11];
-                buf_to_int[2] = '\0';
-                sec = atoi(buf_to_int);
+									buf_to_int[0] = buf[10];
+									buf_to_int[1] = buf[11];
+									buf_to_int[2] = '\0';
+									sec = atoi(buf_to_int);
 
-                track_time = hour * 3600 + minute * 60 + sec;
+									track_time = hour * 3600 + minute * 60 + sec;
 
-                if (running == 0) {
-                    //start clock
-                    msg = (MSG_BUF*)request_memory_block();
-                    msg->mtype = DEFAULT;
-                    send_message(PID_CLOCK, msg);
-                }
-                running = 1;
+									if (running == 0) {
+											//start clock
+											msg = (MSG_BUF*)request_memory_block();
+											msg->mtype = DEFAULT;
+											send_message(PID_CLOCK, msg);
+									}
+									running = 1;
+								}
+								else{
+									#ifdef DEBUG_0
+										printf("ERROR! invalid time format \r\n");
+									#endif /* DEBUG_0 */
+									continue;
+							¨	}
             }
             else if(buf[2] == 'T'){
                 running = 0;
             }
+						else{
+							  #ifdef DEBUG_0
+										printf("ERROR! do not recognize this command \r\n");
+								#endif /* DEBUG_0 */
+						}
         }
     }
 }

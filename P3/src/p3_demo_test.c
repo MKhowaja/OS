@@ -7,7 +7,7 @@
 #ifdef DEBUG_0
 
 #endif /* DEBUG_0 */
-#define TEN_SEC 1000
+#define TEN_SEC 2000
 
 /* initialization table item */
 PROC_INIT g_test_procs[NUM_TEST_PROCS];
@@ -32,15 +32,15 @@ void set_test_procs() {
     
     g_test_procs[2].m_pid = PID_A;  
     g_test_procs[2].mpf_start_pc = &stress_test_proc_a;
-    g_test_procs[2].m_priority   = MEDIUM;
+    g_test_procs[2].m_priority   = LOW;
     
     g_test_procs[3].m_pid = PID_B;
     g_test_procs[3].mpf_start_pc = &stress_test_proc_b;
-    g_test_procs[3].m_priority   = MEDIUM;
+    g_test_procs[3].m_priority   = LOW;
     
     g_test_procs[4].m_pid = PID_C;
     g_test_procs[4].mpf_start_pc = &stress_test_proc_c;
-    g_test_procs[4].m_priority   = MEDIUM;
+    g_test_procs[4].m_priority   = LOW;
     
     uart1_init();
 }
@@ -355,7 +355,7 @@ void stress_test_proc_a(void)
         sprintf(msg->mtext, "%d", num);
         send_message(PID_B, msg);
         num++;
-        if(num == 29){
+        if(num == 69){
             #ifdef DEBUG_0
                 printf("almost reaches 30, might have problem here");
             #endif
@@ -394,7 +394,7 @@ void stress_test_proc_c(void)
     MSG_BUF *msg_p;
     MSG_BUF *msg_q;
     int sender_id;
-    char message[12] = "Process C\r\n";
+    char message[12] = "Process C\r\n\0";
     MSG_BUF* msg_queue = NULL;  
     #ifdef DEBUG_0
             printf("Entering Stress Proc C\r\n");
@@ -418,6 +418,7 @@ void stress_test_proc_c(void)
                 //request msg and delayed send for 10 sec
                 msg_q = (MSG_BUF *) request_memory_block();
                 msg_q->mtype = WAKEUP10;
+								strncpy(msg_q->mtext, "delay send\r\n", strlen("delay send\r\n")+1);
                 delayed_send(PID_C, msg_q, TEN_SEC);
                 while(1){
                     msg_p = (MSG_BUF *) receive_message(&sender_id);
@@ -438,6 +439,9 @@ void stress_test_proc_c(void)
          release_memory_block(msg_p); //Need to free msg_p if not going to uart 
       }
         }else{
+				#ifndef DEBUG_0
+					printf("PANIC!!!");
+				#endif
         release_memory_block(msg_p); //Need to free msg_p if not going to uart 
     }
         

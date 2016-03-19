@@ -314,6 +314,11 @@ void uart_i_process(){
 			if (message != NULL) {
           gp_buffer = (uint8_t*)message->mtext; //pointer to beginning of sent message from CRT			
 					
+					#ifdef DEBUG_0
+
+				printf("%d send %s to display", sender_id, gp_buffer);
+					#endif
+				
 					pUart->IER ^= IER_THRE; // toggle the IER_THRE (interrupt) bit
 					while (*gp_buffer != '\0'){				
 						g_char_out = *gp_buffer;
@@ -321,10 +326,10 @@ void uart_i_process(){
 						gp_buffer++; 
 					}
 					ret = k_release_memory_block_nonpreempt((void*)message);
-					if (ret == 1) {
-							g_switch_flag = 1;
-					}	
 					message = NULL;
+					//if (ret == 1) {
+							//g_switch_flag = 1;
+					//}	
 	  	} 
 	  	else { //no message to receive
 					#ifdef DEBUG_0

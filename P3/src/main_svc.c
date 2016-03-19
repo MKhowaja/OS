@@ -22,7 +22,6 @@
 
 
 int main() 
-
 {	
 	/* CMSIS system initialization */
 	SystemInit(); 

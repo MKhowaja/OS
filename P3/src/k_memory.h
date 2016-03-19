@@ -42,5 +42,6 @@ void *k_request_memory_block(void);
 void *k_request_memory_block_nonpreempt(void);
 int k_release_memory_block(void *);
 int k_release_memory_block_nonpreempt (void *);
+void printMemList(int release);
 
 #endif /* ! K_MEM_H_ */

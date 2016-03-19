@@ -15,9 +15,9 @@
 #include "string.h"
 #include "k_rtx.h"
 #ifdef DEBUG_0
-#include "printf.h"
+//#include "printf.h"
 #endif
-
+#include "printf.h"
 
 MSG_BUF* message = NULL;
 uint8_t *gp_buffer = "\0"; //pointer to beginning of sent message from CRT

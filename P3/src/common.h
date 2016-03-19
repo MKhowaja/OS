@@ -17,7 +17,7 @@
 #define RTX_ERR -1
 #define RTX_OK 0
 #define NUM_KERNEL_PROCS 5
-#define NUM_TEST_PROCS 3
+#define NUM_TEST_PROCS 5
 #define NUM_TOTAL_PROCS (NUM_KERNEL_PROCS+NUM_TEST_PROCS)
 
 /* Process IDs */
@@ -78,7 +78,7 @@ typedef struct msgbuf
 	int m_kdata[4];		/* extra 20B kernel data place holder */
 #endif
 	int mtype;              /* user defined message type */
-	char mtext[5];          /* body of the message */
+	char mtext[20];          /* body of the message */
 } MSG_BUF;
 
 #endif // COMMON_H_

@@ -75,15 +75,15 @@ void set_kernel_procs() {
 void nullProc (void){
     int ret_val;
 		#ifdef DEBUG_0 
-    printf("Null Process Start\n");
+			//printf("Null Process Start\n");
 		#endif
     while (1){
 			#ifdef DEBUG_0 
-        printf("while loop start");
+        //printf("while loop start");
 			#endif
         ret_val = release_processor();
         #ifdef DEBUG_0
-        printf("nullProc: ret_val=%d\n", ret_val);
+					//printf("nullProc: ret_val=%d\r\n", ret_val);
         #endif /* DEBUG_0 */
     }
 }
@@ -101,7 +101,7 @@ void crt(void){
         //we need id of uart_i_process
             //set_g_buffer(msg->mtext);
             send_message(PID_UART_IPROC, msg);
-						pUart ->IER = pUart->IER | IER_THRE;
+						pUart->IER = pUart->IER | IER_THRE;
         }
         else{
             //do nothing except releasing msg block	
@@ -191,6 +191,9 @@ void kcd(void){
             continue;
         } else if (msg->mtype == KCD_REG) {
             if (command_buffer_index < NUM_COMMANDS){
+							#ifdef DEBUG_0
+								printf("kcd is registering command: %s\r\n", msg->mtext);
+							#endif
                 command_buffer[command_buffer_index].pid = sender_id;
                 strcpy(command_buffer[command_buffer_index].cmd, msg->mtext);
                 command_buffer_index = (command_buffer_index + 1);

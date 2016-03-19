@@ -93,6 +93,9 @@ void stress_test_proc_a(void)
 			printf("Enter %Z to exit loop, any other input outputs ERROR\r\n");
 		#endif
 		msg = receive_message(&sender_id);
+		#ifdef DEBUG_0
+			printf("Stress Porc A got a message from %d, and the message is %s\r\n", sender_id, msg->mtext);
+		#endif
 		if(msg && strlen(msg->mtext) >= 2 && msg->mtext[0] == '%' && msg->mtext[1] == 'Z'){
 			release_memory_block(msg);
 			break;
@@ -116,6 +119,11 @@ void stress_test_proc_a(void)
 		sprintf(msg->mtext, "%d", num);
 		send_message(PID_B, msg);
 		num++;
+		if(num == 9){
+			#ifdef DEBUG_0
+				printf("almost reaches 10, might have problem here");
+			#endif
+		}
 		release_processor();
 	}
 }
@@ -133,7 +141,14 @@ void stress_test_proc_b(void)
 		#ifdef DEBUG_0
 			printf("Stress Proc B Loop 1\r\n");
 		#endif
+		
 		msg = (MSG_BUF *) receive_message(&sender_id);
+		#ifdef DEBUG_0
+			if(sender_id == PID_A){
+				printf("Stress Proc B got the message from PROC_A: %d, and the message is %s\r\n", sender_id, msg->mtext);
+			}
+		#endif
+		
 		send_message(PID_C, msg);
 	}
 }
@@ -157,10 +172,10 @@ void stress_test_proc_c(void)
 		}
 
 		if(msg_p->mtype == COUNT_REPORT){
-			if(atoi(msg_p->mtext)%20==0){ //msg_p will be released in uart eventually
+			if(atoi(msg_p->mtext)%20==0){ //msg_p will be released in uart
 				//send message to crt display
 				msg_p->mtype = CRT_DISPLAY;
-				strncpy(msg_p->mtext, message, strlen(message) + 1);
+				strncpy(msg_p->mtext, message, strlen(message) + 1); // message is "Process C"
 				send_message(PID_CRT,msg_p); //message p gets released after crt sends it to uart
 
 				//hibernate for 10 sec
@@ -170,21 +185,25 @@ void stress_test_proc_c(void)
 				delayed_send(PID_C, msg_q, TEN_SEC);
 				while(1){
 					msg_p = (MSG_BUF *) receive_message(&sender_id);
+					#ifdef DEBUG_0
+						if(sender_id == PID_B){
+							printf("Stress Proc C got a message from PROC_B %d, and the message is %s\r\n", sender_id, msg_p->mtext);
+						}
+					#endif
 					if(msg_p->mtype == WAKEUP10){
+						release_memory_block(msg_p); 	//release memory block that was requested for delay send;
 						break;
 					}
 					else{
 						msg_queue_enque(&msg_queue, msg_p);
 					}
 				}
-			}
-            else {
-                release_memory_block(msg_p); //Need to free msg_p if not going to uart 
-            }
-		}
-        else {
-            release_memory_block(msg_p); //Need to free msg_p if not going to uart 
-        }
+			}else {
+         release_memory_block(msg_p); //Need to free msg_p if not going to uart 
+      }
+		}else{
+        release_memory_block(msg_p); //Need to free msg_p if not going to uart 
+    }
         
         //not releasing p here because uart proc will do it eventually
 		release_processor();

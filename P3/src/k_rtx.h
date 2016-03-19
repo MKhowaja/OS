@@ -119,8 +119,8 @@ typedef struct log_msg_t
 	char mtext[17];				/* message data */
 } LOG_MSG_BUF;
 
-#define SZ_MEM_BLK 128           /* fixed size of memory block 128B default */
+#define SZ_MEM_BLK 32           /* fixed size of memory block 128B default */
 //#define SZ_MEM_BLK_WITH_HEADER SZ_MEM_BLK+0x20
-#define NUM_MEM 10
+#define NUM_MEM 30
 #define PROC_BLK_SIZE 0x100
 #endif // ! K_RTX_H_

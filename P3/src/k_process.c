@@ -267,13 +267,13 @@ int process_switch(PCB *p_pcb_old)
 		}
 		gp_current_process->m_state = RUN;
 		__set_MSP((U32) gp_current_process->mp_sp);
-		#ifdef DEBUG_0
-        printf("new process released\r\n");
-		#endif /* DEBUG_0 */
+		//#ifdef DEBUG_0
+        //printf("new process released\r\n");
+		//#endif /* DEBUG_0 */
 		__rte();  // pop exception stack frame from the stack for a new processes
-		#ifdef DEBUG_0
-        printf("new process released __rte()\r\n");
-		#endif /* DEBUG_0 */
+		//#ifdef DEBUG_0
+        //printf("new process released __rte()\r\n");
+		//#endif /* DEBUG_0 */
 	}
 	
 	/* The following will only execute if the if block above is FALSE */
@@ -287,9 +287,9 @@ int process_switch(PCB *p_pcb_old)
 			gp_current_process->m_state = RUN;
 			//ready_enqueue(p_pcb_old);
 			__set_MSP((U32) gp_current_process->mp_sp); //switch to the new proc's stack  
-				#ifdef DEBUG_0
-					printf("ready process released\r\n");
-				#endif /* DEBUG_0 */
+				//#ifdef DEBUG_0
+					//printf("ready process released\r\n");
+				//#endif /* DEBUG_0 */
 		} else {
 			gp_current_process = p_pcb_old; // revert back to the old proc on error
 			return RTX_ERR;
@@ -311,16 +311,17 @@ int k_release_processor(void){
 // 3. process switch invokes scheduler and context-switches to the new process
 	PCB *p_pcb_old = NULL;
 	p_pcb_old = gp_current_process;
-
-	#ifdef DEBUG_0
-        printf("Entering k_release_processor\r\n");
-  #endif /* DEBUG_0 */
+	if(gp_current_process->m_pid != PID_NULL){
+			#ifdef DEBUG_0
+					printf("Entering k_release_processor\r\n");
+			#endif /* DEBUG_0 */
+	}
 	
 	gp_current_process = scheduler();
 	
-	#ifdef DEBUG_0
-        printf("finishing scheduler()\r\n");
-  #endif /* DEBUG_0 */
+	//#ifdef DEBUG_0
+        //printf("finishing scheduler()\r\n");
+  //#endif /* DEBUG_0 */
 	
 	if ( gp_current_process == NULL  ) {
 		gp_current_process = p_pcb_old; // revert back to the old process
@@ -331,9 +332,11 @@ int k_release_processor(void){
 	}
 	process_switch(p_pcb_old);
 	
-	#ifdef DEBUG_0
-        printf("finishing context switch\r\n");
-  #endif /* DEBUG_0 */
+	if(gp_current_process->m_pid != PID_NULL){
+			#ifdef DEBUG_0
+					printf("finishing context switch\r\n");
+			#endif /* DEBUG_0 */
+	}
 	
 	return RTX_OK;
 }

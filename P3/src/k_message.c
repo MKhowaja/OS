@@ -113,7 +113,6 @@ void print_receive_log_buffer(void){
 
 int k_send_message(int receiver_pid, void *message_envelope)
 {
-	
 	PCB * receiver_pcb;
 	MSG_BUF* message;
 	PCB * current_process;
@@ -121,10 +120,6 @@ int k_send_message(int receiver_pid, void *message_envelope)
         printf("Entering k_send_message\r\n");
   #endif /* DEBUG_0 */
 	__disable_irq();
-	
-	#ifdef DEBUG_0
-        printf("k_send_message: irq disabled\r\n");
-  #endif /* DEBUG_0 */
 	current_process = k_get_current_process();
 	if (message_envelope == NULL){
 		__enable_irq();
@@ -187,9 +182,7 @@ void* k_receive_message(int *sender_id)
         printf("Entering k_receive_message\r\n");
   #endif /* DEBUG_0 */
 	__disable_irq();
-	#ifdef DEBUG_0
-        printf("k_receive_message: irq disabled\r\n");
-  	#endif /* DEBUG_0 */
+
 	current_process = k_get_current_process();
 	while (current_process->msg_queue == NULL){
 		//Setting state to msg blocked will cause scheduler to put process in blocked queue
@@ -254,9 +247,6 @@ int k_delayed_send(int receiver_pid, void *message_envelope, int delay){
 	
 	__disable_irq();
 	
-	#ifdef DEBUG_0
-        printf("k_delayed_send: irq disabled\r\n");
-  #endif /* DEBUG_0 */
 	
 	if (message_envelope == NULL){
 		__enable_irq();

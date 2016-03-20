@@ -12,3 +12,5 @@ timer.o: src\k_rtx.h
 timer.o: src\common.h
 timer.o: src\list.h
 timer.o: src\k_message.h
+timer.o: src\printf.h
+timer.o: C:\Software\Keil\ARM\ARMCC\bin\..\include\stdarg.h

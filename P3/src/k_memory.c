@@ -167,9 +167,13 @@ void *k_request_memory_block(void) {
 	}
 	
 	printMemList(0);
+	#ifdef DEBUG_0
+		printf("memory block requested: 0x%x, next is 0x%x\r\n", memory_block, memory_block->next);
+	#endif
 	
 	// atomic ( off ) ;
 	__enable_irq();
+	//memory_block->next = NULL;
 	return (void *)memory_block;
 }
 
@@ -194,6 +198,10 @@ void *k_request_memory_block_nonpreempt(void) {
 	}
 
 	printMemList(0);
+	#ifdef DEBUG_0
+		printf("memory block requested: 0x%x, next is 0x%x\r\n", memory_block, memory_block->next);
+	#endif
+	//memory_block->next = NULL;
 	return (void *)memory_block;
 }
 
@@ -244,6 +252,9 @@ int k_release_memory_block(void *p_mem_blk) {
 	}
 	
 	printMemList(1);
+	#ifdef DEBUG_0
+		printf("released memory block 0x%x, next memory block is 0x%x\r\n", free_memory_node,free_memory_node -> next);
+	#endif
 	
 	if(handle_blocked_process_ready(MEM_BLOCKED)){
 		__enable_irq();
@@ -296,6 +307,9 @@ int k_release_memory_block_nonpreempt(void *p_mem_blk) {
 	}
 	
 	printMemList(1);
+	#ifdef DEBUG_0
+		printf("released memory block 0x%x, next memory block is 0x%x\r\n", free_memory_node,free_memory_node -> next);
+	#endif
 
  	return handle_blocked_process_ready(MEM_BLOCKED);
 }
@@ -309,9 +323,9 @@ void printMemList(int release){
 	#ifdef DEBUG_0
 	while(temp != NULL){
 		  if(release == 1){
-				printf("releasing memory: available memory block %d @ 0x%x\r\n",i, temp);
+				printf("releasing memory: available memory block %d @ 0x%x, NEXT: 0x%x\r\n",i, temp, temp->next);
 			}else{
-				printf("requesting memory: available memory block %d @ 0x%x\r\n",i, temp);
+				printf("requesting memory: available memory block %d @ 0x%x, NEXT: 0x%x\r\n",i, temp, temp->next);
 			}
 		temp = temp->next;
 		i++;

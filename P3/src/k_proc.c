@@ -100,6 +100,14 @@ void crt(void){
         //send msg to uart_i_process
         //we need id of uart_i_process
             //set_g_buffer(msg->mtext);
+        if(PID_UART_IPROC == 0){
+            #ifdef DEBUG_0
+                printf("WTF, why do we wanna send it to null proc, are you serious\n");
+            #endif
+        }    
+        #ifdef DEBUG_0
+            printf("crt send a message to uart");
+        #endif        
             send_message(PID_UART_IPROC, msg);
 						pUart->IER = pUart->IER | IER_THRE;
         }
@@ -171,6 +179,14 @@ void kcd(void){
                             msg = (MSG_BUF*) request_memory_block();
                             msg->mtype = DEFAULT;
                             strcpy(msg->mtext, msg_data);
+                            if(command_buffer[i].pid == 0){
+                                #ifdef DEBUG_0
+                                    printf("WTF, why do we wanna send it to null proc, are you serious\r\n");
+                                #endif
+                            }
+                            #ifdef DEBUG_0
+                                    printf("kcd send a message to %d",command_buffer[i].pid);
+                            #endif
                             send_message(command_buffer[i].pid, msg);
 													#ifdef DEBUG_0 
                             printf ("Sent message with command %d\r\n", i);
@@ -209,6 +225,9 @@ void kcd(void){
         else{
             //has to be CRT DISPLAY
             //msg no need to change
+            #ifdef DEBUG_0
+                 printf("kdc send a message to crt");
+            #endif
             send_message(PID_CRT,msg);
         }
     }

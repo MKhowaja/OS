@@ -218,7 +218,7 @@ void uart_i_process(){
 	int sender_id;
 	int ret = 0;
 	PCB* prev_pcb_node = k_get_current_process();
-	PCB* current_process;
+	//PCB* current_process;
 	
 	g_switch_flag = 0;
 	/* Reading IIR automatically acknowledges the interrupt */
@@ -260,9 +260,17 @@ void uart_i_process(){
 						msg->mtype = DEFAULT;
 		      	strncpy(msg->mtext, (char*)g_buffer, buffer_index);
 
-						current_process = k_get_current_process();
-						msg->sender_pid = current_process->m_pid;
+						//current_process = k_get_current_process();
+						msg->sender_pid = PID_UART_IPROC;
 						// send message to kcd
+						if(PID_KCD == 0){
+							#ifdef DEBUG_0
+								printf("WTF, why do we wanna send it to null proc, are you serious\r\n");
+							#endif
+						}
+						#ifdef DEBUG_0
+							printf("uart send a message to kcd");
+						#endif // DEBUG_0
 						k_send_message_nonpreempt(PID_KCD, msg);
 			    
 						g_switch_flag = 1;
@@ -315,8 +323,7 @@ void uart_i_process(){
           gp_buffer = (uint8_t*)message->mtext; //pointer to beginning of sent message from CRT			
 					
 					#ifdef DEBUG_0
-
-				printf("%d send %s to display", sender_id, gp_buffer);
+						printf("%d send %s to display\r\n", sender_id, gp_buffer);
 					#endif
 				
 					pUart->IER ^= IER_THRE; // toggle the IER_THRE (interrupt) bit
@@ -325,11 +332,14 @@ void uart_i_process(){
 						pUart->THR = g_char_out; //prints to CRT
 						gp_buffer++; 
 					}
+					#ifdef DEBUG_0
+						printf("uart is going to release a memory block\r\n", message, message->mtext);
+					#endif
 					ret = k_release_memory_block_nonpreempt((void*)message);
 					message = NULL;
-					//if (ret == 1) {
-							//g_switch_flag = 1;
-					//}	
+					if (ret == 1) {
+							g_switch_flag = 1;
+					}	
 	  	} 
 	  	else { //no message to receive
 					#ifdef DEBUG_0

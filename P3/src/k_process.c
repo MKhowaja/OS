@@ -333,8 +333,13 @@ int k_release_processor(void){
 	process_switch(p_pcb_old);
 	
 	if(gp_current_process->m_pid != PID_NULL){
+		if(gp_current_process->m_pid == 9){
 			#ifdef DEBUG_0
-					printf("finishing context switch\r\n");
+					printf(" ");
+			#endif /* DEBUG_0 */
+		}
+			#ifdef DEBUG_0
+					printf("finishing context switch, switching to process %d\r\n", gp_current_process->m_pid);
 			#endif /* DEBUG_0 */
 	}
 	

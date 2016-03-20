@@ -10,6 +10,9 @@
 #include "timer.h"
 #include "k_message.h"
 #include "k_rtx.h"
+#ifdef DEBUG_0
+	#include "printf.h"
+#endif
 #define BIT(X) (1<<X)
 
 volatile uint32_t g_timer_count = 0; // increment every 1 ms
@@ -146,6 +149,15 @@ void timer_i_process(void) {
 		message_to_send = sorted_queue;
 		sorted_queue = (MSG_BUF*)sorted_queue->mp_next;
 		target_pid = message_to_send->receiver_pid;
+		if(target_pid == 0){
+			#ifdef DEBUG_0
+				printf("WTF, why do we wanna send it to null proc, are you serious\n");
+			#endif
+		}
+		message_to_send->mp_next = NULL;
+		#ifdef DEBUG_0
+                        printf("irq send a message to %d",target_pid);
+        #endif
 		send_flag = send_flag | k_send_message_nonpreempt(target_pid, (void*)message_to_send);
 	}
 	if (send_flag){
@@ -171,6 +183,11 @@ void expire_list_enqueue(MSG_BUF *msg){
 		else {
 			while (message_iter->mp_next != NULL && msg->msg_delay > ((MSG_BUF*)(message_iter->mp_next))->msg_delay){
 				message_iter = (MSG_BUF*)message_iter->mp_next;
+			}
+			if (message_iter == msg){
+				#ifdef DEBUG_0
+						printf("PANIC 2\r\n");
+				#endif
 			}
 			msg->mp_next = message_iter->mp_next;
 			message_iter->mp_next = msg;

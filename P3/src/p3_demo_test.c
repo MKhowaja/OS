@@ -45,23 +45,6 @@ void set_test_procs() {
     uart1_init();
 }
 
-void printMsgQ(MSG_BUF** msg_queue){
-	MSG_BUF *message_queue_iter = NULL;
-	int i;
-	
-	message_queue_iter = *msg_queue;
-	i = 1;
-	#ifdef DEBUG_0
-	
-	while (message_queue_iter!=NULL){
-			printf("Message queue %dth message is 0x%x, with text %s\r\n", i, message_queue_iter, message_queue_iter->mtext);
-			i++;
-      message_queue_iter = (MSG_BUF*)message_queue_iter->mp_next;
-  }
-	#endif
-	
-}
-
 void msg_queue_enque(MSG_BUF** msg_queue, MSG_BUF* message){
     MSG_BUF* message_queue_iter = NULL;
     message_queue_iter = *msg_queue;
@@ -360,17 +343,11 @@ void stress_test_proc_a(void)
             printf("Enter %Z to exit loop, any other input outputs ERROR\r\n");
         #endif
         msg = receive_message(&sender_id);
-        #ifdef DEBUG_0
-            printf("Stress Porc A got a message from %d, and the message is %s\r\n", sender_id, msg->mtext);
-        #endif
         if(msg && strlen(msg->mtext) >= 2 && msg->mtext[0] == '%' && msg->mtext[1] == 'Z'){
             release_memory_block(msg);
             break;
         }else{
             release_memory_block(msg);
-            #ifdef DEBUG_0
-                printf("ERROR\r\n");
-            #endif
         }
     }
 
@@ -381,22 +358,11 @@ void stress_test_proc_a(void)
             printf("Stress Proc A Loop 2\r\n");
         #endif
         msg =(MSG_BUF *) request_memory_block();
-				#ifdef DEBUG_0
-					printf("Street test proc A requests mem block for message: %d\r\n", num);
-				#endif
         msg->mtype = COUNT_REPORT;
         //TODO: need to check if the msg->mtext can be converted back to int in PROCESS c
         sprintf(msg->mtext, "%d", num);
-				#ifdef DEBUG_0
-					printf("Street test proc A send a message to b");
-				#endif
         send_message(PID_B, msg);
         num++;
-        if(num == 30){
-            #ifdef DEBUG_0
-                printf("almost reaches 30, might have problem here");
-            #endif
-        }
         release_processor();
     }
 }
@@ -416,14 +382,6 @@ void stress_test_proc_b(void)
         #endif
         
         msg = (MSG_BUF *) receive_message(&sender_id);
-        #ifdef DEBUG_0
-            if(sender_id == PID_A){
-                printf("Stress Proc B got the message from PROC_A: %d, and the message is %s\r\n", sender_id, msg->mtext);
-            }
-        #endif
-        #ifdef DEBUG_0
-            printf("b send a message to c");
-        #endif
         send_message(PID_C, msg);
     }
 }
@@ -434,7 +392,6 @@ void stress_test_proc_c(void)
     MSG_BUF *msg_q;
     int sender_id;
     char message[12] = "Process C\r\n\0";
-    //char message2[25] = "Process C1111111111111\r\n\0";
     MSG_BUF* msg_queue = NULL;  
     #ifdef DEBUG_0
             printf("Entering Stress Proc C\r\n");
@@ -465,16 +422,9 @@ void stress_test_proc_c(void)
                 delayed_send(PID_C, msg_q, TEN_SEC);
                 while(1){
                    msg_p = (MSG_BUF *) receive_message(&sender_id);
-                    #ifdef DEBUG_0
-                       if(sender_id == PID_B){
-                           printf("Stress Proc C got a message from PROC_B %d, and the message is %s\r\n", sender_id, msg_p->mtext);
-                        }
-                    #endif
+
                     if(msg_p->mtype == WAKEUP10){
                        //release_memory_block(msg_p);    //release memory block that was requested for delay send;
-												#ifdef DEBUG_0
-													printf("stress process got a message whose message type is WAKEUP10");
-												#endif
                         break;
                     }
                     else{
@@ -482,7 +432,6 @@ void stress_test_proc_c(void)
 												printf("stress process c is enqueue message\r\n");
 											#endif
                        msg_queue_enque(&msg_queue, msg_p);
-												printMsgQ(&msg_queue);
                     }
                 }
             }//else {
@@ -492,9 +441,6 @@ void stress_test_proc_c(void)
 				//#ifndef DEBUG_0
 					//printf("PANIC!!!");
 				//#endif
-				#ifdef DEBUG_0
-						printf("stress process c is going to release message 0x%x, the message is %s\r\n",msg_p, msg_p->mtext);
-				#endif
         release_memory_block(msg_p); //Need to free msg_p if not going to uart 
 				//}
         
@@ -504,78 +450,5 @@ void stress_test_proc_c(void)
 
 
 }
-
-// void stress_test_proc_c(void)
-// {
-// 	const int NUM_MEM = 10;
-// 	MSG_BUF *msg_p;
-// 	MSG_BUF *msg_q;
-// 	MSG_BUF *msg_queue[NUM_MEM];
-// 	char message[12] = "Process C\r\n";
-// 	int first_msg = 0;
-// 	int last_msg = 0;
-// 	int sender_id, i;
- 
-// 	#ifdef DEBUG_0
-//         printf("Entering Stress Proc C\r\n");
-//   #endif
-	
-//  	for(i = 0; i < NUM_MEM; i++){
-//  		msg_queue[i] = NULL;
-//  	}
- 
-//  	while(1) {
-//  		if(msg_queue[first_msg] == NULL && msg_queue[last_msg] == NULL){ //if msg_queue is empty, receive a msg
-//  			first_msg = 0;
-//  			last_msg = 0;
-//  			msg_p = (MSG_BUF *) receive_message(&sender_id);
-//  		}else{
-//  			msg_p = msg_queue[first_msg];
-//  			msg_queue[first_msg] = NULL;
-//  			first_msg = (first_msg+1)%NUM_MEM;
-//  		}
- 
-//  		if(msg_p->mtype == COUNT_REPORT){
-//  			if(atoi(msg_p->mtext)%20==0){
-//  				//send message to crt display
-//  				msg_p->mtype = CRT_DISPLAY;
-//  				strncpy(msg_p->mtext, message, strlen(message) + 1);
-//  				send_message(PID_CRT,msg_p);
- 
-//  				//hibernate for 10 sec
-//  				//request msg and delayed send for 10 sec
-//  				msg_q = (MSG_BUF *) request_memory_block();
-//  				msg_q->mtype = WAKEUP10;
-//  				delayed_send(PID_C, msg_q, 1000);
-//  				while(1){
-//  					msg_p = (MSG_BUF *) receive_message(&sender_id);
-//  					if(msg_p->mtype == WAKEUP10){
-//  						release_memory_block(msg_p);
-//  						break;
-//  					}
-//  					else{
-// 						int test = 3%NUM_MEM;
-//  						if(msg_queue[last_msg]!=NULL){
-//  							last_msg = (++last_msg)%NUM_MEM;
-//  						}
-//  						msg_queue[last_msg] = msg_p;
- 
-//  					}
-//  				}
-//  			}else{
-//  				release_memory_block(msg_p);
-//  			}
-//  		}
-//  		else{
-//  			release_memory_block(msg_p);
-//  		}
-//  		release_processor();
-//  	}
- 
-//  }
-
-
-
-
 
 

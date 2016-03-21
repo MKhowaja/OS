@@ -10,5 +10,4 @@ void set_process_proc(void);
 void stress_test_proc_a(void);
 void stress_test_proc_b(void);
 void stress_test_proc_c(void);
-void printMsgQ(MSG_BUF** msg_queue);
 #endif /* DEMO_TEST_H */

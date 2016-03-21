@@ -108,7 +108,7 @@ void memory_init(void)
 	#ifdef DEBUG_0  
 	printf("Allocated heap done\n");
 	#endif
-	printMemList(0);
+	//printMemList(0);
 	/* allocate memory for heap, not implemented yet*/
   
 }
@@ -166,7 +166,7 @@ void *k_request_memory_block(void) {
 		mem_list.first = mem_list.first->next;
 	}
 	
-	printMemList(0);
+	//printMemList(0);
 	#ifdef DEBUG_0
 		printf("memory block requested: 0x%x, next is 0x%x\r\n", memory_block, memory_block->next);
 	#endif
@@ -197,7 +197,7 @@ void *k_request_memory_block_nonpreempt(void) {
 		mem_list.first = mem_list.first->next;
 	}
 
-	printMemList(0);
+	//printMemList(0);
 	#ifdef DEBUG_0
 		printf("memory block requested: 0x%x, next is 0x%x\r\n", memory_block, memory_block->next);
 	#endif
@@ -251,7 +251,7 @@ int k_release_memory_block(void *p_mem_blk) {
 		mem_list.last = free_memory_node;
 	}
 	
-	printMemList(1);
+	//printMemList(1);
 	#ifdef DEBUG_0
 		printf("released memory block 0x%x, next memory block is 0x%x\r\n", free_memory_node,free_memory_node -> next);
 	#endif
@@ -306,7 +306,7 @@ int k_release_memory_block_nonpreempt(void *p_mem_blk) {
 		mem_list.last = free_memory_node;
 	}
 	
-	printMemList(1);
+	//printMemList(1);
 	#ifdef DEBUG_0
 		printf("released memory block 0x%x, next memory block is 0x%x\r\n", free_memory_node,free_memory_node -> next);
 	#endif

@@ -122,7 +122,6 @@ void crt(void){
     }
 }
 
-
 //command reg
 //input
 void kcd(void){

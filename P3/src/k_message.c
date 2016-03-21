@@ -90,7 +90,7 @@ void message_enque(PCB* receiver, MSG_BUF* message){
 	MSG_BUF* message_queue_iter = NULL;
 	message_queue_iter = receiver->msg_queue;
 	
-	printMessageQ(receiver);
+	//printMessageQ(receiver);
 	#ifdef DEBUG_0
 		printf("getting message 0x%x, message->next is 0x%x\r\n", message, message->mp_next);
 	#endif
@@ -100,13 +100,7 @@ void message_enque(PCB* receiver, MSG_BUF* message){
 	}
 	else {
 			while (message_queue_iter->mp_next !=NULL){
-				
 					message_queue_iter = (MSG_BUF*)message_queue_iter->mp_next;
-				if(message_queue_iter == (MSG_BUF*)message_queue_iter->mp_next){
-						#ifdef DEBUG_0
-							printf("This message address is 0x%x, but its next is itself, 0x%x,  hahahaha it's funny, stop joking!\r\n", message_queue_iter,message_queue_iter->mp_next);
-						#endif
-				}
 			}
 			message_queue_iter->mp_next = message;
 	}

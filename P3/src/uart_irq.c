@@ -312,13 +312,13 @@ void uart_i_process(){
 	} else if (IIR_IntId & IIR_THRE) {
 	// interrupt Id and THRE Interrupt, transmit holding register becomes empty
 		// Should only get here from send message from CRT PROC
-			if (message != NULL){
-					ret = k_release_memory_block_nonpreempt((void*)message);
-					if (ret == 1) {
-							g_switch_flag = 1;
-					}					
-			}
-			message = NULL;
+			//if (message != NULL){
+					//ret = k_release_memory_block_nonpreempt((void*)message);
+					//if (ret == 1) {
+							//g_switch_flag = 1;
+					//}					
+			//}
+			//message = NULL;
 
       message = k_receive_message_nonblocking(&sender_id);
 			if (message != NULL) {
@@ -328,7 +328,11 @@ void uart_i_process(){
 						pUart->THR = g_char_out; //prints to CRT
 						gp_buffer++; 
 					}
-	  	} 
+					ret = k_release_memory_block_nonpreempt((void*)message);
+					message = NULL;
+					pUart->IER ^= IER_THRE;
+					pUart->THR = '\0';
+	  	}
 	  	else { //no message to receive
 					#ifdef DEBUG_0
 							printf("Did not receive any message from CRT!\r\n");

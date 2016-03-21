@@ -902,7 +902,7 @@
             <uSurpInc>0</uSurpInc>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>K_MSG_ENV, _DEBUG_HOTKEYS</Define>
+              <Define>K_MSG_ENV, _DEBUG_HOTKEYS, SET_PRIORITY_0</Define>
               <Undefine></Undefine>
               <IncludePath></IncludePath>
             </VariousControls>

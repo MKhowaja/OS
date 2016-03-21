@@ -107,13 +107,17 @@ void crt(void){
         }    
         #ifdef DEBUG_0
             printf("crt send a message to uart");
-        #endif        
-            send_message(PID_UART_IPROC, msg);
-						pUart->IER = pUart->IER | IER_THRE;
+        #endif
+				
+        send_message(PID_UART_IPROC, msg);
+				pUart->IER = pUart->IER | IER_THRE;
         }
         else{
             //do nothing except releasing msg block	
-            release_memory_block(msg);
+            //release_memory_block(msg);
+						#ifdef DEBUG_0
+                printf("PANIC\r\n");
+            #endif
         }
     }
 }

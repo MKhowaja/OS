@@ -17,7 +17,7 @@
 #define RTX_ERR -1
 #define RTX_OK 0
 #define NUM_KERNEL_PROCS 5
-#define NUM_TEST_PROCS 6
+#define NUM_TEST_PROCS 5
 #define NUM_TOTAL_PROCS (NUM_KERNEL_PROCS+NUM_TEST_PROCS)
 
 /* Process IDs */
@@ -48,6 +48,8 @@
 #define DEFAULT 0
 #define KCD_REG 1
 #define CRT_DISPLAY 2
+#define COUNT_REPORT 	3
+#define WAKEUPTEN 			4
 
 /* ----- Types ----- */
 typedef unsigned char U8;

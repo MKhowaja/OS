@@ -140,7 +140,7 @@ void kcd(void){
             itr = msg_data;
             if (msg_data[0] == '%') {
 								#ifdef DEBUG_0 
-								printf("debug *itr %s\r\n",*itr);
+								printf("debug *itr %s\r\n",itr);
 								#endif
                 while (*itr != ' ' && *itr != '\r') {
                     if (*itr == '\0') {

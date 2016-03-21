@@ -7,7 +7,7 @@
 #ifdef DEBUG_0
 
 #endif /* DEBUG_0 */
-#define TEN_SEC 10000
+#define TEN_SEC 2000
 
 /* initialization table item */
 PROC_INIT g_test_procs[NUM_TEST_PROCS];
@@ -32,7 +32,7 @@ void set_test_procs() {
     
     g_test_procs[2].m_pid = PID_A;  
     g_test_procs[2].mpf_start_pc = &stress_test_proc_a;
-    g_test_procs[2].m_priority   = MEDIUM;
+    g_test_procs[2].m_priority   = HIGH;
     
     g_test_procs[3].m_pid = PID_B;
     g_test_procs[3].mpf_start_pc = &stress_test_proc_b;
@@ -161,7 +161,8 @@ void clock_proc(void){
                     printf("clock send a message to crt");
             #endif
             send_message(PID_CRT, msg);// print to crt
-
+						//printf("\r\n-------------------CRT-------------------------\r\n%s\r\n-------------------------------------", msg->mtext);
+						//release_memory_block(msg);
             //increment 1000 milisecs
             track_time += 1;
             //in case is over one day?
@@ -399,7 +400,11 @@ void stress_test_proc_a(void)
         }
         release_processor();
     }
-}
+	}
+//void stress_test_proc_a(void) {
+	//stress_test_proc_a_();
+	//for (;;);
+//}
 
 
 
@@ -427,6 +432,10 @@ void stress_test_proc_b(void)
         send_message(PID_C, msg);
     }
 }
+//void stress_test_proc_b(void) {
+	//stress_test_proc_b_();
+	//for (;;);
+//}
 
 void stress_test_proc_c(void)
 {
@@ -455,12 +464,21 @@ void stress_test_proc_c(void)
 				#ifdef DEBUG_0
 					printf("stress process c send a message to crt");
 				 #endif
+						 {
+							 static int _count = 0;
+							 printf("send message count: %d\r\n", _count);
+							 if (_count == 1) {
+								 printf("===================================\r\n");
+							 }
+							 ++_count;
+						 }
                send_message(PID_CRT,msg_p); //message p gets released after crt sends it to uart
-
+								//printf("\r\n----------------------CRT-------------------------%s\r\n-------------------------------------------------\r\n", msg_p->mtext);
+								//release_memory_block(msg_p);
                 //hibernate for 10 sec
                 //request msg and delayed send for 10 sec
-               msg_q = (MSG_BUF *) request_memory_block();
-                msg_q->mtype = WAKEUP10;
+								msg_q = (MSG_BUF *) request_memory_block();
+                msg_q->mtype = WAKEUPTEN;
 								strncpy(msg_q->mtext, "delay send C\r\n", strlen("delay send C\r\n")+1);
                 delayed_send(PID_C, msg_q, TEN_SEC);
                 while(1){
@@ -470,7 +488,7 @@ void stress_test_proc_c(void)
                            printf("Stress Proc C got a message from PROC_B %d, and the message is %s\r\n", sender_id, msg_p->mtext);
                         }
                     #endif
-                    if(msg_p->mtype == WAKEUP10){
+                    if(msg_p->mtype == WAKEUPTEN){
                        //release_memory_block(msg_p);    //release memory block that was requested for delay send;
 												#ifdef DEBUG_0
 													printf("stress process got a message whose message type is WAKEUP10");
@@ -501,9 +519,11 @@ void stress_test_proc_c(void)
        // not releasing p here because uart proc will do it eventually
        release_processor();
     }
-
-
 }
+//void stress_test_proc_c(void) {
+	//stress_test_proc_c_();
+	//for (;;);
+//}
 
 // void stress_test_proc_c(void)
 // {

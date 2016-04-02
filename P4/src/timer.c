@@ -16,12 +16,12 @@
 #define BIT(X) (1<<X)
 
 
+volatile uint32_t* timing; //TODO TESTING
 
 volatile uint32_t g_timer_count = 0; // increment every 1 ms
 MSG_BUF* sorted_queue = NULL;
 int send_flag;
 
-volatile uint32_t* timing;
 /**
  * @brief: initialize timer. Only timer 0 is supported
  */

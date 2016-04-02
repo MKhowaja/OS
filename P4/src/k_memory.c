@@ -82,8 +82,8 @@ void memory_init(void)
 	}
 	//p_end is 0x1000456C after above for loop
 #ifdef DEBUG_0  
-	printf("gp_pcbs[0] = 0x%x \n", gp_pcbs[0]);
-	printf("gp_pcbs[1] = 0x%x \n", gp_pcbs[1]);
+	//printf("gp_pcbs[0] = 0x%x \n", gp_pcbs[0]);
+	//printf("gp_pcbs[1] = 0x%x \n", gp_pcbs[1]);
 #endif
 	
 	/* prepare for alloc_stack() to allocate memory for stacks */
@@ -106,7 +106,7 @@ void memory_init(void)
 	new_memory_node->next = NULL;
 	mem_list.last = new_memory_node;
 	#ifdef DEBUG_0  
-	printf("Allocated heap done\n");
+	//printf("Allocated heap done\n");
 	#endif
 	printMemList(0);
 	/* allocate memory for heap, not implemented yet*/
@@ -139,13 +139,13 @@ void *k_request_memory_block(void) {
 	MemNode* memory_block;
 
 #ifdef DEBUG_0 
-	printf("k_request_memory_block: entering...\r\n");
+	//printf("k_request_memory_block: entering...\r\n");
 #endif /* ! DEBUG_0 */
 	// atomic ( on ) ;
 	__disable_irq();
 	
 	#ifdef DEBUG_0 
-	printf("k_request_memory_block: irq disabled\r\n");
+	//printf("k_request_memory_block: irq disabled\r\n");
 #endif /* ! DEBUG_0 */
 	
 	// while ( no memory block is available ) {
@@ -168,7 +168,7 @@ void *k_request_memory_block(void) {
 	
 	printMemList(0);
 	#ifdef DEBUG_0
-		printf("memory block requested: 0x%x, next is 0x%x\r\n", memory_block, memory_block->next);
+		//printf("memory block requested: 0x%x, next is 0x%x\r\n", memory_block, memory_block->next);
 	#endif
 	
 	// atomic ( off ) ;
@@ -180,7 +180,7 @@ void *k_request_memory_block(void) {
 void *k_request_memory_block_nonpreempt(void) {
 	MemNode* memory_block;
 #ifdef DEBUG_0 
-	printf("k_request_memory_block_nonpreempt: entering...\r\n");
+	//printf("k_request_memory_block_nonpreempt: entering...\r\n");
 #endif /* ! DEBUG_0 */
 
 	// while ( no memory block is available ) just return {
@@ -199,7 +199,7 @@ void *k_request_memory_block_nonpreempt(void) {
 
 	printMemList(0);
 	#ifdef DEBUG_0
-		printf("memory block requested: 0x%x, next is 0x%x\r\n", memory_block, memory_block->next);
+		//printf("memory block requested: 0x%x, next is 0x%x\r\n", memory_block, memory_block->next);
 	#endif
 	//memory_block->next = NULL;
 	return (void *)memory_block;
@@ -211,7 +211,7 @@ int k_release_memory_block(void *p_mem_blk) {
 	MemNode* mem_traverse;
 
 #ifdef DEBUG_0 
-	printf("k_release_memory_block: releasing block @ 0x%x\r\n", p_mem_blk);
+	//printf("k_release_memory_block: releasing block @ 0x%x\r\n", p_mem_blk);
 #endif /* ! DEBUG_0 */
 	
 
@@ -233,7 +233,7 @@ int k_release_memory_block(void *p_mem_blk) {
 		if (mem_traverse == p_mem_blk){
 			__enable_irq();
 			#ifdef DEBUG_0 
-					printf("Releasing a memory block that is already in the free list\r\n");
+					//printf("Releasing a memory block that is already in the free list\r\n");
 			#endif /* ! DEBUG_0 */
 			return RTX_ERR;
 		}
@@ -253,7 +253,7 @@ int k_release_memory_block(void *p_mem_blk) {
 	
 	printMemList(1);
 	#ifdef DEBUG_0
-		printf("released memory block 0x%x, next memory block is 0x%x\r\n", free_memory_node,free_memory_node -> next);
+		//printf("released memory block 0x%x, next memory block is 0x%x\r\n", free_memory_node,free_memory_node -> next);
 	#endif
 	
 	if(handle_blocked_process_ready(MEM_BLOCKED)){
@@ -273,7 +273,7 @@ int k_release_memory_block_nonpreempt(void *p_mem_blk) {
 	MemNode* mem_traverse;
 	if (p_mem_blk == NULL){
 		#ifdef DEBUG_0 
-		printf("Release Memory Block Nonpreempt block was NULL. THIS SHOULD NEVER HAPPEN PANIC PANIC PANIC!!!\r\n");
+		//printf("Release Memory Block Nonpreempt block was NULL. THIS SHOULD NEVER HAPPEN PANIC PANIC PANIC!!!\r\n");
 		#endif
 		return RTX_ERR;
 	}
@@ -288,7 +288,7 @@ int k_release_memory_block_nonpreempt(void *p_mem_blk) {
 	while (mem_traverse != NULL) {
 		if (mem_traverse == p_mem_blk){
 			#ifdef DEBUG_0 
-					printf("Releasing a memory block that is already in the free list\r\n");
+					//printf("Releasing a memory block that is already in the free list\r\n");
 			#endif /* ! DEBUG_0 */
 			return RTX_ERR;
 		}
@@ -306,29 +306,13 @@ int k_release_memory_block_nonpreempt(void *p_mem_blk) {
 		mem_list.last = free_memory_node;
 	}
 	
-	printMemList(1);
+	//printMemList(1);
 	#ifdef DEBUG_0
-		printf("released memory block 0x%x, next memory block is 0x%x\r\n", free_memory_node,free_memory_node -> next);
+		//printf("released memory block 0x%x, next memory block is 0x%x\r\n", free_memory_node,free_memory_node -> next);
 	#endif
 
  	return handle_blocked_process_ready(MEM_BLOCKED);
 }
 
 void printMemList(int release){
-	MemNode *temp;
-	int i;
-	
-	temp = mem_list.first;
-	i = 1;
-	#ifdef DEBUG_0
-	while(temp != NULL){
-		  if(release == 1){
-				printf("releasing memory: available memory block %d @ 0x%x, NEXT: 0x%x\r\n",i, temp, temp->next);
-			}else{
-				printf("requesting memory: available memory block %d @ 0x%x, NEXT: 0x%x\r\n",i, temp, temp->next);
-			}
-		temp = temp->next;
-		i++;
-	}
-	#endif
 }

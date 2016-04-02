@@ -3,6 +3,7 @@
 #include "usr_proc.h"
 #include "string.h"
 #include <stdlib.h>
+#include "timer.h"
 
 #ifdef DEBUG_0
 #include "printf.h"
@@ -21,7 +22,7 @@ void set_test_procs() {
 		g_test_procs[i].m_stack_size=0x200;
 		passed_test[i] = 0;
 	}
-	g_test_procs[0].m_pid = PID_A;  
+	g_test_procs[0].m_pid = 1;  
 	g_test_procs[0].mpf_start_pc = &timer_test_proc;
 	g_test_procs[0].m_priority   = HIGH;
 	
@@ -217,8 +218,12 @@ void timer_test_proc(void) {
 	int sender_id = 0;
 	int i = 0;
 	int total_time = 0;
-	start_time = 0;
-	result = 0;
+	int start_time = 0;
+	int result = 0;
+	
+	int buf_size = 30;
+	char buf[30];
+	MSG_BUF* msg;//send out
 	
 	for (i = 0; i < 100; i++) {
 		start_time = *timing;
@@ -227,6 +232,14 @@ void timer_test_proc(void) {
 		total_time = total_time + result;
 		release_memory_block(message);
 	}
+	msg = (MSG_BUF*)request_memory_block();            
+	msg->mtype = CRT_DISPLAY;
+	for(i = 0; i < buf_size; i++){
+		buf[i] = '\0';
+	}
+  sprintf(buf, "total time is %d \n\r", total_time); // 69 x-offset = (80 col width - 11 char for HH:MM:SS)
+	strncpy(msg->mtext, buf, strlen(buf) + 1);
+	send_message(PID_CRT,msg);
 	
 	total_time = 0;
 	for (i = 0; i < 100; i++){
@@ -241,6 +254,15 @@ void timer_test_proc(void) {
 		release_memory_block(message);
 	}
 	
+	msg = (MSG_BUF*)request_memory_block();            
+	msg->mtype = CRT_DISPLAY;
+	for(i = 0; i < buf_size; i++){
+		buf[i] = '\0';
+	}
+  sprintf(buf, "total time is %d \n\r", total_time); // 69 x-offset = (80 col width - 11 char for HH:MM:SS)
+	strncpy(msg->mtext, buf, strlen(buf) + 1);
+	send_message(PID_CRT,msg);
+	
 	total_time = 0;
 	for (i = 0; i < 100; i++){
 		
@@ -254,8 +276,14 @@ void timer_test_proc(void) {
 		
 		release_memory_block(message);
 	}
-	total_time = total_time;
-	printf(" total time is %d \r\n", total_time);
+	msg = (MSG_BUF*)request_memory_block();            
+	msg->mtype = CRT_DISPLAY;
+	for(i = 0; i < buf_size; i++){
+		buf[i] = '\0';
+	}
+  sprintf(buf, "total time is %d \n\r", total_time); // 69 x-offset = (80 col width - 11 char for HH:MM:SS)
+	strncpy(msg->mtext, buf, strlen(buf) + 1);
+	send_message(PID_CRT,msg);
 	
 	while(1) {
 	}

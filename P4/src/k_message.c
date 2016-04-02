@@ -47,20 +47,6 @@ void update_receive_log_buffer(MSG_BUF* message){
 }
 
 void print_send_log_buffer(void){
-	int i;
-	for (i = 0; i < NUM_MSG_BUFFERED; i++){
-		if (send_log_buffer[i].timestamp != NOT_SET){
-				#ifdef DEBUG_0 
-				printf("Sender pid: %d, Receiver pid: %d, Message type: %d, First 16 bytes: %s, timestamp: %d \r\n", 
-				send_log_buffer[i].sender_pid,
-				send_log_buffer[i].receiver_pid,
-				send_log_buffer[i].mtype, 
-				send_log_buffer[i].mtext,
-				send_log_buffer[i].timestamp
-			);
-			#endif
-		}
-	}
 }
 
 void printMessageQ(PCB* receiver){
@@ -68,7 +54,7 @@ void printMessageQ(PCB* receiver){
 		int i = 1;
 		if(receiver == NULL){
 			#ifdef DEBUG_0
-				printf("panic");
+				//printf("panic");
 			#endif
 		}
 		message_queue_iter = receiver->msg_queue;
@@ -76,10 +62,10 @@ void printMessageQ(PCB* receiver){
 		while(message_queue_iter != NULL){
 			if(message_queue_iter == (MSG_BUF*)message_queue_iter->mp_next){
 						#ifdef DEBUG_0
-							printf("This message address is 0x%x, but its next is itself, 0x%x,  hahahaha it's funny, stop joking!\r\n", message_queue_iter,message_queue_iter->mp_next);
+							//printf("This message address is 0x%x, but its next is itself, 0x%x,  hahahaha it's funny, stop joking!\r\n", message_queue_iter,message_queue_iter->mp_next);
 						#endif
 			}
-			printf("process %d's %dth message is 0x%x, with text %s\r\n", receiver->m_pid, i, message_queue_iter, message_queue_iter->mtext);
+			//printf("process %d's %dth message is 0x%x, with text %s\r\n", receiver->m_pid, i, message_queue_iter, message_queue_iter->mtext);
 			message_queue_iter = (MSG_BUF*)message_queue_iter->mp_next;
 			i++;
 		}
@@ -92,7 +78,7 @@ void message_enque(PCB* receiver, MSG_BUF* message){
 	
 	printMessageQ(receiver);
 	#ifdef DEBUG_0
-		printf("getting message 0x%x, message->next is 0x%x\r\n", message, message->mp_next);
+		//printf("getting message 0x%x, message->next is 0x%x\r\n", message, message->mp_next);
 	#endif
 	
 	if (message_queue_iter == NULL){
@@ -104,7 +90,7 @@ void message_enque(PCB* receiver, MSG_BUF* message){
 					message_queue_iter = (MSG_BUF*)message_queue_iter->mp_next;
 				if(message_queue_iter == (MSG_BUF*)message_queue_iter->mp_next){
 						#ifdef DEBUG_0
-							printf("This message address is 0x%x, but its next is itself, 0x%x,  hahahaha it's funny, stop joking!\r\n", message_queue_iter,message_queue_iter->mp_next);
+							//printf("This message address is 0x%x, but its next is itself, 0x%x,  hahahaha it's funny, stop joking!\r\n", message_queue_iter,message_queue_iter->mp_next);
 						#endif
 				}
 			}
@@ -128,7 +114,7 @@ MSG_BUF* message_deque (PCB* receiver){
 	
 	//printMessageQ(receiver);
 	#ifdef DEBUG_0
-		printf("removing message 0x%x, message->next is 0x%x\r\n", message, message->mp_next);
+		//printf("removing message 0x%x, message->next is 0x%x\r\n", message, message->mp_next);
 	#endif
 	//update_receive_log_buffer(message);
 	return message;
@@ -137,20 +123,7 @@ MSG_BUF* message_deque (PCB* receiver){
 
 
 void print_receive_log_buffer(void){
-	int i;
-	for (i = 0; i < NUM_MSG_BUFFERED; i++){
-		if (receive_log_buffer[i].timestamp != NOT_SET){
-				#ifdef DEBUG_0 
-					printf("Sender pid: %d, Receiver pid: %d, Message type: %d, First 16 bytes: %s, timestamp: %d \r\n", 
-				receive_log_buffer[i].sender_pid,
-				receive_log_buffer[i].receiver_pid,
-				receive_log_buffer[i].mtype, 
-				receive_log_buffer[i].mtext,
-				receive_log_buffer[i].timestamp
-			);
-			#endif
-		}
-	}
+	
 }
 
 int k_send_message(int receiver_pid, void *message_envelope)
@@ -160,12 +133,12 @@ int k_send_message(int receiver_pid, void *message_envelope)
 	PCB * current_process = NULL;
 	
 	#ifdef DEBUG_0
-        printf("Entering k_send_message\r\n");
+        //printf("Entering k_send_message\r\n");
   #endif /* DEBUG_0 */
 	
 	if(receiver_pid == 0){
 		#ifdef DEBUG_0
-				printf("Why is pid == 0 here");
+				//printf("Why is pid == 0 here");
 		#endif
 	}
 	
@@ -181,7 +154,7 @@ int k_send_message(int receiver_pid, void *message_envelope)
 	
 	if(receiver_pcb == NULL || receiver_pcb->m_pid == 0){
 			#ifdef DEBUG_0
-				printf("WTF, ARE YOU KIDDING ME!");
+				//printf("WTF, ARE YOU KIDDING ME!");
 			#endif
 	}
 	
@@ -236,7 +209,7 @@ void* k_receive_message(int *sender_id)
 	MSG_BUF* message = NULL;
 	PCB * current_process = NULL;
 	#ifdef DEBUG_0
-        printf("Entering k_receive_message\r\n");
+        //printf("Entering k_receive_message\r\n");
   #endif /* DEBUG_0 */
 	__disable_irq();
 
@@ -254,7 +227,7 @@ void* k_receive_message(int *sender_id)
 
 	if (message == NULL){
 		#ifdef DEBUG_0
-			printf("PANIC RECEIVE MESSAGE WAS NULL\r\n");
+			//printf("PANIC RECEIVE MESSAGE WAS NULL\r\n");
 		#endif /* DEBUG_0 */
 	}else if (message->sender_pid != NULL){
 		*sender_id = message->sender_pid;
@@ -268,25 +241,25 @@ void* k_receive_message_nonblocking(int *sender_id){
 	MSG_BUF* message = NULL;
 	PCB * receiver_pcb = NULL;
 	#ifdef DEBUG_0
-        printf("Entering k_receive_message non blocking\r\n");
+        //printf("Entering k_receive_message non blocking\r\n");
   	#endif /* DEBUG_0 */
 	receiver_pcb = k_get_pcb_from_id(PID_UART_IPROC);
 	if (receiver_pcb == NULL){
 		#ifdef DEBUG_0
-			printf("PANIC UART PCB WAS NULL IN RECEIVE MESSAGE NONBLOCKING\r\n");
+			//printf("PANIC UART PCB WAS NULL IN RECEIVE MESSAGE NONBLOCKING\r\n");
 		#endif /* DEBUG_0 */
 		return NULL;
 	}
 	else if (receiver_pcb->msg_queue == NULL){
 		#ifdef DEBUG_0
-			printf("No message for UART to receive\r\n");
+			//printf("No message for UART to receive\r\n");
 		#endif /* DEBUG_0 */
 		return NULL;
 	}
 	message = message_deque(receiver_pcb);
 	if (message == NULL){
 		#ifdef DEBUG_0
-			printf("PANIC UART RECEIVE MESSAGE WAS NULL\r\n");
+			//printf("PANIC UART RECEIVE MESSAGE WAS NULL\r\n");
 		#endif /* DEBUG_0 */
 	}else if (message->sender_pid != NULL){
 		*sender_id = message->sender_pid;
@@ -299,7 +272,7 @@ int k_delayed_send(int receiver_pid, void *message_envelope, int delay){
 	PCB * current_process = NULL;
 	PCB * pcb = NULL;
 	#ifdef DEBUG_0
-        printf("Entering k_delayed_send\r\n");
+        //printf("Entering k_delayed_send\r\n");
   #endif /* DEBUG_0 */
 	
 	__disable_irq();

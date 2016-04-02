@@ -15,4 +15,8 @@ void expire_list_enqueue(MSG_BUF *msg);
 extern int handle_blocked_process_ready(PROC_STATE_E state);
 uint32_t get_timer_count(void); /* getter of current time */
 
+extern volatile uint32_t* timing;
+
+
+
 #endif /* ! _TIMER_H_ */

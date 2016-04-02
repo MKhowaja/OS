@@ -7,5 +7,10 @@ usr_proc.o: src\uart_def.h
 usr_proc.o: src\usr_proc.h
 usr_proc.o: src\string.h
 usr_proc.o: C:\Software\Keil\ARM\ARMCC\bin\..\include\stdlib.h
+usr_proc.o: src\timer.h
+usr_proc.o: src\sorted_queue.h
+usr_proc.o: src\k_process.h
+usr_proc.o: src\k_rtx.h
+usr_proc.o: src\list.h
 usr_proc.o: src\printf.h
 usr_proc.o: C:\Software\Keil\ARM\ARMCC\bin\..\include\stdarg.h
